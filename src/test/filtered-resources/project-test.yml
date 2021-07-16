@@ -25,8 +25,8 @@ thorntail:
               code: UsersRoles
               flag: required
               module-options:
-                usersProperties: ${project.build.testOutputDirectory}/application-users.properties
-                rolesProperties: ${project.build.testOutputDirectory}/application-roles.properties
+                usersProperties: ${project.build.testOutputDirectory}/users.properties
+                rolesProperties: ${project.build.testOutputDirectory}/roles.properties
 kieservers:
   - host: ${kie.server.base.http.url}
     username: ${kie.server.username}

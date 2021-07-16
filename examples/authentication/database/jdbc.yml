@@ -1,0 +1,13 @@
+pim:
+  auth-method: jdbc
+quarkus:
+  jdbc:
+    principal-query:
+      sql: SELECT u.password, u.role FROM test_user u WHERE u.username=?
+      clear-password-mapper:
+        enabled: true
+        password-index: 1
+      attribute-mappings:
+        0:
+          index: 2
+          to: groups

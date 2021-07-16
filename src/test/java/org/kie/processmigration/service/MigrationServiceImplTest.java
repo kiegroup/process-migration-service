@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2021 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,675 +16,239 @@
 
 package org.kie.processmigration.service;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.jboss.weld.junit4.WeldInitiator;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.kie.processmigration.model.Execution;
-import org.kie.processmigration.model.Execution.ExecutionStatus;
-import org.kie.processmigration.model.Execution.ExecutionType;
-import org.kie.processmigration.model.Migration;
-import org.kie.processmigration.model.MigrationDefinition;
-import org.kie.processmigration.model.MigrationReport;
-import org.kie.processmigration.model.Plan;
-import org.kie.processmigration.model.ProcessRef;
-import org.kie.processmigration.model.exceptions.InvalidKieServerException;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
+import org.junit.jupiter.api.Test;
+import org.kie.processmigration.model.*;
 import org.kie.processmigration.model.exceptions.InvalidMigrationException;
 import org.kie.processmigration.model.exceptions.MigrationNotFoundException;
+import org.kie.processmigration.model.exceptions.PlanNotFoundException;
 import org.kie.processmigration.model.exceptions.ProcessNotFoundException;
-import org.kie.processmigration.model.exceptions.ReScheduleException;
-import org.kie.processmigration.service.impl.MigrationServiceImpl;
-import org.kie.processmigration.service.impl.PlanServiceImpl;
 import org.kie.server.api.model.admin.MigrationReportInstance;
 import org.kie.server.api.model.instance.ProcessInstance;
 import org.kie.server.client.QueryServicesClient;
 import org.kie.server.client.admin.ProcessAdminServicesClient;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import javax.inject.Inject;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-public class MigrationServiceImplTest extends AbstractPersistenceTest {
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
-    private static final Execution SYNC = new Execution().setType(ExecutionType.SYNC);
+@QuarkusTest
+class MigrationServiceImplTest {
 
-    @Rule
-    public WeldInitiator weld = WeldInitiator
-        .from(PlanServiceImpl.class, MigrationServiceImpl.class, TransactionHelper.class)
-        .addBeans(createMockBean(KieService.class), createMockBean(SchedulerService.class))
-        .setPersistenceContextFactory(getPCFactory())
-        .inject(this)
-        .build();
     @Inject
-    private MigrationService migrationService;
-    @Inject
-    private PlanService planService;
-    @Inject
-    private KieService kieServiceMock;
-    @Inject
-    private SchedulerService schedulerServiceMock;
+    MigrationService migrationService;
 
-    @Before
-    public void resetMocks() {
-        Mockito.reset(kieServiceMock, schedulerServiceMock);
-    }
+    @InjectMock
+    PlanService planService;
 
-    @Test(expected = MigrationNotFoundException.class)
-    public void testGetNotFound() throws MigrationNotFoundException {
-        migrationService.get(8888L);
+    @InjectMock
+    KieService kieService;
+
+    @InjectMock
+    SchedulerService schedulerService;
+
+    @Test
+    void testValidateDefinition() {
+        assertThrows(InvalidMigrationException.class, () -> migrationService.submit(null));
+        MigrationDefinition definition = new MigrationDefinition();
+        assertThrows(InvalidMigrationException.class, () -> migrationService.submit(definition));
+        definition.setPlanId(1L);
+        assertThrows(InvalidMigrationException.class, () -> migrationService.submit(definition));
+        definition.setKieServerId("foo");
+        assertThrows(InvalidMigrationException.class, () -> migrationService.submit(definition));
     }
 
     @Test
-    public void testSubmitMigration() throws InvalidMigrationException, MigrationNotFoundException {
+    void testValidatePlan() throws InvalidMigrationException, PlanNotFoundException {
+        Plan plan = new Plan()
+                .setSource(new ProcessRef().setContainerId("source-container").setProcessId("source-process"))
+                .setTarget(new ProcessRef().setContainerId("target-container").setProcessId("target-process"))
+                .setName("migrationPlan");
+        MigrationDefinition definition = new MigrationDefinition();
+        definition.setPlanId(11L);
+        definition.setKieServerId("foo");
+        definition.setExecution(new Execution()
+                .setType(Execution.ExecutionType.ASYNC)
+                .setScheduledStartTime(Instant.now().plus(1, ChronoUnit.MINUTES)));
+        when(kieService.hasKieServer(definition.getKieServerId())).thenReturn(Boolean.TRUE);
+
+        when(planService.get(definition.getPlanId())).thenThrow(new PlanNotFoundException(definition.getPlanId())).thenReturn(plan);
+        assertThrows(InvalidMigrationException.class, () -> migrationService.submit(definition));
+
+        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getSource()))
+                .thenReturn(Boolean.FALSE);
+        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getTarget()))
+                .thenReturn(Boolean.TRUE);
+        assertThrows(ProcessNotFoundException.class, () -> migrationService.submit(definition));
+
+        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getSource()))
+                .thenReturn(Boolean.TRUE);
+        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getTarget()))
+                .thenReturn(Boolean.FALSE);
+        assertThrows(ProcessNotFoundException.class, () -> migrationService.submit(definition));
+
+        verifyNoInteractions(schedulerService);
+    }
+
+    @Test
+    void testScheduleMigration() throws InvalidMigrationException, PlanNotFoundException, MigrationNotFoundException {
+        Plan plan = new Plan()
+                .setSource(new ProcessRef().setContainerId("source-container").setProcessId("source-process"))
+                .setTarget(new ProcessRef().setContainerId("target-container").setProcessId("target-process"))
+                .setName("migrationPlan");
+        MigrationDefinition definition = new MigrationDefinition();
+        definition.setPlanId(11L);
+        definition.setKieServerId("foo");
+        definition.setExecution(new Execution().setType(Execution.ExecutionType.ASYNC).setScheduledStartTime(Instant.now().plus(1, ChronoUnit.MINUTES)));
+        when(kieService.hasKieServer(definition.getKieServerId())).thenReturn(Boolean.TRUE);
+        when(planService.get(11L)).thenReturn(plan);
+        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getSource())).thenReturn(Boolean.TRUE);
+        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getTarget())).thenReturn(Boolean.TRUE);
+
+        Migration migration = migrationService.submit(definition);
+
+        verify(schedulerService, times(1)).scheduleMigration(migration);
+        migrationService.delete(migration.id);
+    }
+
+    @Test
+    void testSubmitSyncMigration() throws InvalidMigrationException, PlanNotFoundException, MigrationNotFoundException {
         // Given
-        Plan plan = createPlan();
-        MigrationDefinition def = createMigrationDefinition(plan, SYNC);
+        assertThat(migrationService, notNullValue());
+        Plan plan = new Plan()
+                .setSource(new ProcessRef().setContainerId("source-container").setProcessId("source-process"))
+                .setTarget(new ProcessRef().setContainerId("target-container").setProcessId("target-process"))
+                .setName("migrationPlan");
+        MigrationDefinition definition = new MigrationDefinition();
+        definition.setRequester("requester");
+        definition.setKieServerId("kie-server-1");
+        definition.setExecution(new Execution().setType(Execution.ExecutionType.SYNC));
+        definition.setPlanId(11L);
 
-        // Setup mock
-        ProcessAdminServicesClient mockProcessAdminServicesClient = Mockito.mock(ProcessAdminServicesClient.class);
-        QueryServicesClient mockQueryServicesClient = Mockito.mock(QueryServicesClient.class);
-        Mockito.when(kieServiceMock.existsProcessDefinition(anyString(), any(ProcessRef.class))).thenReturn(Boolean.TRUE);
-        for (long i = 1; i <= 3; i++) {
-            Mockito.when(mockQueryServicesClient.findProcessInstanceById(eq(i))).thenReturn(buildProcessInstance(i, plan.getSource().getContainerId()));
-            Mockito.when(mockProcessAdminServicesClient.migrateProcessInstance(anyString(),
-                                                                               eq(i),
-                                                                               anyString(),
-                                                                               anyString(),
-                                                                               anyMapOf(String.class, String.class)))
-                .thenReturn(createReport(i));
-        }
+        when(planService.get(11L)).thenReturn(plan);
+        when(kieService.hasKieServer(definition.getKieServerId())).thenReturn(Boolean.TRUE);
+        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getSource())).thenReturn(Boolean.TRUE);
+        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getTarget())).thenReturn(Boolean.TRUE);
 
-        Mockito.when(kieServiceMock.getQueryServicesClient(anyString())).thenReturn(mockQueryServicesClient);
-        Mockito.when(kieServiceMock.getProcessAdminServicesClient(anyString())).thenReturn(mockProcessAdminServicesClient);
-        addMockConfigs(kieServiceMock);
+        QueryServicesClient mockQueryServicesClient = mock(QueryServicesClient.class);
+        when(kieService.getQueryServicesClient(definition.getKieServerId())).thenReturn(mockQueryServicesClient);
+        ProcessAdminServicesClient mockAdminServicesClient = mock(ProcessAdminServicesClient.class);
+        when(kieService.getProcessAdminServicesClient(definition.getKieServerId())).thenReturn(mockAdminServicesClient);
 
-        // When
-        getEntityManager().getTransaction().begin();
-        migrationService.submit(def);
-        getEntityManager().getTransaction().commit();
-
-        // Then
-        for (long i = 1; i <= 3; i++) {
-            verify(mockProcessAdminServicesClient).migrateProcessInstance(plan.getSource().getContainerId(),
-                                                                          i,
-                                                                          plan.getTarget().getContainerId(),
-                                                                          plan.getTarget().getProcessId(),
-                                                                          plan.getMappings());
-        }
-        List<Migration> migrations = migrationService.findAll();
-
-        assertNotNull(migrations);
-        assertEquals(1, migrations.size());
-        Migration m = migrations.get(0);
-        assertEquals(ExecutionStatus.COMPLETED, m.getStatus());
-        assertNotNull(m.getCreatedAt());
-        assertNotNull(m.getStartedAt());
-        assertNotNull(m.getFinishedAt());
-        List<MigrationReport> results = migrationService.getResults(m.getId());
-        assertEquals(3, results.size());
-        results.stream().forEach(r -> assertTrue(r.getSuccessful()));
-    }
-
-    @Test
-    public void testSubmitAllMigrationNoProcessInstances() throws InvalidMigrationException, MigrationNotFoundException {
-        // Given
-        Plan plan = createPlan();
-        MigrationDefinition def = createMigrationDefinition(plan, SYNC);
-        def.getProcessInstanceIds().clear();
-
-        // Setup mock
-        ProcessAdminServicesClient mockProcessAdminServicesClient = Mockito.mock(ProcessAdminServicesClient.class);
-        QueryServicesClient mockQueryServicesClient = Mockito.mock(QueryServicesClient.class);
-
-        Mockito.when(kieServiceMock.existsProcessDefinition(anyString(), any(ProcessRef.class))).thenReturn(Boolean.TRUE);
-        Mockito.when(kieServiceMock.getQueryServicesClient(anyString())).thenReturn(mockQueryServicesClient);
-        Mockito.when(kieServiceMock.getProcessAdminServicesClient(anyString())).thenReturn(mockProcessAdminServicesClient);
-        addMockConfigs(kieServiceMock);
-
-        // When
-        getEntityManager().getTransaction().begin();
-        migrationService.submit(def);
-        getEntityManager().getTransaction().commit();
-
-        // Then
-        List<Migration> migrations = migrationService.findAll();
-
-        assertNotNull(migrations);
-        assertEquals(1, migrations.size());
-        Migration m = migrations.get(0);
-        assertEquals(ExecutionStatus.COMPLETED, m.getStatus());
-        assertNotNull(m.getCreatedAt());
-        assertNotNull(m.getStartedAt());
-        assertNotNull(m.getFinishedAt());
-        List<MigrationReport> results = migrationService.getResults(m.getId());
-        assertTrue(results.isEmpty());
-    }
-
-    @Test
-    public void testSubmitAllProcessesMigration() throws InvalidMigrationException, MigrationNotFoundException {
-        // Given
-        Plan plan = createPlan();
-        MigrationDefinition def = createMigrationDefinition(plan, SYNC);
-        def.getProcessInstanceIds().clear();
-
-        // Setup mocks
-        ProcessAdminServicesClient mockProcessAdminServicesClient = Mockito.mock(ProcessAdminServicesClient.class);
-        QueryServicesClient mockQueryServicesClient = Mockito.mock(QueryServicesClient.class);
-        Mockito.when(kieServiceMock.existsProcessDefinition(anyString(), any(ProcessRef.class))).thenReturn(Boolean.TRUE);
-        for (long i = 1; i <= 110; i++) {
-            Mockito.when(mockQueryServicesClient.findProcessInstanceById(eq(i))).thenReturn(buildProcessInstance(i, plan.getSource().getContainerId()));
-            Mockito.when(mockProcessAdminServicesClient.migrateProcessInstance(anyString(),
-                                                                               eq(i),
-                                                                               anyString(),
-                                                                               anyString(),
-                                                                               anyMapOf(String.class, String.class)))
-                .thenReturn(createReport(i));
-        }
-        Mockito.when(kieServiceMock.getProcessAdminServicesClient(anyString()))
-            .thenReturn(mockProcessAdminServicesClient);
-        Mockito.when(mockQueryServicesClient.findProcessInstancesByContainerId(anyString(), anyListOf(Integer.class), eq(0), anyInt()))
-            .thenReturn(buildProcessInstances(1, 100));
-        Mockito.when(mockQueryServicesClient.findProcessInstancesByContainerId(anyString(), anyListOf(Integer.class), eq(1), anyInt()))
-            .thenReturn(buildProcessInstances(101, 110));
-        Mockito.when(kieServiceMock.getQueryServicesClient(anyString()))
-            .thenReturn(mockQueryServicesClient);
-        addMockConfigs(kieServiceMock);
-
-        // When
-        getEntityManager().getTransaction().begin();
-        migrationService.submit(def);
-        getEntityManager().getTransaction().commit();
-
-        // Then
-        for (long i = 1; i <= 110; i++) {
-            verify(mockProcessAdminServicesClient).migrateProcessInstance(plan.getSource().getContainerId(),
-                                                                          i,
-                                                                          plan.getTarget().getContainerId(),
-                                                                          plan.getTarget().getProcessId(),
-                                                                          plan.getMappings());
-        }
-        List<Migration> migrations = migrationService.findAll();
-
-        assertNotNull(migrations);
-        assertEquals(1, migrations.size());
-        Migration m = migrations.get(0);
-        assertEquals(ExecutionStatus.COMPLETED, m.getStatus());
-        assertNotNull(m.getCreatedAt());
-        assertNotNull(m.getStartedAt());
-        assertNotNull(m.getFinishedAt());
-        List<MigrationReport> results = migrationService.getResults(m.getId());
-        assertEquals(110, results.size());
-        results.stream().forEach(r -> assertTrue(r.getSuccessful()));
-    }
-
-    @Test
-    public void testResumeMigration() throws InvalidMigrationException, MigrationNotFoundException {
-        // Given
-        Plan plan = createPlan();
-        MigrationDefinition def = createMigrationDefinition(plan, SYNC);
-        Migration m = new Migration(def);
-        getEntityManager().persist(m);
-        m.getReports().add(new MigrationReport(m.getId(), createReport(1L)));
-
-        // Setup mock
-        ProcessAdminServicesClient mockProcessAdminServicesClient = Mockito.mock(ProcessAdminServicesClient.class);
-        QueryServicesClient mockQueryServicesClient = Mockito.mock(QueryServicesClient.class);
-        for (long i = 2; i <= 3; i++) {
-            Mockito.when(mockQueryServicesClient.findProcessInstanceById(eq(i))).thenReturn(buildProcessInstance(i, plan.getSource().getContainerId()));
-            Mockito.when(mockProcessAdminServicesClient.migrateProcessInstance(anyString(),
-                                                                               eq(i),
-                                                                               anyString(),
-                                                                               anyString(),
-                                                                               anyMapOf(String.class, String.class)))
-                .thenReturn(createReport(i));
-        }
-        Mockito.when(kieServiceMock.existsProcessDefinition(anyString(), any(ProcessRef.class))).thenReturn(Boolean.TRUE);
-        Mockito.when(kieServiceMock.getQueryServicesClient(anyString())).thenReturn(mockQueryServicesClient);
-        Mockito.when(kieServiceMock.getProcessAdminServicesClient(anyString())).thenReturn(mockProcessAdminServicesClient);
-        addMockConfigs(kieServiceMock);
-
-        // When
-        getEntityManager().getTransaction().begin();
-        migrationService.migrate(m);
-        getEntityManager().getTransaction().commit();
-
-        // Then
-        for (long i = 2; i <= 3; i++) {
-            verify(mockProcessAdminServicesClient).migrateProcessInstance(plan.getSource().getContainerId(),
-                                                                          i,
-                                                                          plan.getTarget().getContainerId(),
-                                                                          plan.getTarget().getProcessId(),
-                                                                          plan.getMappings());
-        }
-        List<Migration> migrations = migrationService.findAll();
-
-        assertNotNull(migrations);
-        assertEquals(1, migrations.size());
-        m = migrations.get(0);
-        assertEquals(ExecutionStatus.COMPLETED, m.getStatus());
-        assertNotNull(m.getCreatedAt());
-        assertNotNull(m.getStartedAt());
-        assertNotNull(m.getFinishedAt());
-        List<MigrationReport> results = migrationService.getResults(m.getId());
-        assertEquals(3, results.size());
-        results.stream().forEach(r -> assertTrue(r.getSuccessful()));
-    }
-
-    @Test
-    public void testSubmitAlreadyMigrated() throws InvalidMigrationException, MigrationNotFoundException {
-        // Given
-        Plan plan = createPlan();
-        MigrationDefinition def = createMigrationDefinition(plan, SYNC);
-
-        // Setup mock
-        ProcessAdminServicesClient mockProcessAdminServicesClient = Mockito.mock(ProcessAdminServicesClient.class);
-        QueryServicesClient mockQueryServicesClient = Mockito.mock(QueryServicesClient.class);
-        for (long i = 1; i <= 2; i++) {
-            Mockito.when(mockQueryServicesClient.findProcessInstanceById(eq(i))).thenReturn(buildProcessInstance(i, plan.getSource().getContainerId()));
-            Mockito.when(mockProcessAdminServicesClient.migrateProcessInstance(anyString(),
-                                                                               eq(i),
-                                                                               anyString(),
-                                                                               anyString(),
-                                                                               anyMapOf(String.class, String.class)))
-                .thenReturn(createReport(i));
-        }
-        Mockito.when(mockQueryServicesClient.findProcessInstanceById(eq(3L))).thenReturn(null);
-        Mockito.when(kieServiceMock.existsProcessDefinition(anyString(), any(ProcessRef.class))).thenReturn(Boolean.TRUE);
-        Mockito.when(kieServiceMock.getQueryServicesClient(anyString())).thenReturn(mockQueryServicesClient);
-        Mockito.when(kieServiceMock.getProcessAdminServicesClient(anyString())).thenReturn(mockProcessAdminServicesClient);
-        addMockConfigs(kieServiceMock);
-
-        // When
-        getEntityManager().getTransaction().begin();
-        migrationService.submit(def);
-        getEntityManager().getTransaction().commit();
-
-        // Then
-        for (long i = 1; i <= 2; i++) {
-            verify(mockProcessAdminServicesClient).migrateProcessInstance(plan.getSource().getContainerId(),
-                                                                          i,
-                                                                          plan.getTarget().getContainerId(),
-                                                                          plan.getTarget().getProcessId(),
-                                                                          plan.getMappings());
-        }
-        List<Migration> migrations = migrationService.findAll();
-
-        assertNotNull(migrations);
-        assertEquals(1, migrations.size());
-        Migration m = migrations.get(0);
-        assertEquals(ExecutionStatus.COMPLETED, m.getStatus());
-        assertNotNull(m.getCreatedAt());
-        assertNotNull(m.getStartedAt());
-        assertNotNull(m.getFinishedAt());
-        List<MigrationReport> results = migrationService.getResults(m.getId());
-        assertEquals(3, results.size());
-        results.stream().forEach(r -> assertTrue(r.getSuccessful()));
-        assertEquals(1, results.get(2).getLogs().size());
-        assertEquals("Instance did not exist in source container. Migration skipped", results.get(2).getLogs().get(0));
-    }
-
-    @Test
-    public void testSubmitAsyncMigration() throws InvalidMigrationException, MigrationNotFoundException, URISyntaxException {
-        // Given
-        Plan plan = createPlan();
-        MigrationDefinition def = createMigrationDefinition(plan, new Execution().setType(ExecutionType.ASYNC).setCallbackUrl(new URI("http://test.com/callback")));
-
-        // Setup mock
-        ProcessAdminServicesClient mockProcessAdminServicesClient = Mockito.mock(ProcessAdminServicesClient.class);
-        Mockito.when(kieServiceMock.existsProcessDefinition(anyString(), any(ProcessRef.class))).thenReturn(Boolean.TRUE);
-        for (long i = 1; i <= 3; i++) {
-            Mockito.when(mockProcessAdminServicesClient.migrateProcessInstance(anyString(),
-                                                                               eq(i),
-                                                                               anyString(),
-                                                                               anyString(),
-                                                                               anyMapOf(String.class, String.class)))
-                .thenReturn(createReport(i));
-        }
-        Mockito.when(kieServiceMock.getProcessAdminServicesClient(anyString())).thenReturn(mockProcessAdminServicesClient);
-        addMockConfigs(kieServiceMock);
-
-        // When
-        getEntityManager().getTransaction().begin();
-        Migration m = migrationService.submit(def);
-        getEntityManager().getTransaction().commit();
-
-        verify(schedulerServiceMock, times(1)).scheduleMigration(m);
-    }
-
-    @Test
-    public void testUpdateMigration() throws InvalidMigrationException, MigrationNotFoundException, URISyntaxException, ReScheduleException {
-        // Given
-        Plan plan = createPlan();
-        Execution execution = new Execution()
-            .setType(ExecutionType.ASYNC)
-            .setScheduledStartTime(LocalDateTime.now().plusDays(2).toInstant(ZoneOffset.UTC))
-            .setCallbackUrl(new URI("http://test.com/callback"));
-        MigrationDefinition def = createMigrationDefinition(plan, execution);
-
-        // Setup mock
-        ProcessAdminServicesClient mockProcessAdminServicesClient = Mockito.mock(ProcessAdminServicesClient.class);
-        Mockito.when(kieServiceMock.existsProcessDefinition(anyString(), any(ProcessRef.class))).thenReturn(Boolean.TRUE);
-        for (long i = 1; i <= 3; i++) {
-            Mockito.when(mockProcessAdminServicesClient.migrateProcessInstance(anyString(),
-                                                                               eq(i),
-                                                                               anyString(),
-                                                                               anyString(),
-                                                                               anyMapOf(String.class, String.class)))
-                .thenReturn(createReport(i));
-        }
-        Mockito.when(kieServiceMock.getProcessAdminServicesClient(anyString())).thenReturn(mockProcessAdminServicesClient);
-        addMockConfigs(kieServiceMock);
-
-        getEntityManager().getTransaction().begin();
-        Migration m = migrationService.submit(def);
-        getEntityManager().getTransaction().commit();
-
-        // When
-        MigrationDefinition updatedMigrationDef = createMigrationDefinition(plan, execution);
-        updatedMigrationDef.getExecution().setScheduledStartTime(LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.UTC));
-        Migration updatedMigration = migrationService.update(m.getId(), updatedMigrationDef);
-
-        // Then
-        verify(schedulerServiceMock, times(1)).scheduleMigration(m);
-        verify(schedulerServiceMock, times(1)).scheduleMigration(updatedMigration);
-        assertEquals(updatedMigrationDef.getExecution().getScheduledStartTime(), migrationService.get(updatedMigration.getId()).getDefinition().getExecution().getScheduledStartTime());
-    }
-
-    @Test
-    public void testSubmitProcessNotFound() throws InvalidMigrationException {
-        // Given
-        Plan plan = createPlan();
-        MigrationDefinition def = createMigrationDefinition(plan, SYNC);
-        def.getProcessInstanceIds().clear();
-
-        // Setup mocks
-        ProcessAdminServicesClient mockProcessAdminServicesClient = Mockito.mock(ProcessAdminServicesClient.class);
-        QueryServicesClient mockQueryServicesClient = Mockito.mock(QueryServicesClient.class);
-        Mockito.when(kieServiceMock.existsProcessDefinition(anyString(), any(ProcessRef.class))).thenReturn(Boolean.FALSE);
-        Mockito.when(kieServiceMock.getProcessAdminServicesClient(anyString()))
-            .thenReturn(mockProcessAdminServicesClient);
-        Mockito.when(kieServiceMock.getQueryServicesClient(anyString()))
-            .thenReturn(mockQueryServicesClient);
-        addMockConfigs(kieServiceMock);
-
-        // When
-        try {
-            getEntityManager().getTransaction().begin();
-            migrationService.submit(def);
-            fail("Expected validation exception");
-        } catch (ProcessNotFoundException e) {
-            assertNotNull(e);
-        } finally {
-            getEntityManager().getTransaction().commit();
-        }
-    }
-
-    @Test
-    public void testSubmitPlanNotFound() throws InvalidMigrationException {
-        // Given
-        Plan plan = createPlan();
-        MigrationDefinition def = createMigrationDefinition(plan, SYNC);
-        def.setPlanId(9999L);
-
-        // Setup mock
-        ProcessAdminServicesClient mockProcessAdminServicesClient = Mockito.mock(ProcessAdminServicesClient.class);
-        Mockito.when(kieServiceMock.getProcessAdminServicesClient(anyString())).thenReturn(mockProcessAdminServicesClient);
-        addMockConfigs(kieServiceMock);
-
-        // When
-        try {
-            getEntityManager().getTransaction().begin();
-            migrationService.submit(def);
-            fail("Expected InvalidMigrationException due to wrong planId");
-        } catch (InvalidMigrationException e) {
-            assertNotNull(e);
-        } finally {
-            getEntityManager().getTransaction().commit();
-        }
-    }
-
-    @Test(expected = InvalidMigrationException.class)
-    public void testSubmitValidationNullDefinition() throws InvalidMigrationException {
-        migrationService.submit(null);
-    }
-
-    @Test(expected = InvalidMigrationException.class)
-    public void testSubmitValidationNullPlan() throws InvalidMigrationException {
-        migrationService.submit(new MigrationDefinition());
-    }
-
-    @Test
-    public void testSubmitValidationInvalidKieServer() throws InvalidMigrationException {
-        // Given
-        Plan plan = createPlan();
-        MigrationDefinition def = createMigrationDefinition(plan, SYNC);
-        def.setKieServerId("wrong kieServerId");
-
-        // Setup mock
-        ProcessAdminServicesClient mockProcessAdminServicesClient = Mockito.mock(ProcessAdminServicesClient.class);
-        Mockito.when(kieServiceMock.getProcessAdminServicesClient(anyString())).thenReturn(mockProcessAdminServicesClient);
-        addMockConfigs(kieServiceMock);
-
-        // When
-        try {
-            getEntityManager().getTransaction().begin();
-            migrationService.submit(def);
-            fail("Expected InvalidKieServerException due to wrong kieserverId");
-        } catch (InvalidKieServerException e) {
-            assertNotNull(e);
-        } finally {
-            getEntityManager().getTransaction().commit();
-        }
-    }
-
-    @Test
-    public void testSubmitValidationKieServerIdNull() {
-        MigrationDefinition def = new MigrationDefinition();
-        def.setPlanId(1L);
-        try {
-            getEntityManager().getTransaction().begin();
-            migrationService.submit(def);
-            fail("Expected InvalidKieServerException due to wrong kieserverId");
-        } catch (InvalidMigrationException e) {
-            assertNotNull(e);
-        } finally {
-            getEntityManager().getTransaction().commit();
-        }
-    }
-
-    @Test
-    public void testSubmitFailed() throws InvalidMigrationException, MigrationNotFoundException {
-        // Given
-        Plan plan = createPlan();
-        MigrationDefinition def = createMigrationDefinition(plan, SYNC);
-
-        // Setup mocks
-        ProcessAdminServicesClient mockProcessAdminServicesClient = Mockito.mock(ProcessAdminServicesClient.class);
-        QueryServicesClient mockQueryServicesClient = Mockito.mock(QueryServicesClient.class);
-
-        Mockito.when(mockProcessAdminServicesClient.migrateProcessInstance(anyString(),
-                                                                           eq(1L),
-                                                                           anyString(),
-                                                                           anyString(),
-                                                                           anyMapOf(String.class, String.class)))
-            .thenThrow(new RuntimeException("Foo"));
-        Mockito.when(mockQueryServicesClient.findProcessInstanceById(eq(1L))).thenReturn(buildProcessInstance(1L, plan.getSource().getContainerId()));
-        Mockito.when(kieServiceMock.existsProcessDefinition(anyString(), any(ProcessRef.class))).thenReturn(Boolean.TRUE);
-        for (long i = 2; i <= 3; i++) {
-            Mockito.when(mockQueryServicesClient.findProcessInstanceById(eq(i))).thenReturn(buildProcessInstance(i, plan.getSource().getContainerId()));
-            Mockito.when(mockProcessAdminServicesClient.migrateProcessInstance(anyString(),
-                                                                               eq(i),
-                                                                               anyString(),
-                                                                               anyString(),
-                                                                               anyMapOf(String.class, String.class)))
-                .thenReturn(createReport(i));
-        }
-
-        Mockito.when(kieServiceMock.getProcessAdminServicesClient(anyString())).thenReturn(mockProcessAdminServicesClient);
-        Mockito.when(kieServiceMock.getQueryServicesClient(anyString())).thenReturn(mockQueryServicesClient);
-        addMockConfigs(kieServiceMock);
-
-        // When
-        getEntityManager().getTransaction().begin();
-        migrationService.submit(def);
-        getEntityManager().getTransaction().commit();
-
-        // Then
-        for (long i = 1; i <= 3; i++) {
-            verify(mockProcessAdminServicesClient).migrateProcessInstance(plan.getSource().getContainerId(),
-                                                                          i,
-                                                                          plan.getTarget().getContainerId(),
-                                                                          plan.getTarget().getProcessId(),
-                                                                          plan.getMappings());
-        }
-        List<Migration> migrations = migrationService.findAll();
-
-        assertNotNull(migrations);
-        assertEquals(1, migrations.size());
-        Migration m = migrations.get(0);
-        assertEquals(ExecutionStatus.FAILED, m.getStatus());
-        assertNotNull(m.getCreatedAt());
-        assertNotNull(m.getStartedAt());
-        assertNotNull(m.getFinishedAt());
-        List<MigrationReport> results = migrationService.getResults(m.getId());
-        assertEquals(3, results.size());
-        results.stream().forEach(r -> {
-            if (r.getProcessInstanceId().equals(1L)) {
-                assertFalse(r.getSuccessful());
-            } else {
-                assertTrue(r.getSuccessful());
-            }
-        });
-    }
-
-    @Test
-    public void testMigrateAsync() throws InvalidMigrationException, MigrationNotFoundException {
-        // Given
-        Plan plan = createPlan();
-        Execution execution = new Execution();
-        execution.setType(ExecutionType.ASYNC).setScheduledStartTime(LocalDateTime.now().plusDays(2).toInstant(ZoneOffset.UTC));
-        MigrationDefinition def = createMigrationDefinition(plan, execution);
-        Migration m = new Migration(def);
-        getEntityManager().persist(m);
-
-        // Setup mock
-        Mockito.when(getEntityManager().find(Migration.class, 99L)).thenReturn(m);
-        Mockito.doNothing().when(getEntityManager()).persist(m);
-        ProcessAdminServicesClient mockProcessAdminServicesClient = Mockito.mock(ProcessAdminServicesClient.class);
-        QueryServicesClient mockQueryServicesClient = Mockito.mock(QueryServicesClient.class);
-        Mockito.when(kieServiceMock.existsProcessDefinition(anyString(), any(ProcessRef.class))).thenReturn(Boolean.TRUE);
-        for (long i = 1; i <= 3; i++) {
-            Mockito.when(mockQueryServicesClient.findProcessInstanceById(eq(i))).thenReturn(buildProcessInstance(i, plan.getSource().getContainerId()));
-            Mockito.when(mockProcessAdminServicesClient.migrateProcessInstance(anyString(),
-                                                                               eq(i),
-                                                                               anyString(),
-                                                                               anyString(),
-                                                                               anyMapOf(String.class, String.class)))
-                .thenReturn(createReport(i));
-        }
-        Mockito.when(kieServiceMock.getProcessAdminServicesClient(anyString())).thenReturn(mockProcessAdminServicesClient);
-        Mockito.when(kieServiceMock.getQueryServicesClient(anyString())).thenReturn(mockQueryServicesClient);
-        addMockConfigs(kieServiceMock);
-
-        // When
-        getEntityManager().getTransaction().begin();
-        Migration result = migrationService.migrate(m);
-        getEntityManager().getTransaction().commit();
-
-        // Then
-        ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
-        verify(getEntityManager(), times(5)).persist(argument.capture());
-        List<MigrationReport> reports = argument.getAllValues().stream()
-            .filter(o -> o.getClass().equals(MigrationReport.class))
-            .map(o -> (MigrationReport) o)
-            .sorted((a, b) -> a.getProcessInstanceId().compareTo(b.getProcessInstanceId()))
-            .collect(Collectors.toList());
-        for (Long i = 1L; i <= 3; i++) {
-            verify(mockProcessAdminServicesClient).migrateProcessInstance(plan.getSource().getContainerId(),
-                                                                          i,
-                                                                          plan.getTarget().getContainerId(),
-                                                                          plan.getTarget().getProcessId(),
-                                                                          plan.getMappings());
-            MigrationReport r = reports.get(i.intValue() - 1);
-            assertEquals(Long.valueOf(m.getId()), r.getMigrationId());
-            assertEquals(Long.valueOf(i), r.getProcessInstanceId());
-            assertTrue(r.getSuccessful());
-        }
-        assertEquals(ExecutionStatus.COMPLETED, result.getStatus());
-        assertNotNull(result.getCreatedAt());
-        assertNotNull(result.getStartedAt());
-        assertNotNull(result.getFinishedAt());
-    }
-
-    private MigrationDefinition createMigrationDefinition(Plan plan, Execution execution) {
-        MigrationDefinition def = new MigrationDefinition();
-        def.setPlanId(plan.getId());
-        def.setKieServerId(MOCK_KIESERVER_ID);
-        def.setExecution(execution);
-        def.setProcessInstanceIds(Arrays.asList(1L, 2L, 3L));
-        return def;
-    }
-
-    private Plan createPlan() {
-        Plan plan = new Plan();
-        plan.setName("name");
-        plan.setSource(new ProcessRef().setContainerId("sourceContainerId").setProcessId("sourceProcessId"));
-        plan.setTarget(new ProcessRef().setContainerId("targetContainerId").setProcessId("targetProcessId"));
-        plan.setDescription("description");
-        Map<String, String> mappings = new HashMap<>();
-        mappings.put("source1", "target1");
-        mappings.put("source2", "target2");
-        plan.setMappings(mappings);
-        getEntityManager().getTransaction().begin();
-        planService.create(plan);
-        getEntityManager().getTransaction().commit();
-        return plan;
-    }
-
-    private MigrationReportInstance createReport(Long id) {
-        MigrationReportInstance report = new MigrationReportInstance();
-        report.setSuccessful(Boolean.TRUE);
-        report.setProcessInstanceId(id);
-        return report;
-    }
-
-    private List<ProcessInstance> buildProcessInstances(long start, long end) {
-        List<ProcessInstance> pis = new ArrayList<>();
-        for (long id = start; id <= end; id++) {
-            pis.add(buildProcessInstance(id, null));
-        }
-        return pis;
-    }
-
-    private ProcessInstance buildProcessInstance(long id, String containerId) {
+        List<ProcessInstance> instances = new ArrayList<>();
         ProcessInstance instance = new ProcessInstance();
-        instance.setId(id);
-        instance.setContainerId(containerId);
-        return instance;
+        instance.setId(2L);
+        instance.setContainerId("source-container");
+        instances.add(instance);
+        when(mockQueryServicesClient.findProcessInstancesByContainerId(eq(plan.getSource().getContainerId()), anyList(), anyInt(), anyInt())).thenReturn(instances);
+        when(mockQueryServicesClient.findProcessInstanceById(instance.getId())).thenReturn(instance);
+
+        MigrationReportInstance report = new MigrationReportInstance();
+        report.setStartDate(new Date());
+        report.setEndDate(new Date());
+        report.setSuccessful(true);
+        report.setProcessInstanceId(instance.getId());
+        report.setLogs(List.of("Migration went fine"));
+        when(mockAdminServicesClient.migrateProcessInstance(anyString(), anyLong(), anyString(), anyString(), anyMap())).thenReturn(report);
+
+        // When
+        migrationService.submit(definition);
+
+        // Then
+        List<Migration> migrations = migrationService.findAll();
+
+        assertThat(migrations, notNullValue());
+        assertThat(migrations, hasSize(1));
+        Migration migration = migrations.get(0);
+        assertThat(migration.getStatus(), is(Execution.ExecutionStatus.COMPLETED));
+        assertThat(migration.getCancelledAt(), nullValue());
+        assertThat(migration.getStartedAt(), notNullValue());
+        assertThat(migration.getFinishedAt(), notNullValue());
+        List<MigrationReport> results = migrationService.getResults(migration.id);
+        assertThat(results, hasSize(1));
+        assertThat(results.get(0).getProcessInstanceId(), is(report.getProcessInstanceId()));
+        assertThat(results.get(0).getSuccessful(), is(report.isSuccessful()));
+        assertThat(results.get(0).getStartDate(), is(report.getStartDate().toInstant()));
+        assertThat(results.get(0).getEndDate(), is(report.getEndDate().toInstant()));
+        assertThat(results.get(0).getMigrationId(), is(migration.id));
+        assertThat(results.get(0).getLogs(), containsInAnyOrder(report.getLogs().toArray()));
+
+        verify(mockAdminServicesClient, times(1)).migrateProcessInstance(anyString(), anyLong(), anyString(), anyString(), anyMap());
+        migrationService.delete(migration.id);
+    }
+
+    @Test
+    void testSubmitSyncFailedMigration() throws InvalidMigrationException, PlanNotFoundException, MigrationNotFoundException {
+        // Given
+        assertThat(migrationService, notNullValue());
+        Plan plan = new Plan()
+                .setSource(new ProcessRef().setContainerId("source-container").setProcessId("source-process"))
+                .setTarget(new ProcessRef().setContainerId("target-container").setProcessId("target-process"))
+                .setName("migrationPlan");
+        MigrationDefinition definition = new MigrationDefinition();
+        definition.setRequester("requester");
+        definition.setKieServerId("kie-server-1");
+        definition.setExecution(new Execution().setType(Execution.ExecutionType.SYNC));
+        definition.setPlanId(11L);
+
+        when(planService.get(11L)).thenReturn(plan);
+        when(kieService.hasKieServer(definition.getKieServerId())).thenReturn(Boolean.TRUE);
+        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getSource())).thenReturn(Boolean.TRUE);
+        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getTarget())).thenReturn(Boolean.TRUE);
+
+        QueryServicesClient mockQueryServicesClient = mock(QueryServicesClient.class);
+        when(kieService.getQueryServicesClient(definition.getKieServerId())).thenReturn(mockQueryServicesClient);
+        ProcessAdminServicesClient mockAdminServicesClient = mock(ProcessAdminServicesClient.class);
+        when(kieService.getProcessAdminServicesClient(definition.getKieServerId())).thenReturn(mockAdminServicesClient);
+
+        List<ProcessInstance> instances = new ArrayList<>();
+        ProcessInstance instance = new ProcessInstance();
+        instance.setId(2L);
+        instance.setContainerId("source-container");
+        instances.add(instance);
+        when(mockQueryServicesClient.findProcessInstancesByContainerId(eq(plan.getSource().getContainerId()), anyList(), anyInt(), anyInt())).thenReturn(instances);
+        when(mockQueryServicesClient.findProcessInstanceById(instance.getId())).thenReturn(instance);
+
+        MigrationReportInstance report = new MigrationReportInstance();
+        report.setStartDate(new Date());
+        report.setEndDate(new Date());
+        report.setSuccessful(false);
+        report.setProcessInstanceId(instance.getId());
+        report.setLogs(List.of("Migration went wrong"));
+        when(mockAdminServicesClient.migrateProcessInstance(anyString(), anyLong(), anyString(), anyString(), anyMap())).thenReturn(report);
+
+        // When
+        migrationService.submit(definition);
+
+        // Then
+        List<Migration> migrations = migrationService.findAll();
+
+        assertThat(migrations, notNullValue());
+        assertThat(migrations, hasSize(1));
+        Migration migration = migrations.get(0);
+        assertThat(migration.getStatus(), is(Execution.ExecutionStatus.FAILED));
+        assertThat(migration.getCancelledAt(), nullValue());
+        assertThat(migration.getStartedAt(), notNullValue());
+        assertThat(migration.getFinishedAt(), notNullValue());
+        List<MigrationReport> results = migrationService.getResults(migration.id);
+        assertThat(results, hasSize(1));
+        assertThat(results.get(0).getProcessInstanceId(), is(report.getProcessInstanceId()));
+        assertThat(results.get(0).getSuccessful(), is(report.isSuccessful()));
+        assertThat(results.get(0).getStartDate(), is(report.getStartDate().toInstant()));
+        assertThat(results.get(0).getEndDate(), is(report.getEndDate().toInstant()));
+        assertThat(results.get(0).getMigrationId(), is(migration.id));
+        assertThat(results.get(0).getLogs(), containsInAnyOrder(report.getLogs().toArray()));
+
+        verify(mockAdminServicesClient, times(1)).migrateProcessInstance(anyString(), anyLong(), anyString(), anyString(), anyMap());
+        migrationService.delete(migration.id);
     }
 }

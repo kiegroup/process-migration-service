@@ -49,10 +49,10 @@ public class MigrationResource {
     private static final String ANONYMOUS = "ANONYMOUS";
 
     @Context
-    private SecurityContext securityContext;
+    SecurityContext securityContext;
 
     @Inject
-    private MigrationService migrationService;
+    MigrationService migrationService;
 
     @GET
     public Response findAll() {

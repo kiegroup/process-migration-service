@@ -17,6 +17,17 @@ package org.kie.processmigration.model;
 
 import java.util.List;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+
+@EqualsAndHashCode
+@ToString
+@Accessors(chain = true)
+@Getter
+@Setter
 public class ProcessInfo {
 
     private List<BpmNode> nodes;
@@ -24,42 +35,4 @@ public class ProcessInfo {
     private String processId;
     private String svgFile;
 
-    public String getProcessId() {
-        return processId;
-    }
-
-    public void setProcessId(String processId) {
-        this.processId = processId;
-    }
-
-    public List<BpmNode> getNodes() {
-        return nodes;
-    }
-
-    public void setNodes(List<BpmNode> nodes) {
-        this.nodes = nodes;
-    }
-
-    public String getSvgFile() {
-        return svgFile;
-    }
-
-    public void setSvgFile(String svgFile) {
-        this.svgFile = svgFile;
-    }
-
-    public String getContainerId() {
-        return containerId;
-    }
-
-    public void setContainerId(String containerId) {
-        this.containerId = containerId;
-    }
-
-    @Override
-    public String toString() {
-        return "ProcessInfo [nodes=" + nodes
-            + ", containerId=" + containerId
-            + ", processId=" + processId + "]";
-    }
 }

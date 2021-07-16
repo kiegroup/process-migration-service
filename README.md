@@ -1,6 +1,7 @@
 # Process Instance Migration Service
 
-This service is intended to be deployed as a standalone application. It must be integrated with one or more KIE Process Server instances to be able to execute migrations remotely.
+This service is intended to be deployed as a standalone application. It must be integrated with one or more KIE Process 
+Server instances to be able to execute migrations remotely.
 
 The two entities that will be used are _Migration Plans_ and _Migrations_.
 
@@ -16,7 +17,8 @@ Is a definition of how the migration will be performed. Includes the following i
 
 ## Migration
 
-Is the execution of a defined plan, applied to a set of process instances. These are the attributes that define a Migration:
+Is the execution of a defined plan, applied to a set of process instances. These are the attributes that define a 
+Migration:
 
 * Migration ID (Generated)
 * Plan ID
@@ -28,8 +30,28 @@ Is the execution of a defined plan, applied to a set of process instances. These
 
 ## Requirements
 
-* JRE 1.8 or greater
+* JRE 1.8 or 11+
 * Running KIE Process server
+
+### Requirements for testing
+
+PIM Integration Tests requires an external Kie Server instance, for that you can provide your own instance
+or use TestContainers. TestContainers on Podman requires to connect through the external API so make sure
+you can connect remotely to Podman.
+
+```shell script
+# Use a different time but bear in mind the default is 5 seconds
+$ podman system service --time=0 &
+
+# Confirm it's working 
+$ podman-remote info
+...
+  os: linux
+  remoteSocket:
+    exists: true
+    path: /run/user/1000/podman/podman.sock
+...
+``` 
 
 ## Build
 
@@ -39,13 +61,13 @@ mvn clean package
 
 ## Run application
 
-It is a [Thorntail 2.x](http://docs.wildfly-swarm.io/2.4.0.Final/) application.
+It is a [Quarkus 1.x](https://quarkus.io/) application.
 
 ```bash
 java -jar target/process-migration-thorntail.jar
 ```
 
-You can provide your custom configuration file. Check [project-defaults.yml](./src/main/resources/project-defaults.yml) to see an example. The provided configuration will be added or override the one existing in project-defaults.yml
+You can provide your custom configuration file. Check [application.yaml](./src/main/resources/application.yml) to see an example. The provided configuration will be added or override the one existing in project-defaults.yml
 
 ```bash
 java -jar target/process-migration-thorntail.jar -s./myconfig.yml
@@ -91,10 +113,12 @@ thorntail:
 
 It is possible to override or extend the provided configuration. You can provide one or more additional configuration files that will allow you to customize the application. Several examples are provided in the [examples](./examples/) folder.
 
-As an example, if you want to replace the H2 default persistence configuration by [MariaDB](./examples/persistence/mariadb.yml) and the authentication mechanism to use [LDAP](./examples/authentication/ldap/ldapExtended.yml) you could use the following command to start the application:
+As an example, if you want to replace the H2 default persistence configuration by [MariaDB](./examples/persistence/mariadb.yml) and the authentication mechanism to use [LDAP](examples/authentication/ldap/ldap.yml) you could use the following command to start the application:
 
 ```bash
 java -Dthorntail.classpath=./mariadb-java-client-2.4.2.jar -jar target/process-migration-thorntail.jar -s./examples/authentication/ldap/ldapExtended.yml -s./examples/persistence/mariadb.yml
+
+java -jar -Dsmallrye.config.locations=./examples/kieservers.yml,./examples/general/port-offset.yml target/quarkus-app/quarkus-run.jar
 ```
 
 **Note:** As the MariaDB jdbc driver is not included in the classpath it must be added.
@@ -132,40 +156,46 @@ thorntail:
 
 _Refer to the [Thorntail Datasource](https://docs.thorntail.io/2.4.0.Final/#creating-a-datasource_thorntail) configuration for further details_
 
-#### Basic authentication
+#### Basic authentication and authorization
 
-Authentication example available [here](./examples/authentication/properties). Shows how to define basic authentication using properties files.
+Authorization example available [here](./examples/authentication/basic-auth.yml). Shows how to define basic authorization.
+
+**Note that this is a build time configuration** (See [Quarkus Authorization](https://quarkus.io/guides/security-authorization))
 
 ```{yaml}
-thorntail:
-  deployment:
-    process-migration.war:
-      web:
-        login-config:
-          auth-method: BASIC (1)
-          security-domain: pim
-        security-constraints:
-          - url-pattern: /* (2)
-            roles: [ admin ]
-          - url-pattern: /health/* (3)
-          - url-pattern: /rest/health/* (3)
-  security:
-    security-domains:
-      pim:
-        classic-authentication:
-          login-modules:
-            UsersRoles:
-              code: UsersRoles
-              flag: required
-              module-options: (4)
-                usersProperties: /opt/process-migration/config/application-users.properties
-                rolesProperties: /opt/process-migration/config/application-roles.properties
+  http:
+    auth:
+      basic: true
+      policy:
+        main-policy:
+          roles-allowed: admin
+      permission:
+        main:
+          paths: /*
+          policy: main-policy
+        public:
+          paths: /q/health/*
+          policy: permit
+          methods: GET
 ```
 
 1. Authentication type `BASIC`
 1. Every resource under root path requires the `admin` role
 1. Health checks are not secured
-1. Properties files use absolute path as they are not part of the classpath. See the existing files in the examples folder to see how to use them.
+
+By default, the user properties IdentityProvider is provided in plain text:
+
+**Note that this is a build time configuration** (See [Quarkus Security](https://quarkus.io/guides/security#identity-providers))
+
+```{yaml}
+  security:
+    users:
+      file:
+        enabled: true
+        plain-text: true
+        users: users.properties
+        roles: roles.properties
+```
 
 ## Using non-provided JDBC drivers
 

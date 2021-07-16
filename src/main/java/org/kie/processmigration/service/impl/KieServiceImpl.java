@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
@@ -41,6 +40,7 @@ import org.kie.processmigration.model.KieServerConfig;
 import org.kie.processmigration.model.ProcessInfo;
 import org.kie.processmigration.model.ProcessRef;
 import org.kie.processmigration.model.RunningInstance;
+import org.kie.processmigration.model.config.KieServers;
 import org.kie.processmigration.model.exceptions.InvalidKieServerException;
 import org.kie.processmigration.model.exceptions.ProcessDefinitionNotFoundException;
 import org.kie.processmigration.service.KieService;
@@ -62,17 +62,13 @@ import org.kie.server.client.credentials.EnteredCredentialsProvider;
 import org.kie.server.common.rest.NoEndpointFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wildfly.swarm.spi.api.config.ConfigKey;
-import org.wildfly.swarm.spi.api.config.ConfigView;
-import org.wildfly.swarm.spi.api.config.SimpleKey;
+
+import io.quarkus.runtime.Startup;
 
 @ApplicationScoped
 @Startup
 public class KieServiceImpl implements KieService {
 
-    private static final String HOST = "host";
-    private static final String USERNAME = "username";
-    private static final String PASSWORD = "password";
     private static final long CONFIGURATION_TIMEOUT = 60000;
     private static final Integer DEFAULT_PAGE_SIZE = 100;
     private static final long AWAIT_EXECUTOR = 5;
@@ -80,23 +76,20 @@ public class KieServiceImpl implements KieService {
     private static final Logger logger = LoggerFactory.getLogger(KieServiceImpl.class);
 
     final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-    final Map<String, KieServerConfig> configs = new HashMap<>();
-    final ConfigKey kieServersKey = new SimpleKey("kieservers");
+    final Collection<KieServerConfig> configs = new ArrayList<>();
 
     @Inject
-    ConfigView configView;
+    KieServers kieServers;
 
     @PostConstruct
-    public void loadConfigs() {
-        if (configView.hasKeyOrSubkeys(kieServersKey)) {
-            @SuppressWarnings("unchecked")
-            List<Map<String, String>> value = configView.resolve(kieServersKey).as(List.class).getValue();
-            value.stream().forEach(this::loadConfig);
+    void loadConfigs() {
+        if (kieServers.kieservers() != null && !kieServers.kieservers().isEmpty()) {
+            kieServers.kieservers().forEach(this::loadConfig);
         }
     }
 
     @PreDestroy
-    public void shutdown() {
+    void shutdown() {
         executorService.shutdown();
         try {
             if (!executorService.awaitTermination(AWAIT_EXECUTOR, TimeUnit.SECONDS)) {
@@ -109,20 +102,19 @@ public class KieServiceImpl implements KieService {
 
     @Override
     public Collection<KieServerConfig> getConfigs() {
-        return Collections.unmodifiableCollection(configs.values());
+        return Collections.unmodifiableCollection(configs);
     }
 
     @Override
     public boolean hasKieServer(String kieServerId) {
         return configs
-            .values()
-            .stream()
-            .anyMatch(config -> config.getId() != null && config.getId().equals(kieServerId));
+                .stream()
+                .anyMatch(config -> config.getId() != null && config.getId().equals(kieServerId));
     }
 
     @Override
     public ProcessAdminServicesClient getProcessAdminServicesClient(String kieServerId) throws
-        InvalidKieServerException {
+            InvalidKieServerException {
         return getClient(kieServerId).getServicesClient(ProcessAdminServicesClient.class);
     }
 
@@ -133,7 +125,7 @@ public class KieServiceImpl implements KieService {
 
     @Override
     public List<RunningInstance> getRunningInstances(String kieServerId, String containerId, Integer page, Integer
-        pageSize) throws InvalidKieServerException {
+            pageSize) throws InvalidKieServerException {
         ProcessServicesClient processServicesClient = getProcessServicesClient(kieServerId);
         List<ProcessInstance> instanceList = processServicesClient.findProcessInstances(containerId, page, pageSize);
 
@@ -157,7 +149,7 @@ public class KieServiceImpl implements KieService {
                 definitions.put(container.getContainerId(), new HashSet<>());
             }
             boolean finished = false;
-            Integer page = 0;
+            int page = 0;
             while (!finished) {
                 List<ProcessDefinition> processes = queryServicesClient.findProcessesByContainerId(container.getContainerId(), page++, DEFAULT_PAGE_SIZE);
                 if (processes.size() < DEFAULT_PAGE_SIZE) {
@@ -171,14 +163,14 @@ public class KieServiceImpl implements KieService {
 
     @Override
     public boolean existsProcessDefinition(String kieServerId, ProcessRef processRef) throws
-        InvalidKieServerException {
+            InvalidKieServerException {
         QueryServicesClient queryService = getQueryServicesClient(kieServerId);
         return queryService.findProcessByContainerIdProcessId(processRef.getContainerId(), processRef.getProcessId()) != null;
     }
 
     @Override
     public ProcessInfo getDefinition(String kieServerId, ProcessRef processRef) throws
-        ProcessDefinitionNotFoundException, InvalidKieServerException {
+            ProcessDefinitionNotFoundException, InvalidKieServerException {
         ProcessInfo processInfo = new ProcessInfo();
 
         //get SVG file
@@ -206,9 +198,9 @@ public class KieServiceImpl implements KieService {
         List<BpmNode> nodes = new ArrayList<>();
         if (pd.getNodes() != null) {
             nodes = pd.getNodes()
-                .stream()
-                .map(n -> new BpmNode().setId(n.getUniqueId()).setName(n.getName()).setType(n.getType()))
-                .collect(Collectors.toCollection(ArrayList::new));
+                    .stream()
+                    .map(n -> new BpmNode().setId(n.getUniqueId()).setName(n.getName()).setType(n.getType()))
+                    .collect(Collectors.toCollection(ArrayList::new));
         }
         processInfo.setNodes(nodes);
         processInfo.setContainerId(processRef.getContainerId());
@@ -216,20 +208,27 @@ public class KieServiceImpl implements KieService {
         return processInfo;
     }
 
-    private void loadConfig(Map<String, String> config) {
-        CredentialsProvider credentialsProvider = new EnteredCredentialsProvider(config.get(USERNAME), config.get(PASSWORD));
+    private void loadConfig(KieServers.KieServer config) {
+        CredentialsProvider credentialsProvider = new EnteredCredentialsProvider(config.username(), config.password());
         KieServerConfig kieConfig = new KieServerConfig();
-        kieConfig.setHost(config.get(HOST))
-            .setCredentialsProvider(credentialsProvider);
+        kieConfig.setHost(config.host())
+                .setCredentialsProvider(credentialsProvider);
         try {
-            kieConfig.setClient(createKieServicesClient(kieConfig));
-            logger.info("Loaded kie server configuration: {}", kieConfig);
+            KieServicesClient client = createKieServicesClient(kieConfig);
+            if (client != null) {
+                kieConfig.setClient(client);
+                if (client.getServerInfo().getResult() != null) {
+                    kieConfig
+                            .setName(client.getServerInfo().getResult().getName())
+                            .setId(client.getServerInfo().getResult().getServerId());
+                }
+            }
         } catch (Exception e) {
-            logger.info("Unable to create kie server configuration for {}. Retry asynchronously", kieConfig);
+            logger.info("Unable to create kie server configuration for {}. Retry asynchronously", config);
             retryConnection(kieConfig);
         }
-        configs.put(kieConfig.getHost(), kieConfig);
-        logger.info("Loaded kie server configuration: {}", kieConfig);
+        configs.add(kieConfig);
+        logger.info("Loaded kie server configuration for: {}", config);
     }
 
     private KieServicesClient createKieServicesClient(KieServerConfig config) {
@@ -240,12 +239,11 @@ public class KieServiceImpl implements KieService {
     }
 
     private KieServicesClient getClient(String kieServerId) throws InvalidKieServerException {
-        return configs.values()
-            .stream()
-            .filter(config -> kieServerId.equals(config.getId()))
-            .findFirst()
-            .orElseThrow(() -> new InvalidKieServerException(kieServerId))
-            .getClient();
+        return configs.stream()
+                .filter(config -> kieServerId.equals(config.getId()))
+                .findFirst()
+                .orElseThrow(() -> new InvalidKieServerException(kieServerId))
+                .getClient();
     }
 
     private UIServicesClient getUIServicesClient(String kieServerId) throws InvalidKieServerException {
@@ -256,7 +254,7 @@ public class KieServiceImpl implements KieService {
         return getClient(kieServerId).getServicesClient(ProcessServicesClient.class);
     }
 
-    void retryConnection(KieServerConfig kieConfig) {
+    private void retryConnection(KieServerConfig kieConfig) {
         executorService.schedule(new KieServerClientConnector(kieConfig), RETRY_DELAY, TimeUnit.SECONDS);
     }
 
@@ -280,11 +278,7 @@ public class KieServiceImpl implements KieService {
                 } catch (NoEndpointFoundException e) {
                     logger.warn("Unable to connect to KieServer: {}. The client will try to reconnect in the background", kieConfig);
                 } catch (Exception e) {
-                    if (e.getCause() != null && NoEndpointFoundException.class.isInstance(e.getCause())) {
-                        logger.warn("Unable to connect to KieServer: {}. The client will try to reconnect in the background", kieConfig);
-                    } else {
-                        logger.warn("Unable to create KieServer client: {}", kieConfig, e);
-                    }
+                    logger.warn("Unable to create KieServer client: {}", kieConfig, e);
                 } finally {
                     if (kieConfig.getClient() == null) {
                         logger.debug("KieServerClient for {} could not be created. Retrying...", kieConfig);

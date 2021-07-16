@@ -40,4 +40,6 @@ public interface MigrationService {
     Migration delete(Long id) throws MigrationNotFoundException;
 
     Migration migrate(Migration migration) throws InvalidMigrationException;
+
+    List<Migration> findPending();
 }

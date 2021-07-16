@@ -16,52 +16,106 @@
 
 package org.kie.processmigration.service;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.jboss.weld.junit4.WeldInitiator;
-import org.junit.Rule;
-import org.junit.Test;
+import io.quarkus.test.junit.QuarkusTest;
+import org.hamcrest.CoreMatchers;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.kie.processmigration.model.Plan;
 import org.kie.processmigration.model.ProcessRef;
-import org.kie.processmigration.service.impl.PlanServiceImpl;
+import org.kie.processmigration.model.exceptions.PlanNotFoundException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import java.util.List;
 
-public class PlanServiceImplTest extends AbstractPersistenceTest {
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-    @Rule
-    public WeldInitiator weld = WeldInitiator
-        .from(PlanServiceImpl.class)
-        .setPersistenceContextFactory(getPCFactory())
-        .inject(this)
-        .build();
+@QuarkusTest
+class PlanServiceImplTest {
 
     @Inject
-    private PlanService planService;
+    PlanService planService;
+
+    @AfterEach
+    @Transactional
+    void cleanUp() {
+        Plan.deleteAll();
+    }
 
     @Test
-    public void testSaveAndFindAll() {
-        // Given
-        assertNotNull(planService);
+    void testService() {
+        assertThat(planService, CoreMatchers.notNullValue());
+        assertThat(planService.findAll(), empty());
+    }
 
-        Plan plan = new Plan();
-        plan.setName("name");
-        plan.setSource(new ProcessRef().setContainerId("containerId").setProcessId("sourceProcessId"));
-        plan.setTarget(new ProcessRef().setContainerId("targetContainerId").setProcessId("targetProcessId"));
-        plan.setDescription("description");
+    @Test
+    void testCreateAndFindAll() {
+        // Given
+        Plan plan = new Plan()
+                .setName("name")
+                .setSource(new ProcessRef()
+                        .setContainerId("containerId").setProcessId("sourceProcessId"))
+                .setTarget(new ProcessRef().setContainerId("targetContainerId").setProcessId("targetProcessId"))
+                .setDescription("description");
 
         // When
-        getEntityManager().getTransaction().begin();
-        planService.create(plan);
-        getEntityManager().getTransaction().commit();
+        Plan result = planService.create(plan);
 
         // Then
         List<Plan> plans = planService.findAll();
 
-        assertNotNull(plans);
-        assertEquals(1, plans.size());
+        assertThat(plans, notNullValue());
+        assertThat(plans, hasSize(1));
+        assertThat(plans.get(0), equalTo(result));
+    }
+
+    @Test
+    void testDelete() throws PlanNotFoundException {
+        assertThrows(PlanNotFoundException.class, () -> planService.delete(1L));
+        // Given
+        Plan plan = new Plan()
+                .setName("name")
+                .setSource(new ProcessRef()
+                        .setContainerId("containerId").setProcessId("sourceProcessId"))
+                .setTarget(new ProcessRef().setContainerId("targetContainerId").setProcessId("targetProcessId"))
+                .setDescription("description");
+        Plan result = planService.create(plan);
+
+        // When
+        assertThat(result, notNullValue());
+        assertThat(result.id, notNullValue());
+        assertThat(planService.delete(result.id), equalTo(plan));
+
+        // Then
+        assertThat(planService.findAll(), empty());
+    }
+
+
+    @Test
+    void testUpdate() throws PlanNotFoundException {
+        assertThrows(PlanNotFoundException.class, () -> planService.delete(1L));
+        // Given
+        Plan plan = new Plan()
+                .setName("name")
+                .setSource(new ProcessRef()
+                        .setContainerId("containerId").setProcessId("sourceProcessId"))
+                .setTarget(new ProcessRef().setContainerId("targetContainerId").setProcessId("targetProcessId"))
+                .setDescription("description");
+        Long id = planService.create(plan).id;
+
+        // When
+        assertThat(id, notNullValue());
+        Plan other = new Plan()
+                .setName("name2")
+                .setSource(new ProcessRef()
+                        .setContainerId("containerId2").setProcessId("sourceProcessId2"))
+                .setTarget(new ProcessRef().setContainerId("targetContainerId2").setProcessId("targetProcessId2"))
+                .setDescription("description2");
+
+        // Then
+        assertThat(planService.update(id, other), equalTo(other));
+        assertThat(planService.findAll(), hasSize(1));
     }
 }

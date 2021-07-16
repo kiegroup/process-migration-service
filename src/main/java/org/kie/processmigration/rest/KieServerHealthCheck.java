@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2021 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,29 @@
 
 package org.kie.processmigration.rest;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
-import org.eclipse.microprofile.health.Liveness;
-import org.eclipse.microprofile.health.Readiness;
+import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
+import org.kie.processmigration.model.KieServerConfig;
 
-@Readiness
-@Liveness
-@ApplicationScoped
-public class HealthStatus implements HealthCheck {
+import static org.kie.processmigration.model.KieServerConfig.SUCCESS_STATUS;
 
-    private static final HealthCheckResponse UP = HealthCheckResponse.named("service").up().build();
+public class KieServerHealthCheck implements HealthCheck {
+
+    private final KieServerConfig config;
+
+    public KieServerHealthCheck(KieServerConfig config) {
+        this.config = config;
+    }
 
     @Override
     public HealthCheckResponse call() {
-        return UP;
+        HealthCheckResponseBuilder response = new HealthCheckResponse().named("kie-server " + config.getName());
+        if (SUCCESS_STATUS.equals(config.getStatus())) {
+            return response.up().build();
+        }
+        return response.down().build();
     }
+
+
 }
