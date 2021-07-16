@@ -89,6 +89,7 @@ public class MigrationServiceImpl implements MigrationService {
     }
 
     @Override
+    @Transactional
     public List<MigrationReport> getResults(Long id) throws MigrationNotFoundException {
         Migration m = get(id);
         return MigrationReport.find("migration_id", m.getId()).list();

@@ -2,21 +2,30 @@ quarkus:
   log:
     level: DEBUG
     min-level: DEBUG
+  # flyway to create PIM schema
+  flyway:
+    connect-retries: 10
+    table: flyway_pim_history
+    migrate-at-start: true
+    baseline-on-migrate: true
+    baseline-version: 1.0
+    baseline-description: PimDB
+    sql-migration-prefix: ${maven.jdbc.db-kind}
   # Quartz configuration
   quartz:
-    store-type: ram
+    store-type: jdbc-cmt
     start-mode: forced
   resteasy:
     path: /rest
   datasource:
-    db-kind: h2
+    db-kind: ${maven.jdbc.db-kind}
     jdbc:
-      url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password: sa
+      url: ${maven.jdbc.url}
+    username: ${maven.jdbc.username}
+    password: ${maven.jdbc.password}
   hibernate-orm:
     database:
-      generation: create
+      generation: validate
   security:
     users:
       file:
