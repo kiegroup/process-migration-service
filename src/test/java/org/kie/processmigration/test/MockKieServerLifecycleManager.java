@@ -171,7 +171,7 @@ public class MockKieServerLifecycleManager implements QuarkusTestResourceLifecyc
         endNode.setType("EndNode");
         endNode.setUniqueId(UUID.randomUUID().toString());
         endNode.setName("End Here");
-        Collection<NodeDefinition> nodes = List.of(endNode, endNode);
+        Collection<NodeDefinition> nodes = List.of(startNode, endNode);
         process3.setNodes(nodes);
 
         ProcessDefinitionList example101DefinitionsResponse = new ProcessDefinitionList(new ProcessDefinition[]{process2, process3});

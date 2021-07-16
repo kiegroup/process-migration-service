@@ -85,7 +85,7 @@ java -jar target/quarkus-app/quarkus-run.jar
 ./target/process-migration-runner
 ```
 
-You can provide your custom configuration file. Check [application.yaml](./src/main/resources/application.yaml) 
+You can provide your custom configuration file. Check [application.yaml](src/main/resources/application.yaml) 
 to see an example. The provided configuration will be added or override the one existing in application.yaml
 
 ### Container image
@@ -152,14 +152,23 @@ quarkus:
         url: ldap://override-when-needed
       identity-mapping:
         search-base-dn: ou=users,o=YourCompany,c=ES
+# Flyway to create PIM schema
+  flyway:
+    connect-retries: 10
+    table: flyway_pim_history
+    migrate-at-start: true
+    baseline-on-migrate: true
+    baseline-version: 1.0
+    baseline-description: PimDB
+    sql-migration-prefix: h2 (1)        
 # Quartz configuration
   quartz:
-    store-type: ram
+    store-type: jdbc-cmt
     start-mode: forced
   resteasy:
-    path: /rest (1)
+    path: /rest (2)
   datasource:
-    db-kind: h2 (2)
+    db-kind: h2 (3)
     jdbc:
       url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
@@ -168,12 +177,13 @@ quarkus:
     database:
       generation: update
 pim:
-  auth-method: file (3)
+  auth-method: file (4)
 ```
 
-1. Deploy the application on `/rest`
-1. H2 inmemory datasource. Override it by one of your choice
-1. Authentication method. Defaults to `file` but `jdbc` or `ldap` are also valid options
+1. Flyway will automatically create PIM schema when enabled based on the DDL scripts prefix. Enabled by default.
+2. Deploy the application on `/rest`
+3. H2 in-memory datasource. Override it by one of your choice
+4. Authentication method. Defaults to `file` but `jdbc` or `ldap` are also valid options
 
 ### Configuration overrides
 
@@ -265,8 +275,9 @@ By default, the user properties IdentityProvider is provided in plain text:
 
 ## Configuring Quartz
 
-By default Quartz jobs are stored in-memory but it is possible to configure Quartz to persist the jobs in
-a database by defining the `quarkus.quartz.store-type` to either `jdbc-cmt` or `jdbc-tx`. See the 
+By default, Quartz jobs are stored in-memory database through connections managed by container, but it is possible to configure Quartz to persist the jobs in
+a different way either using a user transaction based configuration or the in-memory database. This can be achieved by setting the `quarkus.quartz.store-type` property 
+to `ram` or `jdbc-tx`. See the 
 [examples](./examples/quartz) and the [Quarkus Quartz documentation](https://quarkus.io/guides/quartz).
 
 ## Using other JDBC extensions
@@ -274,10 +285,33 @@ a database by defining the `quarkus.quartz.store-type` to either `jdbc-cmt` or `
 The H2 JDBC extension is set by default. However, users will be able to use different JDBC extensions to connect to any
 supported database. For that purpose you will have to re-augment the base build to include the right build properties.
 
+For instance, below command will add a PostgreSQL database extension by re-augmenting the application.
+
+```shell script
+java -jar -Dquarkus.launch.rebuild=true -Dquarkus.datasource.db-kind=postgresql target/quarkus-app/quarkus-run.jar
+```
+
+Afterwards, you can start up the application normally.
+```shell script
+java -jar -Dquarkus.datasource.username=jbpm -Dquarkus.datasource.password=jbpm -Dquarkus.flyway.sql-migration-prefix=postgresql -Dquarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/jbpm?pinGlobalTxToPhysicalConnection=true target/quarkus-app/quarkus-run.jar
+```
+Also, note that Flyway prefix property `quarkus.flyway.sql-migration-prefix` must be set accordingly to the right database used.
+
 Reference:
 
-* [Quarkus Datasources](https://quarkus.io/guides/datasource#jdbc-datasource).
+* [Quarkus Datasources](https://quarkus.io/guides/datasource#jdbc-datasource)
 * [Quarkus Re-augmentation](https://quarkus.io/guides/reaugmentation)
+* [Quarkus Flyway](https://quarkus.io/guides/flyway)
+
+## Disabling database schema auto-creation
+
+Process Migration service generates the database schema automatically if it is not already present by using the DDL scripts bundled in the application.
+You should be able to disable and manage the schema creation by your own by disabling some Flyway properties.
+
+```shell script
+java -jar -Dquarkus.flyway.migrate-at-start=false target/quarkus-app/quarkus-run.jar
+```
+
 
 ### How to change build time properties in a `mutable-jar`
 
@@ -286,7 +320,7 @@ property is changed at runtime. If you want to change a build-time property it i
 build.
 
 ```shell script
-java -jar -Dquarkus.launch.rebuild=true -Dquarkus.datasource.db-kind=mariadb target/quarkus-app/quarkus-run.jar
+java -jar -Dquarkus.launch.rebuild=true -Dquarkus.datasource.db-kind=mariadb -Dquarkus.flyway.sql-migration-prefix=mariadb target/quarkus-app/quarkus-run.jar
 ```
 
 ## Usage

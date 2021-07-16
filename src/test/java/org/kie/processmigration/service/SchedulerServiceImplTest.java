@@ -24,27 +24,25 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.kie.processmigration.listener.TestJobListener;
 import org.kie.processmigration.model.Execution;
 import org.kie.processmigration.model.Migration;
 import org.kie.processmigration.model.MigrationDefinition;
 import org.kie.processmigration.model.exceptions.InvalidMigrationException;
 import org.kie.processmigration.model.exceptions.MigrationNotFoundException;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
-import org.quartz.JobListener;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
 
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -92,9 +90,13 @@ class SchedulerServiceImplTest {
         schedulerService.scheduleMigration(migration);
 
         // Then
-        count.await(10, TimeUnit.SECONDS);
+        if (!count.await(10, TimeUnit.SECONDS)) {
+            fail("Failed while waiting for the jobs to be completed");
+        }
         verify(migrationService, times(1)).get(99L);
         verify(migrationService, times(1)).migrate(migration);
+
+        Thread.sleep(1000L); // wait for the triggers/jobs to be deleted from the db
         assertThat(scheduler.checkExists(new JobKey(migration.getId().toString())), is(Boolean.FALSE));
         assertThat(scheduler.checkExists(new TriggerKey(migration.getId().toString())), is(Boolean.FALSE));
     }
@@ -121,7 +123,9 @@ class SchedulerServiceImplTest {
         // Then
         assertThat(scheduler.checkExists(new JobKey(migration.getId().toString())), is(Boolean.TRUE));
         assertThat(scheduler.checkExists(new TriggerKey(migration.getId().toString())), is(Boolean.TRUE));
-        count.await(10, TimeUnit.SECONDS);
+        if (!count.await(10, TimeUnit.SECONDS)) {
+            fail("Failed while waiting for the jobs to be completed");
+        }
 
         verify(migrationService, times(1)).get(99L);
         verify(migrationService, times(1)).migrate(migration);
@@ -153,7 +157,9 @@ class SchedulerServiceImplTest {
         // Then
         assertThat(scheduler.checkExists(new JobKey(migration.getId().toString())), is(Boolean.TRUE));
         assertThat(scheduler.checkExists(new TriggerKey(migration.getId().toString())), is(Boolean.TRUE));
-        count.await(10, TimeUnit.SECONDS);
+        if (!count.await(10, TimeUnit.SECONDS)) {
+            fail("Failed while waiting for the jobs to be completed");
+        }
 
         verify(migrationService, times(1)).get(99L);
         verify(migrationService, times(1)).migrate(migration);
@@ -175,38 +181,11 @@ class SchedulerServiceImplTest {
 
         // When
         schedulerService.scheduleMigration(migration);
-        count.await(10, TimeUnit.SECONDS);
+        if (!count.await(10, TimeUnit.SECONDS)) {
+            fail("Failed while waiting for the jobs to be completed");
+        }
         // Then
         verify(migrationService, times(0)).migrate(migration);
-    }
-
-    private static final class TestJobListener implements JobListener {
-
-        private final CountDownLatch count;
-
-        TestJobListener(CountDownLatch count) {
-            this.count = count;
-        }
-
-        @Override
-        public String getName() {
-            return "Test Job Listener";
-        }
-
-        @Override
-        public void jobToBeExecuted(JobExecutionContext jobExecutionContext) {
-
-        }
-
-        @Override
-        public void jobExecutionVetoed(JobExecutionContext jobExecutionContext) {
-
-        }
-
-        @Override
-        public void jobWasExecuted(JobExecutionContext jobExecutionContext, JobExecutionException e) {
-            count.countDown();
-        }
     }
 
 }

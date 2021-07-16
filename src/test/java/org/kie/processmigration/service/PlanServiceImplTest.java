@@ -21,14 +21,13 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import io.quarkus.test.junit.QuarkusTest;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.processmigration.model.Plan;
 import org.kie.processmigration.model.ProcessRef;
 import org.kie.processmigration.model.exceptions.PlanNotFoundException;
-
-import io.quarkus.test.junit.QuarkusTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -43,7 +42,7 @@ class PlanServiceImplTest {
     @Inject
     PlanService planService;
 
-    @AfterEach
+    @BeforeEach
     @Transactional
     void cleanUp() {
         Plan.deleteAll();
