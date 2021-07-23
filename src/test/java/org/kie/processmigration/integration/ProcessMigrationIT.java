@@ -15,22 +15,16 @@
  */
 package org.kie.processmigration.integration;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.http.HttpStatus;
-import org.appformer.maven.integration.MavenRepository;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.kie.api.KieServices;
 import org.kie.processmigration.model.Execution;
 import org.kie.processmigration.model.Migration;
 import org.kie.processmigration.model.MigrationDefinition;
@@ -61,6 +55,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.kie.processmigration.test.ContainerKieServerLifecycleManager.ARTIFACT_ID;
+import static org.kie.processmigration.test.ContainerKieServerLifecycleManager.CONTAINER_ID;
+import static org.kie.processmigration.test.ContainerKieServerLifecycleManager.GROUP_ID;
 import static org.kie.processmigration.test.ContainerKieServerLifecycleManager.KIE_SERVER_ID;
 
 @QuarkusTest
@@ -71,13 +68,9 @@ class ProcessMigrationIT {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
-    private static final String ARTIFACT_ID = "test";
-    private static final String GROUP_ID = "com.myspace.test";
+    private static final String PROCESS_ID = "test.myprocess";
     private static final String SOURCE_CONTAINER_ID = "test_1.0.0";
     private static final String TARGET_CONTAINER_ID = "test_2.0.0";
-
-    private static final String CONTAINER_ID = "test";
-    private static final String PROCESS_ID = "test.myprocess";
 
     @ConfigProperty(name = "pim.username")
     String username;
@@ -93,31 +86,13 @@ class ProcessMigrationIT {
 
     @BeforeEach
     void deployProcesses() throws Exception {
-        KieServices ks = KieServices.Factory.get();
         KieServicesClient client = kieService.getClient(KIE_SERVER_ID);
-        MavenRepository repo = MavenRepository.getMavenRepository();
         for (String version : List.of("1.0.0", "2.0.0")) {
-            org.kie.api.builder.ReleaseId builderReleaseId = ks.newReleaseId(GROUP_ID, ARTIFACT_ID, version);
-            File kjar = readFile(CONTAINER_ID + "-" + version + ".jar");
-            File pom = readFile(CONTAINER_ID + "-" + version + ".pom");
-            repo.installArtifact(builderReleaseId, kjar, pom);
             ReleaseId releaseId = new ReleaseId(GROUP_ID, ARTIFACT_ID, version);
             KieContainerResource resource = new KieContainerResource(CONTAINER_ID, releaseId);
             ServiceResponse<KieContainerResource> response = client.createContainer(CONTAINER_ID + "_" + version, resource);
             assertThat(response.getType(), is(KieServiceResponse.ResponseType.SUCCESS));
         }
-    }
-
-    private File readFile(String resource) throws IOException {
-        File tmpFile = new File(resource);
-        tmpFile.deleteOnExit();
-        try (OutputStream os = new FileOutputStream(tmpFile)) {
-            InputStream is = ProcessMigrationIT.class.getResource("/kjars/" + resource).openStream();
-            byte[] buffer = new byte[is.available()];
-            is.read(buffer);
-            os.write(buffer);
-        }
-        return tmpFile;
     }
 
     @Test

@@ -1,10 +1,18 @@
 package org.kie.processmigration.test;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import org.appformer.maven.integration.MavenRepository;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.kie.api.KieServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -21,12 +29,25 @@ public class ContainerKieServerLifecycleManager implements QuarkusTestResourceLi
     private static final String CONTAINER_IMAGE = System.getProperty("kieserver.container.name", "jboss/kie-server-showcase");
     private static final String CONTAINER_TAG = System.getProperty("kieserver.container.tag", "latest");
 
+    public static final String GROUP_ID = "com.myspace.test";
+    public static final String ARTIFACT_ID = "test";
+    public static final String CONTAINER_ID = "test";
     public static final String KIE_SERVER_ID = "pim-kie-server";
 
     private final GenericContainer container;
 
-    public ContainerKieServerLifecycleManager() {
+    public ContainerKieServerLifecycleManager() throws IOException {
         LOGGER.info("Trying to create container for: {}/{}", CONTAINER_IMAGE, CONTAINER_TAG);
+
+        KieServices ks = KieServices.Factory.get();
+        MavenRepository repo = MavenRepository.getMavenRepository();
+        for (String version : List.of("1.0.0", "2.0.0")) {
+            org.kie.api.builder.ReleaseId builderReleaseId = ks.newReleaseId(GROUP_ID, ARTIFACT_ID, version);
+            File kjar = readFile(CONTAINER_ID + "-" + version + ".jar");
+            File pom = readFile(CONTAINER_ID + "-" + version + ".pom");
+            repo.installArtifact(builderReleaseId, kjar, pom);
+        }
+
         this.container = new GenericContainer(DockerImageName.parse(CONTAINER_IMAGE + ":" + CONTAINER_TAG))
                 .withExposedPorts(8080)
                 .withEnv("KIE_SERVER_ID", KIE_SERVER_ID)
@@ -34,6 +55,19 @@ public class ContainerKieServerLifecycleManager implements QuarkusTestResourceLi
                         MountableFile.forHostPath(System.getProperty("user.home") + "/.m2/repository/com/myspace/test/test/"),
                         "/opt/jboss/.m2/repository/com/myspace/test/test/");
     }
+
+    private File readFile(String resource) throws IOException {
+        File tmpFile = new File(resource);
+        tmpFile.deleteOnExit();
+        try (OutputStream os = new FileOutputStream(tmpFile)) {
+            InputStream is = ContainerKieServerLifecycleManager.class.getResource("/kjars/" + resource).openStream();
+            byte[] buffer = new byte[is.available()];
+            is.read(buffer);
+            os.write(buffer);
+        }
+        return tmpFile;
+    }
+
 
     @Override
     public Map<String, String> start() {
