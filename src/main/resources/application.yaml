@@ -57,3 +57,8 @@ quarkus:
       generation: update
 pim:
   auth-method: file
+"%int":
+  kieservers:
+  - host: http://localhost:18080/kie-server/services/rest/server
+    username: kieserver
+    password: kieserver1!

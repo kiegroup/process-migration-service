@@ -44,3 +44,7 @@ quarkus:
         url: ldap://override-when-needed
       identity-mapping:
         search-base-dn: ou=users,o=YourCompany,c=ES
+"%test":
+  pim:
+    username: admin
+    password: admin1!

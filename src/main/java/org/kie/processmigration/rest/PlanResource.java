@@ -26,6 +26,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static javax.ws.rs.core.Response.Status.CREATED;
+
 @Path("/plans")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -51,7 +53,7 @@ public class PlanResource {
         if (plan.id != null) {
             throw new IllegalArgumentException("The plan ID must not be provided when creating a new plan");
         }
-        return Response.ok(planService.create(plan)).status(Response.Status.CREATED).build();
+        return Response.status(CREATED).entity(planService.create(plan)).build();
     }
 
     @PUT

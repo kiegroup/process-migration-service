@@ -113,6 +113,15 @@ public class KieServiceImpl implements KieService {
     }
 
     @Override
+    public KieServicesClient getClient(String kieServerId) throws InvalidKieServerException {
+        return configs.stream()
+                .filter(config -> kieServerId.equals(config.getId()))
+                .findFirst()
+                .orElseThrow(() -> new InvalidKieServerException(kieServerId))
+                .getClient();
+    }
+
+    @Override
     public ProcessAdminServicesClient getProcessAdminServicesClient(String kieServerId) throws
             InvalidKieServerException {
         return getClient(kieServerId).getServicesClient(ProcessAdminServicesClient.class);
@@ -236,14 +245,6 @@ public class KieServiceImpl implements KieService {
         configuration.setTimeout(CONFIGURATION_TIMEOUT);
         configuration.setMarshallingFormat(MarshallingFormat.JSON);
         return KieServicesFactory.newKieServicesClient(configuration);
-    }
-
-    private KieServicesClient getClient(String kieServerId) throws InvalidKieServerException {
-        return configs.stream()
-                .filter(config -> kieServerId.equals(config.getId()))
-                .findFirst()
-                .orElseThrow(() -> new InvalidKieServerException(kieServerId))
-                .getClient();
     }
 
     private UIServicesClient getUIServicesClient(String kieServerId) throws InvalidKieServerException {

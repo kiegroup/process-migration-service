@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.drools</groupId>
+  <groupId>org.kie</groupId>
   <version>7.59.0-SNAPSHOT</version>
   <artifactId>process-migration-service</artifactId>
   <name>Process Instance Migration Service</name>
@@ -15,11 +15,9 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.testTarget>${maven.compiler.target}</maven.compiler.testTarget>
     <maven.compiler.testSource>${maven.compiler.source}</maven.compiler.testSource>
-    <quarkus.platform.version>2.0.2.Final</quarkus.platform.version>
-    <quarkus.plugin.version>2.0.2.Final</quarkus.plugin.version>
+    <quarkus.version>2.0.3.Final</quarkus.version>
     <kieserver.version>${project.version}</kieserver.version>
-    <surefire-plugin.version>2.22.2</surefire-plugin.version>
-    <failsafe-plugin.version>2.22.2</failsafe-plugin.version>
+    <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
     <lombok.version>1.18.16</lombok.version>
     <wiremock.version>2.27.2</wiremock.version>
     <mockito-inline.version>3.7.7</mockito-inline.version>
@@ -32,7 +30,7 @@
       <dependency>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-universe-bom</artifactId>
-        <version>${quarkus.platform.version}</version>
+        <version>${quarkus.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -71,7 +69,6 @@
         <version>2.10.5.1</version>
       </dependency>
       <!--  droolsjbpm-integration dependencies- end -->
-
       <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers</artifactId>
@@ -84,6 +81,7 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
   <dependencies>
     <!-- KIE Dependencies -->
     <dependency>
@@ -189,6 +187,21 @@
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.kie.soup</groupId>
+      <artifactId>kie-soup-maven-integration</artifactId>
+      <version>${kieserver.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.inject</groupId>
+          <artifactId>javax.inject</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.enterprise</groupId>
+          <artifactId>cdi-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
   </dependencies>
   <build>
     <finalName>process-migration</finalName>
@@ -197,14 +210,11 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven.compiler.version}</version>
-        <configuration>
-          <forceJavacCompilerUse>true</forceJavacCompilerUse>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>
-        <version>${quarkus.plugin.version}</version>
+        <version>${quarkus.version}</version>
         <extensions>true</extensions>
         <executions>
           <execution>
@@ -228,7 +238,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>${failsafe-plugin.version}</version>
+        <version>${surefire-plugin.version}</version>
         <configuration>
           <systemPropertyVariables>
             <kieserver.container.name>jboss/kie-server-showcase</kieserver.container.name>
@@ -360,29 +370,38 @@
   </build>
   <profiles>
     <profile>
-      <id>run-code-coverage</id>
+      <id>native</id>
+      <activation>
+        <property>
+          <name>native</name>
+        </property>
+      </activation>
       <build>
         <plugins>
           <plugin>
-            <groupId>com.bazaarvoice.maven.plugins</groupId>
-            <artifactId>process-exec-maven-plugin</artifactId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>${surefire-plugin.version}</version>
             <executions>
               <execution>
-                <id>start-process-migration-service</id>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
                 <configuration>
-                  <arguments>
-                    <argument>java</argument>
-                    <argument>${jacoco.agent.line}</argument>
-                    <argument>-jar</argument>
-                    <argument>${project.build.directory}/${project.build.finalName}-thorntail.jar</argument>
-                    <argument>-s${project.build.testOutputDirectory}/project-test.yml</argument>
-                  </arguments>
+                  <systemPropertyVariables>
+                    <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
+                    <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                    <maven.home>${maven.home}</maven.home>
+                  </systemPropertyVariables>
                 </configuration>
               </execution>
             </executions>
           </plugin>
         </plugins>
       </build>
+      <properties>
+        <quarkus.package.type>native</quarkus.package.type>
+      </properties>
     </profile>
   </profiles>
 </project>

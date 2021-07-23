@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpStatus;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.processmigration.model.Plan;
@@ -43,6 +44,12 @@ import static org.hamcrest.Matchers.is;
 
 @QuarkusTest
 class PlanResourceTest {
+
+    @ConfigProperty(name = "pim.username")
+    String username;
+
+    @ConfigProperty(name = "pim.password")
+    String password;
 
     @InjectMock
     PlanService planService;
@@ -132,6 +139,6 @@ class PlanResourceTest {
     }
 
     RequestSpecification givenAuthenticated() {
-        return given().auth().basic("wbadmin", "wbadmin");
+        return given().auth().basic(username, password);
     }
 }

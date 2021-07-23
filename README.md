@@ -55,79 +55,129 @@ $ podman-remote info
 
 ## Build
 
-```bash
+It is a [Quarkus 2.x](https://quarkus.io/) application.
+
+### JVM
+
+```shell script
 mvn clean package
+```
+
+### Native
+
+**Note**: Native compilation is currently not supported.
+
+```shell script
+mvn clean package -Pnative -Dquarkus.native.container-build=true
 ```
 
 ## Run application
 
-It is a [Quarkus 1.x](https://quarkus.io/) application.
+### JVM 
 
 ```bash
-java -jar target/process-migration-thorntail.jar
+java -jar target/quarkus-app/quarkus-run.jar
 ```
 
-You can provide your custom configuration file. Check [application.yaml](./src/main/resources/application.yml) to see an example. The provided configuration will be added or override the one existing in project-defaults.yml
+### Native
 
-```bash
-java -jar target/process-migration-thorntail.jar -s./myconfig.yml
+```shell script
+./target/process-migration-runner
 ```
 
-Start the server on a different ports set:
-
-```bash
-java -jar target/process-migration-thorntail.jar -Dswarm.network.socket-binding-groups.standard-sockets.port-offset=10
-```
+You can provide your custom configuration file. Check [application.yaml](./src/main/resources/application.yaml) 
+to see an example. The provided configuration will be added or override the one existing in application.yaml
 
 ## Configuration
 
 Default configuration is as follows:
 
 ```yaml
-thorntail:
-  deployment:
-    process-migration.war:
-      jaxrs:                   (1)
-        application-path: /rest
-  datasources:                 (2)
-    data-sources:
-      pimDS:
-        driver-name: h2
-        connection-url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-        user-name: sa
-        password: sa
-  ejb3:                        (3)
-    timer-service:
-      default-data-store: timers-store
-      database-data-stores:
-        timers-store:
-          datasource-jndi-name: java:jboss/datasources/pimDS
-          partition: timer
+quarkus:
+  http:
+    auth:
+      basic: true
+      policy:
+        main-policy:
+          roles-allowed: admin
+      permission:
+        main:
+          paths: /*
+          policy: main-policy
+        public:
+          paths: /q/health/*
+          policy: permit
+          methods: GET
+  security:
+    users:
+      file:
+        realm-name: pim_file
+        enabled: true
+        plain-text: true
+        users: users.properties
+        roles: roles.properties
+    jdbc:
+      realm-name: Quarkus_jdbc
+      enabled: true
+      principal-query:
+        sql: SELECT u.password, u.role FROM users u WHERE u.username=?
+    ldap:
+      realm-name: pim_ldap
+      dir-context:
+        url: ldap://override-when-needed
+      identity-mapping:
+        search-base-dn: ou=users,o=YourCompany,c=ES
+# Quartz configuration
+  quartz:
+    store-type: jdbc-cmt
+    start-mode: forced
+  # flyway to create Quartz tables
+  flyway:
+    connect-retries: 10
+    table: flyway_quarkus_history
+    migrate-at-start: true
+    baseline-on-migrate: true
+    baseline-version: 1.0
+    baseline-description: Quartz
+  resteasy:
+    path: /rest (1)
+  datasource:
+    db-kind: h2 (2)
+    jdbc:
+      url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: sa
+  hibernate-orm:
+    database:
+      generation: update
+pim:
+  auth-method: file (3)
 ```
 
 1. Deploy the application on `/rest`
 1. H2 inmemory datasource. Override it by one of your choice
-1. EJB Timers persistence configuration
+1. Authentication method. Defaults to `file` but `jdbc` or `ldap` are also valid options
 
 ### Configuration overrides
 
-It is possible to override or extend the provided configuration. You can provide one or more additional configuration files that will allow you to customize the application. Several examples are provided in the [examples](./examples/) folder.
+Check [Quarkus Configuration Reference Guide](https://quarkus.io/guides/config-reference) for further details.
 
-As an example, if you want to replace the H2 default persistence configuration by [MariaDB](./examples/persistence/mariadb.yml) and the authentication mechanism to use [LDAP](examples/authentication/ldap/ldap.yml) you could use the following command to start the application:
+It is possible to override or extend the provided configuration. You can provide one or more additional configuration 
+files that will allow you to customize the application. Several examples are provided in the [examples](./examples) 
+folder.
 
-```bash
-java -Dthorntail.classpath=./mariadb-java-client-2.4.2.jar -jar target/process-migration-thorntail.jar -s./examples/authentication/ldap/ldapExtended.yml -s./examples/persistence/mariadb.yml
+As an example, if you want to replace the H2 default persistence configuration by 
+[MariaDB](./examples/persistence/mariadb.yml) and the authentication mechanism to use 
+[LDAP](examples/authentication/ldap/ldap.yml).
 
-java -jar -Dsmallrye.config.locations=./examples/kieservers.yml,./examples/general/port-offset.yml target/quarkus-app/quarkus-run.jar
-```
+**Note:** As the MariaDB jdbc driver is not included in the classpath. It must be added.
 
-**Note:** As the MariaDB jdbc driver is not included in the classpath it must be added.
-
-**Note:** These files will override or extend the already defined properties in the project-defaults.yml file
+**Note:** These files will override or extend the already defined properties in the application.yaml file
 
 #### Defining KIE Servers
 
-The right way to configure the connection to one or more KIE Servers in order to perform the migrations, a list of kieservers should exist in the configuration file.
+The right way to configure the connection to one or more KIE Servers in order to perform the migrations, a list of 
+kieservers should exist in the configuration file.
 
 ```yaml
 kieservers:
@@ -139,22 +189,21 @@ kieservers:
     password: secret
 ```
 
-#### MySQL Datasource
+#### MariaDB Datasource
 
 See [Using non-provided JDBC drivers](#using-non-provided-jdbc-drivers) for details on how to include additional JDBC drivers to the runtime.
 
 ```yaml
-thorntail:
-  datasources:
-    data-sources:
-      pimDS:
-        driver-name: mysql
-        connection-url: jdbc:mysql://mysql.example.com:3306/pimdb?useUnicode=true&useSSL=false&serverTimezone=UTC
-        user-name: pim
-        password: pim
+quarkus:
+  datasource:
+    db-kind: mariadb
+    jdbc:
+      url: jdbc:mariadb://localhost:3306/pimdb
+    username: pim
+    password: pim123
 ```
 
-_Refer to the [Thorntail Datasource](https://docs.thorntail.io/2.4.0.Final/#creating-a-datasource_thorntail) configuration for further details_
+_Refer to the [Quarkus Datasource](https://quarkus.io/guides/datasource) configuration for further details_
 
 #### Basic authentication and authorization
 
@@ -199,16 +248,9 @@ By default, the user properties IdentityProvider is provided in plain text:
 
 ## Using non-provided JDBC drivers
 
-The H2 JDBC driver is included by default. However, users will want to use different JDBC drivers to connect to external databases. For that purpose you will
-have to provide a `-Dthorntail.classpath` parameter with the path to the JDBC driver.
-
-```bash
-$ java -Dthorntail.classpath=./mariadb-java-client-2.4.2.jar -jar target/process-migration-thorntail.jar -s./mariadb-config.yml
-...
-19-07-19 11:00:00,566 INFO  [org.wildfly.swarm.datasources] (main) THORN1003: Auto-detected JDBC driver for h2
-2019-07-19 11:00:00,572 INFO  [org.wildfly.swarm.datasources] (main) THORN1003: Auto-detected JDBC driver for mariadb
-...
-```
+The H2 JDBC driver is included by default. However, users will want to use different JDBC drivers to connect to external databases. 
+For that purpose you will have add a dependency to your preferred database. Check all the supported Database drivers in
+ [Quarkus Datasources](https://quarkus.io/guides/datasource#jdbc-datasource).
 
 ## Usage
 
@@ -217,7 +259,7 @@ $ java -Dthorntail.classpath=./mariadb-java-client-2.4.2.jar -jar target/process
 Request:
 
 ```bash
-URL: http://localhost:8180/rest/plans
+URL: http://localhost:8080/rest/plans
 Method: POST
 HTTP Headers:
   Content-Type: application/json
@@ -240,7 +282,7 @@ Body:
 Response:
 
 ```http
-Status: 200 OK
+Status: 201 CREATED
 HTTP Headers:
   Content-Type: application/json
 Body:
@@ -268,7 +310,7 @@ Body:
 ### Create a sync migration
 
 ```http
-URL: http://localhost:8180/rest/migrations
+URL: http://localhost:8080/rest/migrations
 Method: POST
 HTTP Headers:
   Content-Type: application/json
@@ -287,7 +329,7 @@ Body:
 Response:
 
 ```http
-Status: 200 OK
+Status: 201 CREATED
 HTTP Headers:
   Content-Type: application/json
 Body:
@@ -318,7 +360,7 @@ The following request will fetch the overall result of the migration
 Request:
 
 ```http
-URL: http://localhost:8180/rest/migrations/1
+URL: http://localhost:8080/rest/migrations/1
 Method: GET
 HTTP Headers:
   Content-Type: application/json
@@ -355,7 +397,7 @@ To retrieve the individual results of the migration of each process instance
 Request:
 
 ```http
-URL: http://localhost:8180/rest/migrations/1/results
+URL: http://localhost:8080/rest/migrations/1/results
 Method: GET
 HTTP Headers:
   Content-Type: application/json
@@ -429,7 +471,7 @@ Body:
 Request:
 
 ```http
-URL: http://localhost:8180/rest/migrations
+URL: http://localhost:8080/rest/migrations
 Method: POST
 HTTP Headers:
   Content-Type: application/json
