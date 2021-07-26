@@ -72,8 +72,38 @@
         <artifactId>weld-junit4</artifactId>
         <version>${version.weld-junit}</version>
       </dependency>
+      <dependency>
+        <groupId>io.thorntail</groupId>
+        <artifactId>bom</artifactId>
+        <version>${version.thorntail}</version>
+        <type>pom</type>
+        <scope>import</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>io.thorntail.jdk-specific</groupId>
+            <artifactId>thorntail-jdk-specific</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.jboss.spec.javax.servlet</groupId>
+            <artifactId>jboss-servlet-api_4.0_spec</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.jboss.spec.javax.annotation</groupId>
+            <artifactId>jboss-annotations-api_1.3_spec</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.jboss.spec.javax.ws.rs</groupId>
+            <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.jboss.spec.javax.websocket</groupId>
+            <artifactId>jboss-websocket-api_1.1_spec</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
     </dependencies>
   </dependencyManagement>
+
   <dependencies>
     <!-- KIE Dependencies -->
     <dependency>
@@ -99,8 +129,24 @@
       <artifactId>jaxrs</artifactId>
       <exclusions>
         <exclusion>
-          <artifactId>thorntail-jdk-specific</artifactId>
           <groupId>io.thorntail.jdk-specific</groupId>
+          <artifactId>thorntail-jdk-specific</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.spec.javax.servlet</groupId>
+          <artifactId>jboss-servlet-api_4.0_spec</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.spec.javax.annotation</groupId>
+          <artifactId>jboss-annotations-api_1.3_spec</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.spec.javax.ws.rs</groupId>
+          <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.spec.javax.websocket</groupId>
+          <artifactId>jboss-websocket-api_1.1_spec</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -117,6 +163,10 @@
       <artifactId>microprofile-config</artifactId>
       <exclusions>
         <exclusion>
+          <groupId>org.jboss.spec.javax.transaction</groupId>
+          <artifactId>jboss-transaction-api_1.3_spec</artifactId>
+        </exclusion>
+        <exclusion>
           <artifactId>narayana-jts-idlj</artifactId>
           <groupId>org.jboss.narayana.jts</groupId>
         </exclusion>
@@ -131,6 +181,10 @@
       <artifactId>jpa</artifactId>
       <exclusions>
         <exclusion>
+          <groupId>org.glassfish</groupId>
+          <artifactId>jakarta.el</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>javax.enterprise</groupId>
           <artifactId>cdi-api</artifactId>
         </exclusion>
@@ -138,11 +192,37 @@
           <groupId>org.jboss.spec.javax.el</groupId>
           <artifactId>jboss-el-api_3.0_spec</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>org.jboss.spec.javax.enterprise.concurrent</groupId>
+          <artifactId>jboss-concurrency-api_1.0_spec</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.spec.javax.interceptor</groupId>
+          <artifactId>jboss-interceptors-api_1.2_spec</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
       <groupId>io.thorntail</groupId>
       <artifactId>ejb</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.enterprise</groupId>
+          <artifactId>cdi-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.spec.javax.resource</groupId>
+          <artifactId>jboss-connector-api_1.7_spec</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.spec.javax.ejb</groupId>
+          <artifactId>jboss-ejb-api_3.2_spec</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.spec.javax.transaction</groupId>
+          <artifactId>jboss-transaction-api_1.3_spec</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- External dependencies -->
@@ -203,6 +283,10 @@
         <exclusion>
           <groupId>org.jboss.spec.javax.el</groupId>
           <artifactId>jboss-el-api_3.0_spec</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.spec.javax.annotation</groupId>
+          <artifactId>jboss-annotations-api_1.2_spec</artifactId>
         </exclusion>
         <exclusion>
           <groupId>javax.inject</groupId>
