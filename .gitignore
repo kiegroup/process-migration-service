@@ -5,6 +5,7 @@ i# Eclipse, Netbeans and IntelliJ files
 /*.ipr
 /*.iws
 /*.iml
+**/.DS_Store
 
 target/
 .classpath
