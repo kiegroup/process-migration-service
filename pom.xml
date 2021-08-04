@@ -181,10 +181,6 @@
       <artifactId>jpa</artifactId>
       <exclusions>
         <exclusion>
-          <groupId>org.glassfish</groupId>
-          <artifactId>jakarta.el</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>javax.enterprise</groupId>
           <artifactId>cdi-api</artifactId>
         </exclusion>
