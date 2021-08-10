@@ -168,7 +168,7 @@ folder.
 
 As an example, if you want to replace the H2 default persistence configuration by 
 [MariaDB](./examples/persistence/mariadb.yml) and the authentication mechanism to use 
-[LDAP](examples/authentication/ldap/ldap.yml).
+[LDAP](examples/authentication/ldap/ldap.yml), see below.
 
 **Note:** As the MariaDB jdbc driver is not included in the classpath. It must be added.
 
@@ -177,7 +177,7 @@ As an example, if you want to replace the H2 default persistence configuration b
 #### Defining KIE Servers
 
 The right way to configure the connection to one or more KIE Servers in order to perform the migrations, a list of 
-kieservers should exist in the configuration file.
+KIE servers should exist in the configuration file. [Example](./examples/kieservers.yml)
 
 ```yaml
 kieservers:
@@ -248,8 +248,8 @@ By default, the user properties IdentityProvider is provided in plain text:
 
 ## Using non-provided JDBC drivers
 
-The H2 JDBC driver is included by default. However, users will want to use different JDBC drivers to connect to external databases. 
-For that purpose you will have add a dependency to your preferred database. Check all the supported Database drivers in
+The H2 JDBC driver is included by default. However, users will be able to use different JDBC drivers to connect to external databases. 
+For that purpose you will have to add a dependency for your preferred database. Check all the supported Database drivers in
  [Quarkus Datasources](https://quarkus.io/guides/datasource#jdbc-datasource).
 
 ## Usage

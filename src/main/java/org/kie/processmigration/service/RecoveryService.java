@@ -16,18 +16,18 @@
 
 package org.kie.processmigration.service;
 
-import io.quarkus.runtime.Startup;
-import org.kie.processmigration.model.Execution.ExecutionStatus;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.kie.processmigration.model.Migration;
 import org.kie.processmigration.model.exceptions.InvalidMigrationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.Arrays;
-import java.util.List;
+import io.quarkus.runtime.Startup;
 
 @Startup
 @Singleton

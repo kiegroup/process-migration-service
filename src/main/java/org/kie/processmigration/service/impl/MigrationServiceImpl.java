@@ -16,22 +16,15 @@
 
 package org.kie.processmigration.service.impl;
 
-import io.quarkus.hibernate.orm.panache.Panache;
-import org.apache.commons.lang3.StringUtils;
-import org.kie.processmigration.model.Execution.ExecutionStatus;
-import org.kie.processmigration.model.Execution.ExecutionType;
-import org.kie.processmigration.model.Migration;
-import org.kie.processmigration.model.MigrationDefinition;
-import org.kie.processmigration.model.MigrationReport;
-import org.kie.processmigration.model.Plan;
-import org.kie.processmigration.model.exceptions.*;
-import org.kie.processmigration.service.*;
-import org.kie.server.api.model.admin.MigrationReportInstance;
-import org.kie.server.api.model.instance.ProcessInstance;
-import org.kie.server.client.QueryServicesClient;
-import org.kie.server.client.admin.ProcessAdminServicesClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -41,10 +34,33 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import java.net.URI;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.kie.processmigration.model.Execution.ExecutionStatus;
+import org.kie.processmigration.model.Execution.ExecutionType;
+import org.kie.processmigration.model.Migration;
+import org.kie.processmigration.model.MigrationDefinition;
+import org.kie.processmigration.model.MigrationReport;
+import org.kie.processmigration.model.Plan;
+import org.kie.processmigration.model.exceptions.InvalidKieServerException;
+import org.kie.processmigration.model.exceptions.InvalidMigrationException;
+import org.kie.processmigration.model.exceptions.MigrationNotFoundException;
+import org.kie.processmigration.model.exceptions.PlanNotFoundException;
+import org.kie.processmigration.model.exceptions.ProcessNotFoundException;
+import org.kie.processmigration.model.exceptions.ReScheduleException;
+import org.kie.processmigration.service.KieService;
+import org.kie.processmigration.service.MigrationService;
+import org.kie.processmigration.service.PlanService;
+import org.kie.processmigration.service.SchedulerService;
+import org.kie.processmigration.service.TransactionHelper;
+import org.kie.server.api.model.admin.MigrationReportInstance;
+import org.kie.server.api.model.instance.ProcessInstance;
+import org.kie.server.client.QueryServicesClient;
+import org.kie.server.client.admin.ProcessAdminServicesClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.quarkus.hibernate.orm.panache.Panache;
 
 @ApplicationScoped
 public class MigrationServiceImpl implements MigrationService {
@@ -125,7 +141,7 @@ public class MigrationServiceImpl implements MigrationService {
             throw new ReScheduleException("The migration execution type MUST be ASYNC");
         }
         migration.setDefinition(definition);
-        txHelper.withTransaction((Runnable) migration::persist);
+        txHelper.withTransaction((Runnable) Panache.getEntityManager().merge(migration));
         schedulerService.reScheduleMigration(migration);
         return migration;
     }

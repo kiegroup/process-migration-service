@@ -51,8 +51,6 @@ import lombok.experimental.Accessors;
 @Setter
 public class MigrationReport extends PanacheEntity {
 
-    private static final long serialVersionUID = 5817223334991683064L;
-
     @Column(name = "migration_id")
     private Long migrationId;
 

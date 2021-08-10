@@ -26,7 +26,10 @@ import org.kie.processmigration.model.MigrationDefinition;
 import org.kie.processmigration.model.exceptions.InvalidMigrationException;
 import org.kie.processmigration.model.exceptions.MigrationNotFoundException;
 import org.kie.processmigration.service.SchedulerService;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
+import org.quartz.JobListener;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
@@ -38,11 +41,14 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.*;
+import static org.quartz.impl.matchers.EverythingMatcher.allJobs;
 
 @QuarkusTest
 class SchedulerServiceImplTest {
@@ -78,13 +84,15 @@ class SchedulerServiceImplTest {
         definition.setProcessInstanceIds(List.of(1L));
         Migration migration = new Migration(definition);
         migration.id = 99L;
+        CountDownLatch count = new CountDownLatch(1);
         when(migrationService.get(migration.id)).thenReturn(migration);
+        scheduler.getListenerManager().addJobListener(new TestJobListener(count), allJobs());
 
         // When
         schedulerService.scheduleMigration(migration);
 
         // Then
-        Thread.sleep(100L);
+        count.await(10, TimeUnit.SECONDS);
         verify(migrationService, times(1)).get(99L);
         verify(migrationService, times(1)).migrate(migration);
         assertThat(scheduler.checkExists(new JobKey(migration.id.toString())), is(Boolean.FALSE));
@@ -103,6 +111,8 @@ class SchedulerServiceImplTest {
         definition.setExecution(new Execution().setType(Execution.ExecutionType.ASYNC).setScheduledStartTime(when));
         Migration migration = new Migration(definition);
         migration.id = 99L;
+        CountDownLatch count = new CountDownLatch(1);
+        scheduler.getListenerManager().addJobListener(new TestJobListener(count), allJobs());
         when(migrationService.get(migration.id)).thenReturn(migration);
 
         // When
@@ -111,12 +121,10 @@ class SchedulerServiceImplTest {
         // Then
         assertThat(scheduler.checkExists(new JobKey(migration.id.toString())), is(Boolean.TRUE));
         assertThat(scheduler.checkExists(new TriggerKey(migration.id.toString())), is(Boolean.TRUE));
-        Thread.sleep(1000L);
+        count.await(10, TimeUnit.SECONDS);
 
         verify(migrationService, times(1)).get(99L);
         verify(migrationService, times(1)).migrate(migration);
-        assertThat(scheduler.checkExists(new JobKey(migration.id.toString())), is(Boolean.FALSE));
-        assertThat(scheduler.checkExists(new TriggerKey(migration.id.toString())), is(Boolean.FALSE));
     }
 
 
@@ -132,6 +140,8 @@ class SchedulerServiceImplTest {
         definition.setExecution(new Execution().setType(Execution.ExecutionType.ASYNC).setScheduledStartTime(when));
         Migration migration = new Migration(definition);
         migration.id = 99L;
+        CountDownLatch count = new CountDownLatch(1);
+        scheduler.getListenerManager().addJobListener(new TestJobListener(count), allJobs());
         when(migrationService.get(migration.id)).thenReturn(migration);
 
         schedulerService.scheduleMigration(migration);
@@ -143,12 +153,10 @@ class SchedulerServiceImplTest {
         // Then
         assertThat(scheduler.checkExists(new JobKey(migration.id.toString())), is(Boolean.TRUE));
         assertThat(scheduler.checkExists(new TriggerKey(migration.id.toString())), is(Boolean.TRUE));
-        Thread.sleep(1500L);
+        count.await(10, TimeUnit.SECONDS);
 
         verify(migrationService, times(1)).get(99L);
         verify(migrationService, times(1)).migrate(migration);
-        assertThat(scheduler.checkExists(new JobKey(migration.id.toString())), is(Boolean.FALSE));
-        assertThat(scheduler.checkExists(new TriggerKey(migration.id.toString())), is(Boolean.FALSE));
     }
 
 
@@ -162,16 +170,43 @@ class SchedulerServiceImplTest {
         definition.setProcessInstanceIds(List.of(1L));
         Migration migration = new Migration(definition);
         migration.id = 99L;
-        when(migrationService.get(migration.id)).thenThrow(new MigrationNotFoundException(99L));
+        CountDownLatch count = new CountDownLatch(1);
+        scheduler.getListenerManager().addJobListener(new TestJobListener(count), allJobs());
 
         // When
         schedulerService.scheduleMigration(migration);
-
+        count.await(10, TimeUnit.SECONDS);
         // Then
         verify(migrationService, times(0)).migrate(migration);
-        Thread.sleep(500);
-        assertThat(scheduler.checkExists(new JobKey(migration.id.toString())), is(Boolean.FALSE));
-        assertThat(scheduler.checkExists(new TriggerKey(migration.id.toString())), is(Boolean.FALSE));
+    }
+
+    private static final class TestJobListener implements JobListener {
+
+        private final CountDownLatch count;
+
+        TestJobListener(CountDownLatch count) {
+            this.count = count;
+        }
+
+        @Override
+        public String getName() {
+            return "Test Job Listener";
+        }
+
+        @Override
+        public void jobToBeExecuted(JobExecutionContext jobExecutionContext) {
+
+        }
+
+        @Override
+        public void jobExecutionVetoed(JobExecutionContext jobExecutionContext) {
+
+        }
+
+        @Override
+        public void jobWasExecuted(JobExecutionContext jobExecutionContext, JobExecutionException e) {
+            count.countDown();
+        }
     }
 
 }

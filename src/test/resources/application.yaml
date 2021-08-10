@@ -34,7 +34,7 @@ quarkus:
         users: users.properties
         roles: roles.properties
     jdbc:
-      realm-name: Quarkus_jdbc
+      realm-name: pim_jdbc
       enabled: true
       principal-query:
         sql: SELECT u.password, u.role FROM users u WHERE u.username=?

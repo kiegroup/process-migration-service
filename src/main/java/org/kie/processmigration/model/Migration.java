@@ -48,7 +48,7 @@ import lombok.experimental.Accessors;
 @Entity
 @Table(name = "migrations")
 @SequenceGenerator(name = "migrationIdSeq", sequenceName = "MIGRATION_ID_SEQ")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode
 @ToString
 @Accessors(chain = true)
 @Getter
