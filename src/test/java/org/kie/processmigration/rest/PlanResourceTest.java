@@ -38,7 +38,7 @@ import io.vertx.core.json.Json;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
@@ -86,7 +86,7 @@ class PlanResourceTest {
                 .extract().asString();
 
         Plan[] resultPlans = Json.decodeValue(results, Plan[].class);
-        assertThat(plans, contains(resultPlans));
+        assertThat(resultPlans, arrayContaining(plans.toArray()));
     }
 
     @Test

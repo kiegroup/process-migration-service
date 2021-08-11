@@ -75,7 +75,7 @@ public class SchedulerServiceImpl implements SchedulerService {
     }
 
     private Trigger buildTrigger(Migration migration) {
-        TriggerBuilder builder = TriggerBuilder.newTrigger().withIdentity(migration.id.toString());
+        TriggerBuilder<Trigger> builder = TriggerBuilder.newTrigger().withIdentity(migration.id.toString());
         if (migration.getDefinition().getExecution() == null || migration.getDefinition().getExecution().getScheduledStartTime() == null) {
             builder = builder.startNow();
         } else {

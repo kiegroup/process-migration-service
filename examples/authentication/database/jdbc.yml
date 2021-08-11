@@ -3,7 +3,7 @@ pim:
 quarkus:
   jdbc:
     principal-query:
-      sql: SELECT u.password, u.role FROM test_user u WHERE u.username=?
+      sql: SELECT u.password, u.role FROM users u WHERE u.username=?
       clear-password-mapper:
         enabled: true
         password-index: 1

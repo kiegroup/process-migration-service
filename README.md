@@ -30,7 +30,7 @@ Migration:
 
 ## Requirements
 
-* JRE 1.8 or 11+
+* JRE 11+
 * Running KIE Process server
 
 ### Requirements for testing
@@ -151,14 +151,6 @@ quarkus:
   quartz:
     store-type: jdbc-cmt
     start-mode: forced
-  # flyway to create Quartz tables
-  flyway:
-    connect-retries: 10
-    table: flyway_quarkus_history
-    migrate-at-start: true
-    baseline-on-migrate: true
-    baseline-version: 1.0
-    baseline-description: Quartz
   resteasy:
     path: /rest (1)
   datasource:
@@ -266,12 +258,30 @@ By default, the user properties IdentityProvider is provided in plain text:
         roles: roles.properties
 ```
 
-## Using non-provided JDBC drivers
+## Using other JDBC extensions
 
-The H2 JDBC driver is included by default. However, users will be able to use different JDBC drivers to connect to
-external databases. For that purpose you will have to add a Quarkus extension for your preferred database.
-Check all the supported JDBC driver extensions in
-[Quarkus Datasources](https://quarkus.io/guides/datasource#jdbc-datasource).
+The H2 JDBC extension is set by default. However, users will be able to use different JDBC extensions to connect to any
+supported database. For that purpose you will have to re-augment the base build to include the right build properties.
+
+Reference:
+
+* [Quarkus Datasources](https://quarkus.io/guides/datasource#jdbc-datasource).
+* [Quarkus Re-augmentation](https://quarkus.io/guides/reaugmentation)
+
+### How to build the mutable-jar
+
+First build the project as a `mutable-jar` and optionally with a configuration property to make sure your application 
+does not startup if a build time property has been changed at runtime.
+
+```shell script
+mvn clean install -Dquarkus.package.type=mutable-jar -Dquarkus.configuration.build-time-mismatch-at-runtime=fail
+```
+
+Then re-augment your application with the desired build time properties
+
+```shell script
+java -jar -Dquarkus.launch.rebuild=true -Dquarkus.datasource.db-kind=mariadb target/quarkus-app/quarkus-run.jar
+```
 
 ## Usage
 

@@ -1,8 +1,4 @@
 quarkus:
-  configuration:
-    build-time-mismatch-at-runtime: fail
-  package:
-    type: mutable-jar
   http:
     auth:
       basic: true
@@ -32,6 +28,7 @@ quarkus:
         sql: SELECT u.password, u.role FROM users u WHERE u.username=?
     ldap:
       realm-name: pim_ldap
+      enabled: true
       dir-context:
         url: ldap://override-when-needed
       identity-mapping:
@@ -40,15 +37,6 @@ quarkus:
   quartz:
     store-type: jdbc-cmt
     start-mode: forced
-  # flyway to create Quartz tables
-  flyway:
-    connect-retries: 10
-    table: flyway_quarkus_history
-    migrate-at-start: true
-    baseline-on-migrate: true
-    baseline-version: 1.0
-    baseline-description: Quartz
-    locations: db/migration/h2
   resteasy:
     path: /rest
   datasource:
