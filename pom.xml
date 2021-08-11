@@ -9,13 +9,16 @@
   <name>Process Instance Migration Service</name>
 
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.version>3.8.1</maven.compiler.version>
     <maven.compiler.parameters>true</maven.compiler.parameters>
     <maven.compiler.target>11</maven.compiler.target>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.testTarget>${maven.compiler.target}</maven.compiler.testTarget>
     <maven.compiler.testSource>${maven.compiler.source}</maven.compiler.testSource>
-    <quarkus.version>2.1.0.CR1</quarkus.version>
+    <maven.resource.plugin.version>3.2.0</maven.resource.plugin.version>
+    <frontend.maven.plugin.version>1.12.0</frontend.maven.plugin.version>
+    <quarkus.version>2.1.1.Final</quarkus.version>
     <kieserver.version>${project.version}</kieserver.version>
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
     <lombok.version>1.18.16</lombok.version>
@@ -62,6 +65,12 @@
         <groupId>org.kie.server</groupId>
         <artifactId>kie-server-controller-client</artifactId>
         <version>${kieserver.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.kie</groupId>
+        <artifactId>kie-test-util</artifactId>
+        <version>${kieserver.version}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
@@ -112,15 +121,48 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-jdbc-h2</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
       <artifactId>quarkus-quartz</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-flyway</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-container-image-jib</artifactId>
+    </dependency>
+    <!-- JDBC Extensions -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-h2</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-mariadb</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-postgresql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-mysql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-derby</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-mssql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-oracle</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-db2</artifactId>
     </dependency>
     <!-- Bundled identityProviders -->
     <dependency>
@@ -144,7 +186,6 @@
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>kie-test-util</artifactId>
-      <version>${kieserver.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -258,6 +299,7 @@
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
+        <version>${frontend.maven.plugin.version}</version>
         <configuration>
           <workingDirectory>frontend</workingDirectory>
           <!-- remove when integrated with parent - start -->
@@ -325,6 +367,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
+        <version>${maven.resource.plugin.version}</version>
         <executions>
           <execution>
             <id>copy-resources</id>

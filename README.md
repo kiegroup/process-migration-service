@@ -88,6 +88,26 @@ java -jar target/quarkus-app/quarkus-run.jar
 You can provide your custom configuration file. Check [application.yaml](./src/main/resources/application.yaml) 
 to see an example. The provided configuration will be added or override the one existing in application.yaml
 
+### Container image
+
+If you want to create a container image using your JVM or Native build use the `-Dquarkus.container-image.build=true` 
+flag when packaging your application and pass in any other configuration property you want to override. See the 
+[Container Image Guide](https://quarkus.io/guides/container-image#building).
+
+```shell script 
+$ mvn clean package -Dquarkus.container-image.build=true \
+ -Dquarkus.container-image.push=true \
+-Dquarkus.container-image.image=quay.io/kiegroup/process-migraiton-service:1.0
+...
+[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] Created container image quay.io/kiegroup/process-migraiton-service:1.0 (sha256:dc8028963923081941529ef0ea515bd1e970b8fc96d5ad6a9346eb4ad61028f6)
+```
+
+Or you can just use your favourite container builder tool and refer to any of the existing [Dockerfiles](./src/main/docker)
+
+```shell script
+$ podman build -t quay.io/kiegroup/process-migraiton-service:1.0 -f ./src/main/docker/Dockerfile.jvm .
+```
+
 ## Configuration
 
 Default configuration is as follows:
@@ -248,9 +268,10 @@ By default, the user properties IdentityProvider is provided in plain text:
 
 ## Using non-provided JDBC drivers
 
-The H2 JDBC driver is included by default. However, users will be able to use different JDBC drivers to connect to external databases. 
-For that purpose you will have to add a dependency for your preferred database. Check all the supported Database drivers in
- [Quarkus Datasources](https://quarkus.io/guides/datasource#jdbc-datasource).
+The H2 JDBC driver is included by default. However, users will be able to use different JDBC drivers to connect to
+external databases. For that purpose you will have to add a Quarkus extension for your preferred database.
+Check all the supported JDBC driver extensions in
+[Quarkus Datasources](https://quarkus.io/guides/datasource#jdbc-datasource).
 
 ## Usage
 

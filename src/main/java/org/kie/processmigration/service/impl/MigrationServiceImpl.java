@@ -67,7 +67,7 @@ public class MigrationServiceImpl implements MigrationService {
 
     private static final Logger logger = LoggerFactory.getLogger(MigrationServiceImpl.class);
 
-    private static final List<ExecutionStatus> PENDING_STATUSES = Arrays.asList(ExecutionStatus.STARTED, ExecutionStatus.CREATED);
+    private static final List<ExecutionStatus> PENDING_STATUSES = List.of(ExecutionStatus.STARTED, ExecutionStatus.CREATED);
     private static final List<Integer> QUERY_PROCESS_INSTANCE_STATUSES = Collections.singletonList(org.kie.api.runtime.process.ProcessInstance.STATE_ACTIVE);
     public static final Integer QUERY_PAGE_SIZE = 100;
 
@@ -102,7 +102,7 @@ public class MigrationServiceImpl implements MigrationService {
 
     @Override
     public List<Migration> findPending() {
-        return Migration.find("status", PENDING_STATUSES).list();
+        return Migration.find("status in ?1", PENDING_STATUSES).list();
     }
 
     @Override

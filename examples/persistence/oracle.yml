@@ -6,3 +6,5 @@ quarkus:
       url: jdbc:oracle:thin:@oracle-12cr1.example.com:1521:pimdb
     username: pim
     password: pim123
+  flyway:
+    locations: db/migration/oracle

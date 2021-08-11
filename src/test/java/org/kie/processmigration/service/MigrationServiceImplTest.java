@@ -16,10 +16,21 @@
 
 package org.kie.processmigration.service;
 
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import org.junit.jupiter.api.Test;
-import org.kie.processmigration.model.*;
+import org.kie.processmigration.model.Execution;
+import org.kie.processmigration.model.Migration;
+import org.kie.processmigration.model.MigrationDefinition;
+import org.kie.processmigration.model.MigrationReport;
+import org.kie.processmigration.model.Plan;
+import org.kie.processmigration.model.ProcessRef;
 import org.kie.processmigration.model.exceptions.InvalidMigrationException;
 import org.kie.processmigration.model.exceptions.MigrationNotFoundException;
 import org.kie.processmigration.model.exceptions.PlanNotFoundException;
@@ -29,17 +40,28 @@ import org.kie.server.api.model.instance.ProcessInstance;
 import org.kie.server.client.QueryServicesClient;
 import org.kie.server.client.admin.ProcessAdminServicesClient;
 
-import javax.inject.Inject;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyMap;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class MigrationServiceImplTest {
@@ -152,103 +174,59 @@ class MigrationServiceImplTest {
         when(mockQueryServicesClient.findProcessInstancesByContainerId(eq(plan.getSource().getContainerId()), anyList(), anyInt(), anyInt())).thenReturn(instances);
         when(mockQueryServicesClient.findProcessInstanceById(instance.getId())).thenReturn(instance);
 
+        List.of(createReport(instance.getId(), true), createReport(instance.getId(), false))
+                .forEach(r -> {
+                    try {
+                        when(mockAdminServicesClient.migrateProcessInstance(anyString(), anyLong(), anyString(), anyString(), anyMap())).thenReturn(r);
+
+                        // When
+                        migrationService.submit(definition);
+
+                        // Then
+                        List<Migration> migrations = migrationService.findAll();
+
+                        assertThat(migrations, notNullValue());
+                        assertThat(migrations, hasSize(1));
+                        Migration migration = migrations.get(0);
+                        if (r.isSuccessful()) {
+                            assertThat(migration.getStatus(), is(Execution.ExecutionStatus.COMPLETED));
+                        } else {
+                            assertThat(migration.getStatus(), is(Execution.ExecutionStatus.FAILED));
+                        }
+                        assertThat(migration.getCancelledAt(), nullValue());
+                        assertThat(migration.getStartedAt(), notNullValue());
+                        assertThat(migration.getFinishedAt(), notNullValue());
+                        List<MigrationReport> results = migrationService.getResults(migration.id);
+                        assertThat(results, hasSize(1));
+                        assertThat(results.get(0).getProcessInstanceId(), is(r.getProcessInstanceId()));
+                        assertThat(results.get(0).getSuccessful(), is(r.isSuccessful()));
+                        assertThat(results.get(0).getStartDate(), is(r.getStartDate().toInstant()));
+                        assertThat(results.get(0).getEndDate(), is(r.getEndDate().toInstant()));
+                        assertThat(results.get(0).getMigrationId(), is(migration.id));
+                        assertThat(results.get(0).getLogs(), containsInAnyOrder(r.getLogs().toArray()));
+
+
+                        migrationService.delete(migration.id);
+                    } catch (MigrationNotFoundException | InvalidMigrationException e) {
+                        fail("Unexpected exception", e);
+                    }
+                });
+        verify(mockAdminServicesClient, times(2)).migrateProcessInstance(anyString(), anyLong(), anyString(), anyString(), anyMap());
+    }
+
+    private MigrationReportInstance createReport(Long instanceId, boolean successful) {
         MigrationReportInstance report = new MigrationReportInstance();
         report.setStartDate(new Date());
         report.setEndDate(new Date());
-        report.setSuccessful(true);
-        report.setProcessInstanceId(instance.getId());
-        report.setLogs(List.of("Migration went fine"));
-        when(mockAdminServicesClient.migrateProcessInstance(anyString(), anyLong(), anyString(), anyString(), anyMap())).thenReturn(report);
-
-        // When
-        migrationService.submit(definition);
-
-        // Then
-        List<Migration> migrations = migrationService.findAll();
-
-        assertThat(migrations, notNullValue());
-        assertThat(migrations, hasSize(1));
-        Migration migration = migrations.get(0);
-        assertThat(migration.getStatus(), is(Execution.ExecutionStatus.COMPLETED));
-        assertThat(migration.getCancelledAt(), nullValue());
-        assertThat(migration.getStartedAt(), notNullValue());
-        assertThat(migration.getFinishedAt(), notNullValue());
-        List<MigrationReport> results = migrationService.getResults(migration.id);
-        assertThat(results, hasSize(1));
-        assertThat(results.get(0).getProcessInstanceId(), is(report.getProcessInstanceId()));
-        assertThat(results.get(0).getSuccessful(), is(report.isSuccessful()));
-        assertThat(results.get(0).getStartDate(), is(report.getStartDate().toInstant()));
-        assertThat(results.get(0).getEndDate(), is(report.getEndDate().toInstant()));
-        assertThat(results.get(0).getMigrationId(), is(migration.id));
-        assertThat(results.get(0).getLogs(), containsInAnyOrder(report.getLogs().toArray()));
-
-        verify(mockAdminServicesClient, times(1)).migrateProcessInstance(anyString(), anyLong(), anyString(), anyString(), anyMap());
-        migrationService.delete(migration.id);
+        report.setProcessInstanceId(instanceId);
+        if (successful) {
+            report.setSuccessful(true);
+            report.setLogs(List.of("Migration went fine"));
+        } else {
+            report.setSuccessful(false);
+            report.setLogs(List.of("Migration went wrong"));
+        }
+        return report;
     }
 
-    @Test
-    void testSubmitSyncFailedMigration() throws InvalidMigrationException, PlanNotFoundException, MigrationNotFoundException {
-        // Given
-        assertThat(migrationService, notNullValue());
-        Plan plan = new Plan()
-                .setSource(new ProcessRef().setContainerId("source-container").setProcessId("source-process"))
-                .setTarget(new ProcessRef().setContainerId("target-container").setProcessId("target-process"))
-                .setName("migrationPlan");
-        MigrationDefinition definition = new MigrationDefinition();
-        definition.setRequester("requester");
-        definition.setKieServerId("kie-server-1");
-        definition.setExecution(new Execution().setType(Execution.ExecutionType.SYNC));
-        definition.setPlanId(11L);
-
-        when(planService.get(11L)).thenReturn(plan);
-        when(kieService.hasKieServer(definition.getKieServerId())).thenReturn(Boolean.TRUE);
-        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getSource())).thenReturn(Boolean.TRUE);
-        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getTarget())).thenReturn(Boolean.TRUE);
-
-        QueryServicesClient mockQueryServicesClient = mock(QueryServicesClient.class);
-        when(kieService.getQueryServicesClient(definition.getKieServerId())).thenReturn(mockQueryServicesClient);
-        ProcessAdminServicesClient mockAdminServicesClient = mock(ProcessAdminServicesClient.class);
-        when(kieService.getProcessAdminServicesClient(definition.getKieServerId())).thenReturn(mockAdminServicesClient);
-
-        List<ProcessInstance> instances = new ArrayList<>();
-        ProcessInstance instance = new ProcessInstance();
-        instance.setId(2L);
-        instance.setContainerId("source-container");
-        instances.add(instance);
-        when(mockQueryServicesClient.findProcessInstancesByContainerId(eq(plan.getSource().getContainerId()), anyList(), anyInt(), anyInt())).thenReturn(instances);
-        when(mockQueryServicesClient.findProcessInstanceById(instance.getId())).thenReturn(instance);
-
-        MigrationReportInstance report = new MigrationReportInstance();
-        report.setStartDate(new Date());
-        report.setEndDate(new Date());
-        report.setSuccessful(false);
-        report.setProcessInstanceId(instance.getId());
-        report.setLogs(List.of("Migration went wrong"));
-        when(mockAdminServicesClient.migrateProcessInstance(anyString(), anyLong(), anyString(), anyString(), anyMap())).thenReturn(report);
-
-        // When
-        migrationService.submit(definition);
-
-        // Then
-        List<Migration> migrations = migrationService.findAll();
-
-        assertThat(migrations, notNullValue());
-        assertThat(migrations, hasSize(1));
-        Migration migration = migrations.get(0);
-        assertThat(migration.getStatus(), is(Execution.ExecutionStatus.FAILED));
-        assertThat(migration.getCancelledAt(), nullValue());
-        assertThat(migration.getStartedAt(), notNullValue());
-        assertThat(migration.getFinishedAt(), notNullValue());
-        List<MigrationReport> results = migrationService.getResults(migration.id);
-        assertThat(results, hasSize(1));
-        assertThat(results.get(0).getProcessInstanceId(), is(report.getProcessInstanceId()));
-        assertThat(results.get(0).getSuccessful(), is(report.isSuccessful()));
-        assertThat(results.get(0).getStartDate(), is(report.getStartDate().toInstant()));
-        assertThat(results.get(0).getEndDate(), is(report.getEndDate().toInstant()));
-        assertThat(results.get(0).getMigrationId(), is(migration.id));
-        assertThat(results.get(0).getLogs(), containsInAnyOrder(report.getLogs().toArray()));
-
-        verify(mockAdminServicesClient, times(1)).migrateProcessInstance(anyString(), anyLong(), anyString(), anyString(), anyMap());
-        migrationService.delete(migration.id);
-    }
 }

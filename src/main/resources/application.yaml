@@ -1,4 +1,8 @@
 quarkus:
+  configuration:
+    build-time-mismatch-at-runtime: fail
+  package:
+    type: mutable-jar
   http:
     auth:
       basic: true
@@ -22,7 +26,7 @@ quarkus:
         users: users.properties
         roles: roles.properties
     jdbc:
-      realm-name: Quarkus_jdbc
+      realm-name: pim_jdbc
       enabled: true
       principal-query:
         sql: SELECT u.password, u.role FROM users u WHERE u.username=?
@@ -44,6 +48,7 @@ quarkus:
     baseline-on-migrate: true
     baseline-version: 1.0
     baseline-description: Quartz
+    locations: db/migration/h2
   resteasy:
     path: /rest
   datasource:

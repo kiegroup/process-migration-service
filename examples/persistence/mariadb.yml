@@ -5,3 +5,5 @@ quarkus:
       url: jdbc:mariadb://localhost:3306/pimdb
     username: pim
     password: pim123
+  flyway:
+    locations: db/migration/mariadb
