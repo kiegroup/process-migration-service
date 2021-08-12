@@ -5,5 +5,3 @@ quarkus:
       url: jdbc:mysql://mysql.example.com:3306/pimdb?useUnicode=true&useSSL=false&serverTimezone=UTC
     username: pim
     password: pim123
-  flyway:
-    locations: db/migration/mysql

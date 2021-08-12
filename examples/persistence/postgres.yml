@@ -5,5 +5,3 @@ quarkus:
       url: jdbc:postgresql://localhost/pimdb
     username: pim
     password: pim123
-  flyway:
-    locations: db/migration/postgres

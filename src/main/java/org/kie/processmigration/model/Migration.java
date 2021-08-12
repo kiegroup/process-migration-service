@@ -24,8 +24,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
@@ -81,7 +79,6 @@ public class Migration extends PanacheEntity {
     @Lob
     private String errorMessage;
 
-    @Enumerated(EnumType.STRING)
     private ExecutionStatus status;
 
     @JsonIgnore
