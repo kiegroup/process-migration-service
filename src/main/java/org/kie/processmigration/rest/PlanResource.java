@@ -57,7 +57,7 @@ public class PlanResource {
 
     @POST
     public Response create(Plan plan) {
-        if (plan.id != null) {
+        if (plan.getId() != null) {
             throw new IllegalArgumentException("The plan ID must not be provided when creating a new plan");
         }
         return Response.status(CREATED).entity(planService.create(plan)).build();

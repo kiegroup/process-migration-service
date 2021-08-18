@@ -97,15 +97,15 @@ flag when packaging your application and pass in any other configuration propert
 ```shell script 
 $ mvn clean package -Dquarkus.container-image.build=true \
  -Dquarkus.container-image.push=true \
--Dquarkus.container-image.image=quay.io/kiegroup/process-migraiton-service:1.0
+-Dquarkus.container-image.image=quay.io/kiegroup/process-migration-service:1.0
 ...
-[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] Created container image quay.io/kiegroup/process-migraiton-service:1.0 (sha256:dc8028963923081941529ef0ea515bd1e970b8fc96d5ad6a9346eb4ad61028f6)
+[INFO] [io.quarkus.container.image.jib.deployment.JibProcessor] Created container image quay.io/kiegroup/process-migration-service:1.0 (sha256:dc8028963923081941529ef0ea515bd1e970b8fc96d5ad6a9346eb4ad61028f6)
 ```
 
 Or you can just use your favourite container builder tool and refer to any of the existing [Dockerfiles](./src/main/docker)
 
 ```shell script
-$ podman build -t quay.io/kiegroup/process-migraiton-service:1.0 -f ./src/main/docker/Dockerfile.jvm .
+$ podman build -t quay.io/kiegroup/process-migration-service:1.0 -f ./src/main/docker/Dockerfile.jvm .
 ```
 
 ## Configuration
@@ -203,7 +203,7 @@ kieservers:
 
 #### MariaDB Datasource
 
-See [Using non-provided JDBC drivers](#using-non-provided-jdbc-drivers) for details on how to include additional JDBC drivers to the runtime.
+See [Using other JDBC extensions](#using-other-JDBC-extensions) for details on how to include additional JDBC drivers to the runtime.
 
 ```yaml
 quarkus:
@@ -223,7 +223,7 @@ Authorization example available [here](./examples/authentication/basic-auth.yml)
 
 **Note that this is a build time configuration** (See [Quarkus Authorization](https://quarkus.io/guides/security-authorization))
 
-```{yaml}
+```yaml
   http:
     auth:
       basic: true
@@ -248,7 +248,7 @@ By default, the user properties IdentityProvider is provided in plain text:
 
 **Note that this is a build time configuration** (See [Quarkus Security](https://quarkus.io/guides/security#identity-providers))
 
-```{yaml}
+```yaml
   security:
     users:
       file:

@@ -46,7 +46,7 @@ public class RecoveryService {
             try {
                 migrationService.migrate(m);
             } catch (InvalidMigrationException e) {
-                logger.warn("Unable to resume migration with id: " + m.id, e);
+                logger.warn("Unable to resume migration with id: " + m.getId(), e);
             }
         });
     }

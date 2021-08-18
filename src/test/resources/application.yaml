@@ -6,14 +6,6 @@ quarkus:
   quartz:
     store-type: ram
     start-mode: forced
-  # flyway to create Quartz tables
-  flyway:
-    connect-retries: 10
-    table: flyway_quarkus_history
-    migrate-at-start: true
-    baseline-on-migrate: true
-    baseline-version: 1.0
-    baseline-description: Quartz
   resteasy:
     path: /rest
   datasource:
@@ -24,7 +16,7 @@ quarkus:
     password: sa
   hibernate-orm:
     database:
-      generation: drop-and-create
+      generation: create
   security:
     users:
       file:

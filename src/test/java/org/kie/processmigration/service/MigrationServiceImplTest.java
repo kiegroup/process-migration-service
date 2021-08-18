@@ -139,7 +139,7 @@ class MigrationServiceImplTest {
         Migration migration = migrationService.submit(definition);
 
         verify(schedulerService, times(1)).scheduleMigration(migration);
-        migrationService.delete(migration.id);
+        migrationService.delete(migration.getId());
     }
 
     @Test
@@ -196,17 +196,17 @@ class MigrationServiceImplTest {
                         assertThat(migration.getCancelledAt(), nullValue());
                         assertThat(migration.getStartedAt(), notNullValue());
                         assertThat(migration.getFinishedAt(), notNullValue());
-                        List<MigrationReport> results = migrationService.getResults(migration.id);
+                        List<MigrationReport> results = migrationService.getResults(migration.getId());
                         assertThat(results, hasSize(1));
                         assertThat(results.get(0).getProcessInstanceId(), is(r.getProcessInstanceId()));
                         assertThat(results.get(0).getSuccessful(), is(r.isSuccessful()));
                         assertThat(results.get(0).getStartDate(), is(r.getStartDate().toInstant()));
                         assertThat(results.get(0).getEndDate(), is(r.getEndDate().toInstant()));
-                        assertThat(results.get(0).getMigrationId(), is(migration.id));
+                        assertThat(results.get(0).getMigrationId(), is(migration.getId()));
                         assertThat(results.get(0).getLogs(), containsInAnyOrder(r.getLogs().toArray()));
 
 
-                        migrationService.delete(migration.id);
+                        migrationService.delete(migration.getId());
                     } catch (MigrationNotFoundException | InvalidMigrationException e) {
                         fail("Unexpected exception", e);
                     }

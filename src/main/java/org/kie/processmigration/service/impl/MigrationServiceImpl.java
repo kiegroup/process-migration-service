@@ -18,7 +18,6 @@ package org.kie.processmigration.service.impl;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -92,7 +91,7 @@ public class MigrationServiceImpl implements MigrationService {
     @Override
     public List<MigrationReport> getResults(Long id) throws MigrationNotFoundException {
         Migration m = get(id);
-        return MigrationReport.find("migration_id", m.id).list();
+        return MigrationReport.find("migration_id", m.getId()).list();
     }
 
     @Override
@@ -204,7 +203,7 @@ public class MigrationServiceImpl implements MigrationService {
             logger.warn("Unable to migrate instanceID: " + instanceId, e);
             reportInstance = buildReportFromError(instanceId, e);
         }
-        final MigrationReport report = new MigrationReport(migration.id, reportInstance);
+        final MigrationReport report = new MigrationReport(migration.getId(), reportInstance);
         return txHelper.withTransaction(() -> {
             report.persist();
             return report;
@@ -221,12 +220,12 @@ public class MigrationServiceImpl implements MigrationService {
                     .buildPost(Entity.json(migration))
                     .invoke();
             if (Status.OK.getStatusCode() == response.getStatus()) {
-                logger.debug("Migration [{}] - Callback to {} replied successfully", migration.id, callbackURI);
+                logger.debug("Migration [{}] - Callback to {} replied successfully", migration.getId(), callbackURI);
             } else {
-                logger.warn("Migration [{}] - Callback to {} replied with {}", migration.id, callbackURI, response.getStatus());
+                logger.warn("Migration [{}] - Callback to {} replied with {}", migration.getId(), callbackURI, response.getStatus());
             }
         } catch (Exception e) {
-            logger.error("Migration [{}] - Callback to {} failed.", migration.id, callbackURI, e);
+            logger.error("Migration [{}] - Callback to {} failed.", migration.getId(), callbackURI, e);
         }
     }
 

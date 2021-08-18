@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2021 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,8 +85,8 @@ class PlanServiceImplTest {
 
         // When
         assertThat(result, notNullValue());
-        assertThat(result.id, notNullValue());
-        assertThat(planService.delete(result.id), equalTo(plan));
+        assertThat(result.getId(), notNullValue());
+        assertThat(planService.delete(result.getId()), equalTo(plan));
 
         // Then
         assertThat(planService.findAll(), empty());
@@ -103,7 +103,7 @@ class PlanServiceImplTest {
                         .setContainerId("containerId").setProcessId("sourceProcessId"))
                 .setTarget(new ProcessRef().setContainerId("targetContainerId").setProcessId("targetProcessId"))
                 .setDescription("description");
-        Long id = planService.create(plan).id;
+        Long id = planService.create(plan).getId();
 
         // When
         assertThat(id, notNullValue());

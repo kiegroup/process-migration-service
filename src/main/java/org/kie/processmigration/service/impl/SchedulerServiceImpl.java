@@ -53,29 +53,29 @@ public class SchedulerServiceImpl implements SchedulerService {
     @Override
     public void scheduleMigration(Migration migration) {
         JobDetail job = JobBuilder.newJob(MigrationJob.class)
-                .withIdentity(migration.id.toString())
+                .withIdentity(migration.getId().toString())
                 .build();
         try {
-            LOGGER.debug("Schedule migration for {}", migration.id);
+            LOGGER.debug("Schedule migration for {}", migration.getId());
             scheduler.scheduleJob(job, buildTrigger(migration));
         } catch (SchedulerException e) {
-            LOGGER.error("Unable to schedule migration for {}", migration.id, e);
+            LOGGER.error("Unable to schedule migration for {}", migration.getId(), e);
         }
     }
 
     @Override
     public void reScheduleMigration(Migration migration) {
         try {
-            LOGGER.debug("re-scheduling migration for {}", migration.id);
+            LOGGER.debug("re-scheduling migration for {}", migration.getId());
             Trigger trigger = buildTrigger(migration);
             scheduler.rescheduleJob(trigger.getKey(), buildTrigger(migration));
         } catch (SchedulerException e) {
-            LOGGER.error("Unable to re-schedule job for {}", migration.id, e);
+            LOGGER.error("Unable to re-schedule job for {}", migration.getId(), e);
         }
     }
 
     private Trigger buildTrigger(Migration migration) {
-        TriggerBuilder<Trigger> builder = TriggerBuilder.newTrigger().withIdentity(migration.id.toString());
+        TriggerBuilder<Trigger> builder = TriggerBuilder.newTrigger().withIdentity(migration.getId().toString());
         if (migration.getDefinition().getExecution() == null || migration.getDefinition().getExecution().getScheduledStartTime() == null) {
             builder = builder.startNow();
         } else {

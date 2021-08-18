@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2021 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ class SchedulerServiceImplTest {
 
     @AfterEach
     void resetScheduler() throws SchedulerException {
-        if(scheduler != null) {
+        if (scheduler != null) {
             scheduler.clear();
         }
     }
@@ -83,9 +83,9 @@ class SchedulerServiceImplTest {
         definition.setRequester("me");
         definition.setProcessInstanceIds(List.of(1L));
         Migration migration = new Migration(definition);
-        migration.id = 99L;
+        migration.setId(99L);
         CountDownLatch count = new CountDownLatch(1);
-        when(migrationService.get(migration.id)).thenReturn(migration);
+        when(migrationService.get(migration.getId())).thenReturn(migration);
         scheduler.getListenerManager().addJobListener(new TestJobListener(count), allJobs());
 
         // When
@@ -95,8 +95,8 @@ class SchedulerServiceImplTest {
         count.await(10, TimeUnit.SECONDS);
         verify(migrationService, times(1)).get(99L);
         verify(migrationService, times(1)).migrate(migration);
-        assertThat(scheduler.checkExists(new JobKey(migration.id.toString())), is(Boolean.FALSE));
-        assertThat(scheduler.checkExists(new TriggerKey(migration.id.toString())), is(Boolean.FALSE));
+        assertThat(scheduler.checkExists(new JobKey(migration.getId().toString())), is(Boolean.FALSE));
+        assertThat(scheduler.checkExists(new TriggerKey(migration.getId().toString())), is(Boolean.FALSE));
     }
 
     @Test
@@ -110,17 +110,17 @@ class SchedulerServiceImplTest {
         Instant when = Instant.now().plus(500, ChronoUnit.MILLIS);
         definition.setExecution(new Execution().setType(Execution.ExecutionType.ASYNC).setScheduledStartTime(when));
         Migration migration = new Migration(definition);
-        migration.id = 99L;
+        migration.setId(99L);
         CountDownLatch count = new CountDownLatch(1);
         scheduler.getListenerManager().addJobListener(new TestJobListener(count), allJobs());
-        when(migrationService.get(migration.id)).thenReturn(migration);
+        when(migrationService.get(migration.getId())).thenReturn(migration);
 
         // When
         schedulerService.scheduleMigration(migration);
 
         // Then
-        assertThat(scheduler.checkExists(new JobKey(migration.id.toString())), is(Boolean.TRUE));
-        assertThat(scheduler.checkExists(new TriggerKey(migration.id.toString())), is(Boolean.TRUE));
+        assertThat(scheduler.checkExists(new JobKey(migration.getId().toString())), is(Boolean.TRUE));
+        assertThat(scheduler.checkExists(new TriggerKey(migration.getId().toString())), is(Boolean.TRUE));
         count.await(10, TimeUnit.SECONDS);
 
         verify(migrationService, times(1)).get(99L);
@@ -139,10 +139,10 @@ class SchedulerServiceImplTest {
         Instant when = Instant.now().plus(5, ChronoUnit.HOURS);
         definition.setExecution(new Execution().setType(Execution.ExecutionType.ASYNC).setScheduledStartTime(when));
         Migration migration = new Migration(definition);
-        migration.id = 99L;
+        migration.setId(99L);
         CountDownLatch count = new CountDownLatch(1);
         scheduler.getListenerManager().addJobListener(new TestJobListener(count), allJobs());
-        when(migrationService.get(migration.id)).thenReturn(migration);
+        when(migrationService.get(migration.getId())).thenReturn(migration);
 
         schedulerService.scheduleMigration(migration);
 
@@ -151,8 +151,8 @@ class SchedulerServiceImplTest {
         schedulerService.reScheduleMigration(migration);
 
         // Then
-        assertThat(scheduler.checkExists(new JobKey(migration.id.toString())), is(Boolean.TRUE));
-        assertThat(scheduler.checkExists(new TriggerKey(migration.id.toString())), is(Boolean.TRUE));
+        assertThat(scheduler.checkExists(new JobKey(migration.getId().toString())), is(Boolean.TRUE));
+        assertThat(scheduler.checkExists(new TriggerKey(migration.getId().toString())), is(Boolean.TRUE));
         count.await(10, TimeUnit.SECONDS);
 
         verify(migrationService, times(1)).get(99L);
@@ -161,7 +161,7 @@ class SchedulerServiceImplTest {
 
 
     @Test
-    void testScheduleMigrationNotFound() throws InvalidMigrationException, InterruptedException, MigrationNotFoundException, SchedulerException {
+    void testScheduleMigrationNotFound() throws InvalidMigrationException, InterruptedException, SchedulerException {
         // Given
         MigrationDefinition definition = new MigrationDefinition();
         definition.setPlanId(1L);
@@ -169,7 +169,7 @@ class SchedulerServiceImplTest {
         definition.setRequester("me");
         definition.setProcessInstanceIds(List.of(1L));
         Migration migration = new Migration(definition);
-        migration.id = 99L;
+        migration.setId(99L);
         CountDownLatch count = new CountDownLatch(1);
         scheduler.getListenerManager().addJobListener(new TestJobListener(count), allJobs());
 

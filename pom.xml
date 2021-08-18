@@ -3,90 +3,102 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.jboss</groupId>
+    <artifactId>jboss-parent</artifactId>
+    <!-- Keep in sync with jboss-parent version in kie-user-bom-parent/pom.xml -->
+    <version>36</version>
+  </parent>
   <groupId>org.kie</groupId>
-  <version>7.59.0-SNAPSHOT</version>
   <artifactId>process-migration-service</artifactId>
   <name>Process Instance Migration Service</name>
+  <version>7.59.0-SNAPSHOT</version>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.version>3.8.1</maven.compiler.version>
     <maven.compiler.parameters>true</maven.compiler.parameters>
-    <maven.compiler.target>11</maven.compiler.target>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.testTarget>${maven.compiler.target}</maven.compiler.testTarget>
-    <maven.compiler.testSource>${maven.compiler.source}</maven.compiler.testSource>
-    <maven.resource.plugin.version>3.2.0</maven.resource.plugin.version>
-    <frontend.maven.plugin.version>1.12.0</frontend.maven.plugin.version>
-    <quarkus.version>2.1.1.Final</quarkus.version>
-    <kieserver.version>${project.version}</kieserver.version>
-    <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
-    <lombok.version>1.18.16</lombok.version>
-    <wiremock.version>2.27.2</wiremock.version>
-    <mockito-inline.version>3.7.7</mockito-inline.version>
-    <testcontainers.version>1.15.3</testcontainers.version>
-    <jackson-databind.version>2.10.5.1</jackson-databind.version>
+    <version.com.fasterxml.jackson.core.jackson-databind>2.10.5.1</version.com.fasterxml.jackson.core.jackson-databind>
+    <version.frontend.plugin>1.12.0</version.frontend.plugin>
+    <version.io.quarkus>2.1.1.Final</version.io.quarkus>
+    <version.org.github.tomakehurst.wiremock-jre8>2.27.2</version.org.github.tomakehurst.wiremock-jre8>
+    <version.org.kie.server>${project.version}</version.org.kie.server>
+    <version.org.mockito>3.7.7</version.org.mockito>
+    <version.org.projectlombok.lombok>1.18.16</version.org.projectlombok.lombok>
+    <version.org.testcontainers>1.15.3</version.org.testcontainers>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>io.quarkus</groupId>
-        <artifactId>quarkus-universe-bom</artifactId>
-        <version>${quarkus.version}</version>
+        <artifactId>quarkus-bom</artifactId>
+        <version>${version.io.quarkus}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>${lombok.version}</version>
+        <version>${version.org.projectlombok.lombok}</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>com.github.tomakehurst</groupId>
         <artifactId>wiremock-jre8</artifactId>
-        <version>${wiremock.version}</version>
+        <version>${version.org.github.tomakehurst.wiremock-jre8}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-inline</artifactId>
-        <version>${mockito-inline.version}</version>
+        <version>${version.org.mockito}</version>
         <scope>test</scope>
       </dependency>
       <!-- droolsjbpm-integration dependencies - start -->
       <dependency>
         <groupId>org.kie.server</groupId>
         <artifactId>kie-server-client</artifactId>
-        <version>${kieserver.version}</version>
+        <version>${version.org.kie.server}</version>
       </dependency>
       <dependency>
         <groupId>org.kie.server</groupId>
         <artifactId>kie-server-controller-client</artifactId>
-        <version>${kieserver.version}</version>
+        <version>${version.org.kie.server}</version>
       </dependency>
       <dependency>
         <groupId>org.kie</groupId>
         <artifactId>kie-test-util</artifactId>
-        <version>${kieserver.version}</version>
-        <scope>test</scope>
+        <version>${version.org.kie.server}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>${jackson-databind.version}</version>
+        <version>${version.com.fasterxml.jackson.core.jackson-databind}</version>
       </dependency>
       <!--  droolsjbpm-integration dependencies- end -->
       <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers</artifactId>
-        <version>${testcontainers.version}</version>
+        <version>${version.org.testcontainers}</version>
       </dependency>
       <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>junit-jupiter</artifactId>
-        <version>${testcontainers.version}</version>
+        <version>${version.org.testcontainers}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.kie.soup</groupId>
+        <artifactId>kie-soup-maven-integration</artifactId>
+        <version>${version.org.kie.server}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -125,10 +137,6 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-flyway</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
       <artifactId>quarkus-container-image-jib</artifactId>
     </dependency>
     <!-- JDBC Extensions -->
@@ -147,10 +155,6 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-jdbc-mysql</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-jdbc-derby</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -231,18 +235,7 @@
     <dependency>
       <groupId>org.kie.soup</groupId>
       <artifactId>kie-soup-maven-integration</artifactId>
-      <version>${kieserver.version}</version>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.inject</groupId>
-          <artifactId>javax.inject</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.enterprise</groupId>
-          <artifactId>cdi-api</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
   </dependencies>
   <build>
@@ -251,12 +244,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>${maven.compiler.version}</version>
       </plugin>
       <plugin>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>
-        <version>${quarkus.version}</version>
+        <version>${version.io.quarkus}</version>
         <extensions>true</extensions>
         <executions>
           <execution>
@@ -270,7 +262,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>${surefire-plugin.version}</version>
         <configuration>
           <systemPropertyVariables>
             <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
@@ -280,11 +271,10 @@
       </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>${surefire-plugin.version}</version>
         <configuration>
           <systemPropertyVariables>
             <kieserver.container.name>jboss/kie-server-showcase</kieserver.container.name>
-            <kieserver.container.tag>${kieserver.version}</kieserver.container.tag>
+            <kieserver.container.tag>latest</kieserver.container.tag>
           </systemPropertyVariables>
         </configuration>
         <executions>
@@ -299,7 +289,7 @@
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
-        <version>${frontend.maven.plugin.version}</version>
+        <version>${version.frontend.plugin}</version>
         <configuration>
           <workingDirectory>frontend</workingDirectory>
           <!-- remove when integrated with parent - start -->
@@ -367,7 +357,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>${maven.resource.plugin.version}</version>
         <executions>
           <execution>
             <id>copy-resources</id>
@@ -419,7 +408,6 @@
         <plugins>
           <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>${surefire-plugin.version}</version>
             <configuration>
               <environmentVariables>
                 <DOCKER_HOST>unix:///run/user/1000/podman/podman.sock</DOCKER_HOST>
@@ -442,7 +430,6 @@
         <plugins>
           <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>${surefire-plugin.version}</version>
             <executions>
               <execution>
                 <goals>

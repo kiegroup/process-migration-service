@@ -25,6 +25,9 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
@@ -33,7 +36,7 @@ import javax.persistence.Table;
 
 import org.kie.server.api.model.admin.MigrationReportInstance;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -49,7 +52,11 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @Getter
 @Setter
-public class MigrationReport extends PanacheEntity {
+public class MigrationReport extends PanacheEntityBase {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "migrationIdSeq")
+    private Long id;
 
     @Column(name = "migration_id")
     private Long migrationId;

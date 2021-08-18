@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2021 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ class ProcessMigrationIT {
     private Migration createMigration() throws IOException {
         Plan plan = createPlan();
         MigrationDefinition def = new MigrationDefinition();
-        def.setPlanId(plan.id);
+        def.setPlanId(plan.getId());
         def.setKieServerId(KIE_SERVER_ID);
         def.setProcessInstanceIds(List.of(1L));
         def.setExecution(new Execution().setType(Execution.ExecutionType.SYNC));
@@ -141,7 +141,7 @@ class ProcessMigrationIT {
                 .asString();
         Migration migration = mapper.readValue(result, Migration.class);
         assertNotNull(migration);
-        assertThat(migration.id, notNullValue());
+        assertThat(migration.getId(), notNullValue());
         assertThat(migration.getStatus(), is(Execution.ExecutionStatus.COMPLETED));
         assertThat(migration.getStartedAt(), notNullValue());
         assertThat(migration.getFinishedAt(), notNullValue());
@@ -177,7 +177,7 @@ class ProcessMigrationIT {
                 .asString();
         Plan resultPlan = mapper.readValue(result, Plan.class);
 
-        assertThat(resultPlan.id, notNullValue());
+        assertThat(resultPlan.getId(), notNullValue());
         assertThat(resultPlan.getName(), is(plan.getName()));
         assertThat(resultPlan.getDescription(), is(plan.getDescription()));
         assertThat(resultPlan.getSource().getContainerId(), is(resultPlan.getSource().getContainerId()));
