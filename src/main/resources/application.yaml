@@ -40,7 +40,6 @@ quarkus:
         search-base-dn: ou=users,o=YourCompany,c=ES
 # Quartz configuration
   quartz:
-    # store-type: jdbc-cmt
     store-type: ram
     start-mode: forced
   resteasy:
@@ -53,7 +52,7 @@ quarkus:
     password: sa
   hibernate-orm:
     database:
-      generation: create
+      generation: update
 pim:
   auth-method: file
 "%int":

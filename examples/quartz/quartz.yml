@@ -1,5 +1,8 @@
+# This example configures Quartz to use an independent datasource.
+# It is not required and the default datasource can be used as well.
 quarkus:
   quartz:
+    clustered: true
     store-type: jdbc-cmt
     datasource: quartzds
   datasource:

@@ -16,11 +16,10 @@
 
 package org.kie.processmigration.test;
 
-import io.quarkus.test.junit.QuarkusTestProfile;
-
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import io.quarkus.test.junit.QuarkusTestProfile;
 
 public class Profiles {
 

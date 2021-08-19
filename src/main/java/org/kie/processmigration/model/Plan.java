@@ -59,7 +59,7 @@ import lombok.experimental.Accessors;
 public class Plan extends PanacheEntityBase {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "migrationIdSeq")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "planIdSeq")
     @EqualsAndHashCode.Exclude
     private Long id;
 

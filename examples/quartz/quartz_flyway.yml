@@ -1,5 +1,8 @@
+# This example configures Quartz with Flyway with an independent
+# datasource. Don't forget to add the Quarkus Flyway extension.
 quarkus:
   quartz:
+    clustered: true
     store-type: jdbc-cmt
     datasource: quartzds
   datasource:

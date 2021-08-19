@@ -114,6 +114,11 @@ Default configuration is as follows:
 
 ```yaml
 quarkus:
+  class-loading:
+    removed-artifacts: com.oracle.database.jdbc:ojdbc8,com.ibm.db2:jcc,com.microsoft.sqlserver:mssql-jdbc
+  package:
+    type: mutable-jar
+    user-providers-directory: providers
   http:
     auth:
       basic: true
@@ -137,7 +142,7 @@ quarkus:
         users: users.properties
         roles: roles.properties
     jdbc:
-      realm-name: Quarkus_jdbc
+      realm-name: pim_jdbc
       enabled: true
       principal-query:
         sql: SELECT u.password, u.role FROM users u WHERE u.username=?
@@ -149,7 +154,7 @@ quarkus:
         search-base-dn: ou=users,o=YourCompany,c=ES
 # Quartz configuration
   quartz:
-    store-type: jdbc-cmt
+    store-type: ram
     start-mode: forced
   resteasy:
     path: /rest (1)
@@ -258,6 +263,12 @@ By default, the user properties IdentityProvider is provided in plain text:
         roles: roles.properties
 ```
 
+## Configuring Quartz
+
+By default Quartz jobs are stored in-memory but it is possible to configure Quartz to persist the jobs in
+a database by defining the `quarkus.quartz.store-type` to either `jdbc-cmt` or `jdbc-tx`. See the 
+[examples](./examples/quartz) and the [Quarkus Quartz documentation](https://quarkus.io/guides/quartz).
+
 ## Using other JDBC extensions
 
 The H2 JDBC extension is set by default. However, users will be able to use different JDBC extensions to connect to any
@@ -268,16 +279,11 @@ Reference:
 * [Quarkus Datasources](https://quarkus.io/guides/datasource#jdbc-datasource).
 * [Quarkus Re-augmentation](https://quarkus.io/guides/reaugmentation)
 
-### How to build the mutable-jar
+### How to change build time properties in a `mutable-jar`
 
-First build the project as a `mutable-jar` and optionally with a configuration property to make sure your application 
-does not startup if a build time property has been changed at runtime.
-
-```shell script
-mvn clean install -Dquarkus.package.type=mutable-jar -Dquarkus.configuration.build-time-mismatch-at-runtime=fail
-```
-
-Then re-augment your application with the desired build time properties
+By default, the Process Migration Service is built as a `mutable-jar` and configured to fail if any built-time
+property is changed at runtime. If you want to change a build-time property it is required that you re-augment the
+build.
 
 ```shell script
 java -jar -Dquarkus.launch.rebuild=true -Dquarkus.datasource.db-kind=mariadb target/quarkus-app/quarkus-run.jar

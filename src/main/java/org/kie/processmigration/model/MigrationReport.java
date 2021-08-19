@@ -55,7 +55,7 @@ import lombok.experimental.Accessors;
 public class MigrationReport extends PanacheEntityBase {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "migrationIdSeq")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "migRepIdSeq")
     private Long id;
 
     @Column(name = "migration_id")
