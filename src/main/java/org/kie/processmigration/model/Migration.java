@@ -50,7 +50,6 @@ import lombok.experimental.Accessors;
 
 @Entity
 @Table(name = "migrations")
-@SequenceGenerator(name = "migrationIdSeq", sequenceName = "MIGRATION_ID_SEQ")
 @EqualsAndHashCode
 @ToString
 @Accessors(chain = true)
@@ -60,6 +59,8 @@ public class Migration extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "migrationIdSeq")
+    @SequenceGenerator(name = "migrationIdSeq", sequenceName = "MIGRATION_ID_SEQ")
+    @EqualsAndHashCode.Exclude
     private Long id;
 
     @Embedded

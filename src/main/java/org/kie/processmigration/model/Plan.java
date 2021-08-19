@@ -50,7 +50,6 @@ import lombok.experimental.Accessors;
 
 @Entity
 @Table(name = "plans")
-@SequenceGenerator(name = "planIdSeq", sequenceName = "PLAN_ID_SEQ")
 @EqualsAndHashCode(callSuper = false)
 @ToString
 @Accessors(chain = true)
@@ -60,6 +59,7 @@ public class Plan extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "planIdSeq")
+    @SequenceGenerator(name = "planIdSeq", sequenceName = "PLAN_ID_SEQ")
     @EqualsAndHashCode.Exclude
     private Long id;
 
