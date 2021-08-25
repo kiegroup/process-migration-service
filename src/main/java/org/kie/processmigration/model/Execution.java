@@ -25,7 +25,18 @@ import javax.persistence.Embeddable;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+
 @Embeddable
+@EqualsAndHashCode
+@ToString
+@Accessors(chain = true)
+@Getter
+@Setter
 public class Execution {
 
     public enum ExecutionType {
@@ -53,30 +64,4 @@ public class Execution {
     @Column(name = "scheduled_start_time")
     private Instant scheduledStartTime;
 
-    public Instant getScheduledStartTime() {
-        return scheduledStartTime;
-    }
-
-    public Execution setScheduledStartTime(Instant scheduledStartTime) {
-        this.scheduledStartTime = scheduledStartTime;
-        return this;
-    }
-
-    public ExecutionType getType() {
-        return type;
-    }
-
-    public Execution setType(ExecutionType type) {
-        this.type = type;
-        return this;
-    }
-
-    public URI getCallbackUrl() {
-        return callbackUrl;
-    }
-
-    public Execution setCallbackUrl(URI callbackUrl) {
-        this.callbackUrl = callbackUrl;
-        return this;
-    }
 }

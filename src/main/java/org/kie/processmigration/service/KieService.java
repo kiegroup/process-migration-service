@@ -27,6 +27,7 @@ import org.kie.processmigration.model.ProcessRef;
 import org.kie.processmigration.model.RunningInstance;
 import org.kie.processmigration.model.exceptions.InvalidKieServerException;
 import org.kie.processmigration.model.exceptions.ProcessDefinitionNotFoundException;
+import org.kie.server.client.KieServicesClient;
 import org.kie.server.client.QueryServicesClient;
 import org.kie.server.client.admin.ProcessAdminServicesClient;
 
@@ -47,4 +48,6 @@ public interface KieService {
     boolean existsProcessDefinition(String kieServerId, ProcessRef processRef) throws InvalidKieServerException;
 
     List<RunningInstance> getRunningInstances(String kieServerId, String containerId, Integer page, Integer pageSize) throws InvalidKieServerException;
+
+    KieServicesClient getClient(String kieServerId) throws InvalidKieServerException;
 }

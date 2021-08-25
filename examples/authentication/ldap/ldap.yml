@@ -1,0 +1,16 @@
+pim:
+  auth-method: ldap
+quakus:
+  security:
+    ldap:
+      dir-context:
+        url: ldap://localhost:10389
+        principal: uid=admin,ou=system
+        password: secret
+      identity-mapping:
+        search-base-dn: ou=users,dc=example,dc=com
+        rdn-identifier: uid
+        attribute-mappings:
+          from: uid
+          filter: uniqueMember
+          filter-base-dn: ou=groups,dc=example,dc=com
