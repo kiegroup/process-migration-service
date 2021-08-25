@@ -1,0 +1,42 @@
+quarkus:
+  log:
+    level: DEBUG
+    min-level: DEBUG
+  # Quartz configuration
+  quartz:
+    store-type: ram
+    start-mode: forced
+  resteasy:
+    path: /rest
+  datasource:
+    db-kind: h2
+    jdbc:
+      url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: sa
+  hibernate-orm:
+    database:
+      generation: create
+  security:
+    users:
+      file:
+        realm-name: pim_file
+        enabled: true
+        plain-text: true
+        users: users.properties
+        roles: roles.properties
+    jdbc:
+      realm-name: pim_jdbc
+      enabled: true
+      principal-query:
+        sql: SELECT u.password, u.role FROM users u WHERE u.username=?
+    ldap:
+      realm-name: pim_ldap
+      dir-context:
+        url: ldap://override-when-needed
+      identity-mapping:
+        search-base-dn: ou=users,o=YourCompany,c=ES
+"%test":
+  pim:
+    username: admin
+    password: admin1!

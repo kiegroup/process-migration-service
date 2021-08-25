@@ -1,0 +1,10 @@
+pim:
+  auth-method: file
+quarkus:
+  security:
+    users:
+      file:
+        enabled: true
+        plain-text: true
+        users: users.properties
+        roles: roles.properties

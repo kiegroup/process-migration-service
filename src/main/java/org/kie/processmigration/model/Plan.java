@@ -16,7 +16,7 @@
 
 package org.kie.processmigration.model;
 
-import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.AttributeOverride;
@@ -32,28 +32,38 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+
 @Entity
 @Table(name = "plans")
-@SequenceGenerator(name = "planIdSeq", sequenceName = "PLAN_ID_SEQ")
-@NamedQueries({
-    @NamedQuery(name = "Plan.findAll", query = "SELECT p FROM Plan p"),
-    @NamedQuery(name = "Plan.findById", query = "SELECT p FROM Plan p WHERE p.id = :id")
-})
-public class Plan implements Serializable {
-
-    private static final long serialVersionUID = 1244535648642365858L;
+@EqualsAndHashCode(callSuper = false)
+@ToString
+@Accessors(chain = true)
+@Getter
+@Setter
+public class Plan extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "planIdSeq")
-    private long id;
+    @SequenceGenerator(name = "planIdSeq", sequenceName = "PLAN_ID_SEQ")
+    @EqualsAndHashCode.Exclude
+    private Long id;
 
+    @NotBlank
     private String name;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -61,81 +71,37 @@ public class Plan implements Serializable {
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "containerId", column = @Column(name = "source_container_id")),
-        @AttributeOverride(name = "processId", column = @Column(name = "source_process_id")),
+            @AttributeOverride(name = "containerId", column = @Column(name = "source_container_id")),
+            @AttributeOverride(name = "processId", column = @Column(name = "source_process_id")),
     })
+    @NotNull
+    @Valid
     private ProcessRef source;
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "containerId", column = @Column(name = "target_container_id")),
-        @AttributeOverride(name = "processId", column = @Column(name = "target_process_id")),
+            @AttributeOverride(name = "containerId", column = @Column(name = "target_container_id")),
+            @AttributeOverride(name = "processId", column = @Column(name = "target_process_id")),
     })
+    @NotNull
+    @Valid
     private ProcessRef target;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "source")
     @Column(name = "target")
     @CollectionTable(
-        name = "plan_mappings",
-        joinColumns = @JoinColumn(name = "plan_id")
+            name = "plan_mappings",
+            joinColumns = @JoinColumn(name = "plan_id")
     )
-    private Map<String, String> mappings;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public ProcessRef getSource() {
-        return source;
-    }
-
-    public void setSource(ProcessRef source) {
-        this.source = source;
-    }
-
-    public ProcessRef getTarget() {
-        return target;
-    }
-
-    public void setTarget(ProcessRef target) {
-        this.target = target;
-    }
-
-    public Map<String, String> getMappings() {
-        return mappings;
-    }
-
-    public void setMappings(Map<String, String> mappings) {
-        this.mappings = mappings;
-    }
+    private Map<String, String> mappings = new HashMap<>();
 
     public Plan copy(Plan plan) {
-        this.name = plan.getName();
-        this.description = plan.getDescription();
-        this.source = plan.getSource();
-        this.target = plan.getTarget();
-        this.mappings = plan.getMappings();
+        this.name = plan.name;
+        this.description = plan.description;
+        this.source = plan.source;
+        this.target = plan.target;
+        this.mappings = plan.mappings;
         return this;
     }
 }

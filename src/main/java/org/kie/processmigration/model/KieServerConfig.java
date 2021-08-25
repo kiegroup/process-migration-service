@@ -16,16 +16,32 @@
 
 package org.kie.processmigration.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.kie.server.api.model.KieServerInfo;
 import org.kie.server.api.model.ServiceResponse;
 import org.kie.server.client.CredentialsProvider;
 import org.kie.server.client.KieServicesClient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+
+@EqualsAndHashCode
+@ToString
+@Accessors(chain = true)
+@Getter
+@Setter
 public class KieServerConfig {
 
-    private static final String UNKNOWN_STATUS = "UNKNOWN";
+    public static final String UNKNOWN_STATUS = "UNKNOWN";
+    public static final String SUCCESS_STATUS = "SUCCESS";
+
     private String id;
+
+    private String name;
 
     private String host;
 
@@ -50,38 +66,6 @@ public class KieServerConfig {
         return id;
     }
 
-    public KieServerConfig setId(String id) {
-        this.id = id;
-        return this;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public KieServerConfig setHost(String host) {
-        this.host = host;
-        return this;
-    }
-
-    public CredentialsProvider getCredentialsProvider() {
-        return credentialsProvider;
-    }
-
-    public KieServerConfig setCredentialsProvider(CredentialsProvider credentialsProvider) {
-        this.credentialsProvider = credentialsProvider;
-        return this;
-    }
-
-    public KieServicesClient getClient() {
-        return client;
-    }
-
-    public KieServerConfig setClient(KieServicesClient client) {
-        this.client = client;
-        return this;
-    }
-
     public String getStatus() {
         if (client == null) {
             return UNKNOWN_STATUS;
@@ -93,10 +77,4 @@ public class KieServerConfig {
         }
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("KieServerConfig [id=").append(id).append(", host=").append(host).append(", status=").append(getStatus()).append("]");
-        return builder.toString();
-    }
 }

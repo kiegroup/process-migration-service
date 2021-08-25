@@ -19,6 +19,17 @@ import java.time.Instant;
 
 import org.kie.server.api.model.instance.ProcessInstance;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+
+@EqualsAndHashCode
+@ToString
+@Accessors(chain = true)
+@Getter
+@Setter
 public class RunningInstance {
 
     private int id;
@@ -37,51 +48,4 @@ public class RunningInstance {
         startTime = p.getDate().toInstant();
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public Long getProcessInstanceId() {
-        return processInstanceId;
-    }
-
-    public void setProcessInstanceId(Long processInstanceId) {
-        this.processInstanceId = processInstanceId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Integer getState() {
-        return state;
-    }
-
-    public void setState(Integer state) {
-        this.state = state;
-    }
-
-    public Instant getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Instant startTime) {
-        this.startTime = startTime;
-    }
 }

@@ -17,6 +17,17 @@ package org.kie.processmigration.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+
+@EqualsAndHashCode
+@ToString
+@Accessors(chain = true)
+@Getter
+@Setter
 public class BpmNode {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -24,36 +35,4 @@ public class BpmNode {
     private String id;
     private String type;
 
-    public String getName() {
-        return name;
-    }
-
-    public BpmNode setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public BpmNode setId(String id) {
-        this.id = id;
-        return this;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public BpmNode setType(String type) {
-        this.type = type;
-        return this;
-    }
-
-    @Override
-    public String toString() {
-        return "BpmNode [name=" + name + ", type=" + type
-            + ", id=" + id + "]";
-    }
 }

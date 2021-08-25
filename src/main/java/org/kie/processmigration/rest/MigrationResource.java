@@ -40,6 +40,8 @@ import org.kie.processmigration.model.exceptions.MigrationNotFoundException;
 import org.kie.processmigration.model.exceptions.ReScheduleException;
 import org.kie.processmigration.service.MigrationService;
 
+import static javax.ws.rs.core.Response.Status.CREATED;
+
 @Path("/migrations")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -49,10 +51,10 @@ public class MigrationResource {
     private static final String ANONYMOUS = "ANONYMOUS";
 
     @Context
-    private SecurityContext securityContext;
+    SecurityContext securityContext;
 
     @Inject
-    private MigrationService migrationService;
+    MigrationService migrationService;
 
     @GET
     public Response findAll() {
@@ -78,7 +80,7 @@ public class MigrationResource {
         if (ExecutionType.ASYNC.equals(definition.getExecution().getType())) {
             return Response.accepted(result).build();
         } else {
-            return Response.ok(result).build();
+            return Response.status(CREATED).entity(result).build();
         }
     }
 
