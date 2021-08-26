@@ -33,6 +33,8 @@ import org.kie.processmigration.model.Plan;
 import org.kie.processmigration.model.exceptions.PlanNotFoundException;
 import org.kie.processmigration.service.PlanService;
 
+import static javax.ws.rs.core.Response.Status.CREATED;
+
 @Path("/plans")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -40,7 +42,7 @@ import org.kie.processmigration.service.PlanService;
 public class PlanResource {
 
     @Inject
-    private PlanService planService;
+    PlanService planService;
 
     @GET
     public Response findAll() {
@@ -55,10 +57,10 @@ public class PlanResource {
 
     @POST
     public Response create(Plan plan) {
-        if (plan.getId() != 0) {
+        if (plan.getId() != null) {
             throw new IllegalArgumentException("The plan ID must not be provided when creating a new plan");
         }
-        return Response.ok(planService.create(plan)).build();
+        return Response.status(CREATED).entity(planService.create(plan)).build();
     }
 
     @PUT

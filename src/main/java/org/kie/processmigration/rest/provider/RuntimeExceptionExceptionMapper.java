@@ -22,13 +22,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import java.util.Optional;
 
 @Provider
 public class RuntimeExceptionExceptionMapper implements ExceptionMapper<RuntimeException> {
 
     @Override
     public Response toResponse(RuntimeException exception) {
-        JsonObject json = Json.createObjectBuilder().add("message", exception.getMessage()).build();
+        JsonObject json = Json.createObjectBuilder().add("message", Optional.ofNullable(exception.getMessage()).orElse(exception.toString())).build();
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(json).type(MediaType.APPLICATION_JSON).build();
     }
 }

@@ -1,0 +1,22 @@
+# This example configures Quartz with Flyway with an independent
+# datasource. Don't forget to add the Quarkus Flyway extension.
+quarkus:
+  quartz:
+    clustered: true
+    store-type: jdbc-cmt
+    datasource: quartzds
+  datasource:
+    "quartzds":
+      db-kind: h2
+      jdbc:
+        url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+      username: sa
+      password: sa
+  flyway:
+    "quartzds":
+      connect-retries: 10
+      table: flyway_quarkus_history
+      migrate-at-start: true
+      baseline-on-migrate: true
+      baseline-version: 1.0
+      baseline-description: Quartz

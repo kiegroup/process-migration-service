@@ -1,0 +1,22 @@
+quarkus:
+  http:
+    auth:
+      basic: true
+      policy:
+        main-policy:
+          roles-allowed: admin
+      permission:
+        main:
+          paths: /*
+          policy: main-policy
+        public:
+          paths: /q/health/*
+          policy: permit
+          methods: GET
+  security:
+    users:
+      file:
+        enabled: true
+        plain-text: true
+        users: users.properties
+        roles: roles.properties
