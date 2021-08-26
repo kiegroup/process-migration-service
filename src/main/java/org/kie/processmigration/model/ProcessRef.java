@@ -16,36 +16,25 @@
 package org.kie.processmigration.model;
 
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotBlank;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 @Embeddable
+@EqualsAndHashCode
+@ToString
+@Accessors(chain = true)
+@Getter
+@Setter
 public class ProcessRef {
 
-    private String containerId;
-    private String processId;
+    @NotBlank
+    public String containerId;
+    @NotBlank
+    public String processId;
 
-    public String getContainerId() {
-        return containerId;
-    }
-
-    public ProcessRef setContainerId(String containerId) {
-        this.containerId = containerId;
-        return this;
-    }
-
-    public String getProcessId() {
-        return processId;
-    }
-
-    public ProcessRef setProcessId(String processId) {
-        this.processId = processId;
-        return this;
-    }
-
-    @Override
-    public String toString() {
-        return "ProcessRef{" +
-            "containerId='" + containerId + '\'' +
-            ", processId='" + processId + '\'' +
-            '}';
-    }
 }

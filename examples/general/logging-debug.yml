@@ -1,4 +1,4 @@
-thorntail:
-  logging:
-    root-logger:
-        level: DEBUG
+quarkus:
+  log:
+    level: DEBUG
+    min-level: DEBUG

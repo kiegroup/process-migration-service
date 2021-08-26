@@ -16,33 +16,24 @@
 
 package org.kie.processmigration.service;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
+import javax.inject.Singleton;
 
-import org.kie.processmigration.model.Execution.ExecutionStatus;
 import org.kie.processmigration.model.Migration;
 import org.kie.processmigration.model.exceptions.InvalidMigrationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.quarkus.runtime.Startup;
 
 @Startup
 @Singleton
 public class RecoveryService {
 
     private static final Logger logger = LoggerFactory.getLogger(RecoveryService.class);
-    private static final List<ExecutionStatus> PENDING_STATUSES = Arrays.asList(ExecutionStatus.STARTED,
-                                                                                ExecutionStatus.CREATED);
-
-    @PersistenceContext
-    private EntityManager em;
 
     @Inject
     MigrationService migrationService;
@@ -50,9 +41,8 @@ public class RecoveryService {
     @PostConstruct
     public void resumeMigrations() {
         logger.info("Resuming ongoing migrations ...");
-        TypedQuery<Migration> query = em.createNamedQuery("Migration.findByStatus", Migration.class);
-        query.setParameter("statuses", PENDING_STATUSES);
-        query.getResultList().forEach(m -> {
+        List<Migration> migrations = migrationService.findPending();
+        migrations.forEach(m -> {
             try {
                 migrationService.migrate(m);
             } catch (InvalidMigrationException e) {

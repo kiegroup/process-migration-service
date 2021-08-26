@@ -1,4 +1,4 @@
-i# Eclipse, Netbeans and IntelliJ files
+# Eclipse, Netbeans and IntelliJ files
 /.*
 !.gitignore
 /nbproject

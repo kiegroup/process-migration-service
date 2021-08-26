@@ -1,8 +1,7 @@
-thorntail:
-  datasources:
-    data-sources:
-      pimDS:
-        driver-name: mysql
-        connection-url: jdbc:mysql://mysql.example.com:3306/pimdb?useUnicode=true&useSSL=false&serverTimezone=UTC
-        user-name: pim
-        password: pim
+quarkus:
+  datasource:
+    db-kind: mysql
+    jdbc:
+      url: jdbc:mysql://mysql.example.com:3306/pimdb?useUnicode=true&useSSL=false&serverTimezone=UTC
+    username: pim
+    password: pim123

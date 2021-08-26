@@ -1,0 +1,62 @@
+quarkus:
+  class-loading:
+    removed-artifacts: com.oracle.database.jdbc:ojdbc8,com.ibm.db2:jcc,com.microsoft.sqlserver:mssql-jdbc
+  package:
+    type: mutable-jar
+    user-providers-directory: providers
+  http:
+    auth:
+      basic: true
+      policy:
+        main-policy:
+          roles-allowed: admin
+      permission:
+        main:
+          paths: /*
+          policy: main-policy
+        public:
+          paths: /q/health/*
+          policy: permit
+          methods: GET
+  security:
+    users:
+      file:
+        realm-name: pim_file
+        enabled: true
+        plain-text: true
+        users: users.properties
+        roles: roles.properties
+    jdbc:
+      realm-name: pim_jdbc
+      enabled: true
+      principal-query:
+        sql: SELECT u.password, u.role FROM users u WHERE u.username=?
+    ldap:
+      realm-name: pim_ldap
+      enabled: true
+      dir-context:
+        url: ldap://override-when-needed
+      identity-mapping:
+        search-base-dn: ou=users,o=YourCompany,c=ES
+# Quartz configuration
+  quartz:
+    store-type: ram
+    start-mode: forced
+  resteasy:
+    path: /rest
+  datasource:
+    db-kind: h2
+    jdbc:
+      url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: sa
+  hibernate-orm:
+    database:
+      generation: update
+pim:
+  auth-method: file
+"%int":
+  kieservers:
+  - host: http://localhost:18080/kie-server/services/rest/server
+    username: kieserver
+    password: kieserver1!
