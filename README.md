@@ -1,7 +1,7 @@
 # Process Instance Migration Service
 
 This service is intended to be deployed as a standalone application. It must be integrated with one or more KIE Process 
-Server instances to be able to execute migrations remotely.
+Server instances to be able to execute migrations remotely. TEST
 
 The two entities that will be used are _Migration Plans_ and _Migrations_.
 
