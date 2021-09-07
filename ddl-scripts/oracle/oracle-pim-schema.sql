@@ -3,12 +3,12 @@ create sequence MIGRATION_ID_SEQ start with 1 increment by  50;
 create sequence PLAN_ID_SEQ start with 1 increment by  50;
 
 create table migration_report_logs (
-   report_id number(19,0) not null,
+    report_id number(19,0) not null,
     log clob
 );
 
 create table migration_reports (
-   id number(19,0) not null,
+    id number(19,0) not null,
     end_date timestamp,
     migration_id number(19,0),
     process_instance_id number(19,0),
@@ -18,7 +18,7 @@ create table migration_reports (
 );
 
 create table migrations (
-   id number(19,0) not null,
+    id number(19,0) not null,
     cancelled_at timestamp,
     created_at timestamp,
     callback_url raw(255),
@@ -35,14 +35,14 @@ create table migrations (
 );
 
 create table plan_mappings (
-   plan_id number(19,0) not null,
+    plan_id number(19,0) not null,
     target varchar2(255 char),
     source varchar2(255 char) not null,
     primary key (plan_id, source)
 );
 
 create table plans (
-   id number(19,0) not null,
+    id number(19,0) not null,
     description varchar2(255 char),
     name varchar2(255 char),
     source_container_id varchar2(255 char),
@@ -53,11 +53,11 @@ create table plans (
 );
 
 create table process_instance_ids (
-   migration_definition_id number(19,0) not null,
+    migration_definition_id number(19,0) not null,
     processInstanceIds number(19,0)
 );
 
-create index IDXgiy3fyawbd9nt7mymgd9qd61h on migration_reports (migration_id);
+create index IDX_MigrationReports_Id on migration_reports (migration_id);
 
 alter table migration_report_logs
    add constraint FKj8bsydiucvs2kygnscp1bt1wy

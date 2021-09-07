@@ -32,7 +32,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.kie.processmigration.listener.TestJobListener;
+import org.kie.processmigration.listener.CountDownJobListener;
 import org.kie.processmigration.model.Execution;
 import org.kie.processmigration.model.Migration;
 import org.kie.processmigration.model.MigrationDefinition;
@@ -62,6 +62,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.kie.processmigration.model.Execution.ExecutionStatus.COMPLETED;
 import static org.kie.processmigration.model.Execution.ExecutionStatus.CREATED;
 import static org.kie.processmigration.model.Execution.ExecutionStatus.SCHEDULED;
@@ -115,7 +116,7 @@ public class DDLScriptsTest {
         definition.setExecution(execution);
 
         CountDownLatch count = new CountDownLatch(1);
-        scheduler.getListenerManager().addJobListener(new TestJobListener(count), allJobs());
+        scheduler.getListenerManager().addJobListener(new CountDownJobListener(count), allJobs());
 
         when(kieService.hasKieServer(definition.getKieServerId())).thenReturn(Boolean.TRUE);
         when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getSource())).thenReturn(Boolean.TRUE);
@@ -145,7 +146,9 @@ public class DDLScriptsTest {
         if (execution.getType() == ASYNC) {
             assertThat(scheduler.checkExists(new JobKey(migration.getId().toString())), is(Boolean.TRUE));
             assertThat(scheduler.checkExists(new TriggerKey(migration.getId().toString())), is(Boolean.TRUE));
-            count.await(10, TimeUnit.SECONDS);
+            if (!count.await(10, TimeUnit.SECONDS)) {
+                fail("Failed while waiting for the jobs to be completed");
+            }
         }
 
         // Then

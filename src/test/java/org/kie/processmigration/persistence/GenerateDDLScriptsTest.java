@@ -29,6 +29,8 @@ import java.util.stream.Stream;
 
 import javax.persistence.Persistence;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.engine.jdbc.internal.DDLFormatterImpl;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,6 +42,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 @Disabled
 public class GenerateDDLScriptsTest {
 
+    @EqualsAndHashCode
+    @ToString
     public static class ScriptFile {
 
         private final String dialect;
@@ -63,36 +67,6 @@ public class GenerateDDLScriptsTest {
 
         public String getDialect() {
             return this.dialect;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((dialect == null) ? 0 : dialect.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            ScriptFile other = (ScriptFile) obj;
-            if (dialect == null) {
-                if (other.dialect != null)
-                    return false;
-            } else if (!dialect.equals(other.dialect))
-                return false;
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return alias;
         }
     }
 

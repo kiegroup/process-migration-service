@@ -275,7 +275,7 @@ By default, the user properties IdentityProvider is provided in plain text:
 
 ## Configuring Quartz
 
-By default, Quartz jobs are stored in-memory database through connections managed by container, but it is possible to configure Quartz to persist the jobs in
+By default, Quartz jobs are stored in-memory database through connections managed by the container, but it is possible to configure Quartz to persist the jobs in
 a different way either using a user transaction based configuration or the in-memory database. This can be achieved by setting the `quarkus.quartz.store-type` property 
 to `ram` or `jdbc-tx`. See the 
 [examples](./examples/quartz) and the [Quarkus Quartz documentation](https://quarkus.io/guides/quartz).
@@ -285,7 +285,7 @@ to `ram` or `jdbc-tx`. See the
 The H2 JDBC extension is set by default. However, users will be able to use different JDBC extensions to connect to any
 supported database. For that purpose you will have to re-augment the base build to include the right build properties.
 
-For instance, below command will add a PostgreSQL database extension by re-augmenting the application.
+For instance, the below command will add a PostgreSQL database extension by re-augmenting the application.
 
 ```shell script
 java -jar -Dquarkus.launch.rebuild=true -Dquarkus.datasource.db-kind=postgresql target/quarkus-app/quarkus-run.jar
@@ -306,7 +306,7 @@ Reference:
 ## Disabling database schema auto-creation
 
 Process Migration service generates the database schema automatically if it is not already present by using the DDL scripts bundled in the application.
-You should be able to disable and manage the schema creation by your own by disabling some Flyway properties.
+You should be able to disable and manage the schema creation by disabling the `quarkus.flyway.migrate-at-start` property.
 
 ```shell script
 java -jar -Dquarkus.flyway.migrate-at-start=false target/quarkus-app/quarkus-run.jar
