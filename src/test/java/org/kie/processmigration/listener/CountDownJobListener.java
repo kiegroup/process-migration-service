@@ -21,11 +21,11 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobListener;
 
-public final class TestJobListener implements JobListener {
+public final class CountDownJobListener implements JobListener {
 
     private final CountDownLatch count;
 
-    public TestJobListener(CountDownLatch count) {
+    public CountDownJobListener(CountDownLatch count) {
         this.count = count;
     }
 

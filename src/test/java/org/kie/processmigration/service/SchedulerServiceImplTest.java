@@ -28,7 +28,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.kie.processmigration.listener.TestJobListener;
+import org.kie.processmigration.listener.CountDownJobListener;
 import org.kie.processmigration.model.Execution;
 import org.kie.processmigration.model.Migration;
 import org.kie.processmigration.model.MigrationDefinition;
@@ -84,7 +84,7 @@ class SchedulerServiceImplTest {
         migration.setId(99L);
         CountDownLatch count = new CountDownLatch(1);
         when(migrationService.get(migration.getId())).thenReturn(migration);
-        scheduler.getListenerManager().addJobListener(new TestJobListener(count), allJobs());
+        scheduler.getListenerManager().addJobListener(new CountDownJobListener(count), allJobs());
 
         // When
         schedulerService.scheduleMigration(migration);
@@ -95,10 +95,6 @@ class SchedulerServiceImplTest {
         }
         verify(migrationService, times(1)).get(99L);
         verify(migrationService, times(1)).migrate(migration);
-
-        Thread.sleep(1000L); // wait for the triggers/jobs to be deleted from the db
-        assertThat(scheduler.checkExists(new JobKey(migration.getId().toString())), is(Boolean.FALSE));
-        assertThat(scheduler.checkExists(new TriggerKey(migration.getId().toString())), is(Boolean.FALSE));
     }
 
     @Test
@@ -114,7 +110,7 @@ class SchedulerServiceImplTest {
         Migration migration = new Migration(definition);
         migration.setId(99L);
         CountDownLatch count = new CountDownLatch(1);
-        scheduler.getListenerManager().addJobListener(new TestJobListener(count), allJobs());
+        scheduler.getListenerManager().addJobListener(new CountDownJobListener(count), allJobs());
         when(migrationService.get(migration.getId())).thenReturn(migration);
 
         // When
@@ -145,7 +141,7 @@ class SchedulerServiceImplTest {
         Migration migration = new Migration(definition);
         migration.setId(99L);
         CountDownLatch count = new CountDownLatch(1);
-        scheduler.getListenerManager().addJobListener(new TestJobListener(count), allJobs());
+        scheduler.getListenerManager().addJobListener(new CountDownJobListener(count), allJobs());
         when(migrationService.get(migration.getId())).thenReturn(migration);
 
         schedulerService.scheduleMigration(migration);
@@ -177,7 +173,7 @@ class SchedulerServiceImplTest {
         Migration migration = new Migration(definition);
         migration.setId(99L);
         CountDownLatch count = new CountDownLatch(1);
-        scheduler.getListenerManager().addJobListener(new TestJobListener(count), allJobs());
+        scheduler.getListenerManager().addJobListener(new CountDownJobListener(count), allJobs());
 
         // When
         schedulerService.scheduleMigration(migration);

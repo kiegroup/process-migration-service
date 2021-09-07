@@ -3,12 +3,12 @@ create sequence MIGRATION_ID_SEQ start with 1 increment by 50;
 create sequence PLAN_ID_SEQ start with 1 increment by 50;
 
 create table migration_report_logs (
-   report_id bigint not null,
+    report_id bigint not null,
     log longtext
 ) engine=InnoDB;
 
 create table migration_reports (
-   id bigint not null,
+    id bigint not null,
     end_date datetime(6),
     migration_id bigint,
     process_instance_id bigint,
@@ -18,7 +18,7 @@ create table migration_reports (
 ) engine=InnoDB;
 
 create table migrations (
-   id bigint not null,
+    id bigint not null,
     cancelled_at datetime(6),
     created_at datetime(6),
     callback_url tinyblob,
@@ -35,14 +35,14 @@ create table migrations (
 ) engine=InnoDB;
 
 create table plan_mappings (
-   plan_id bigint not null,
+    plan_id bigint not null,
     target varchar(255),
     source varchar(255) not null,
     primary key (plan_id, source)
 ) engine=InnoDB;
 
 create table plans (
-   id bigint not null,
+    id bigint not null,
     description varchar(255),
     name varchar(255),
     source_container_id varchar(255),
@@ -53,11 +53,11 @@ create table plans (
 ) engine=InnoDB;
 
 create table process_instance_ids (
-   migration_definition_id bigint not null,
+    migration_definition_id bigint not null,
     processInstanceIds bigint
 ) engine=InnoDB;
 
-create index IDXgiy3fyawbd9nt7mymgd9qd61h on migration_reports (migration_id);
+create index IDX_MigrationReports_Id on migration_reports (migration_id);
 
 alter table migration_report_logs
    add constraint FKj8bsydiucvs2kygnscp1bt1wy

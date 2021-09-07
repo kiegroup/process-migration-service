@@ -23,7 +23,7 @@ import javax.transaction.Transactional;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.kie.processmigration.model.Plan;
 import org.kie.processmigration.model.ProcessRef;
@@ -42,7 +42,7 @@ class PlanServiceImplTest {
     @Inject
     PlanService planService;
 
-    @BeforeEach
+    @AfterEach
     @Transactional
     void cleanUp() {
         Plan.deleteAll();
