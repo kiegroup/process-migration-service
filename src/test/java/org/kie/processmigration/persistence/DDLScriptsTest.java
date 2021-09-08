@@ -27,9 +27,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.kie.processmigration.listener.CountDownJobListener;
@@ -96,6 +98,14 @@ public class DDLScriptsTest {
     @Inject
     Scheduler scheduler;
 
+    @AfterEach
+    @Transactional
+    void cleanUp() {
+        MigrationReport.deleteAll();
+        Migration.deleteAll();
+        Plan.deleteAll();
+    }
+
     static Stream<Execution> getExecutionTypes() {
         Execution sync = new Execution();
         sync.setType(SYNC);
@@ -112,7 +122,7 @@ public class DDLScriptsTest {
         MigrationDefinition definition = new MigrationDefinition();
         definition.setPlanId(plan.getId());
         definition.setKieServerId(KIE_SERVER_ID);
-        definition.setProcessInstanceIds(List.of(1L));
+        definition.setProcessInstanceIds(new ArrayList<>(List.of(1L)));
         definition.setExecution(execution);
 
         CountDownLatch count = new CountDownLatch(1);
@@ -194,7 +204,7 @@ public class DDLScriptsTest {
         report.setEndDate(new Date());
         report.setProcessInstanceId(instanceId);
         report.setSuccessful(true);
-        report.setLogs(List.of("Migration went fine"));
+        report.setLogs(new ArrayList<>(List.of("Migration went fine")));
         return report;
     }
 
