@@ -441,43 +441,43 @@
             <phase>generate-resources</phase>
             <configuration>
               <target>
-                <concat destfile="${project.build.outputDirectory}/db/migration/h2/h2${maven.pim.flyway.prefix.version}-pim-schema.sql">
+                <concat destfile="${project.build.outputDirectory}/db/migration/h2/h2${maven.pim.flyway.prefix.version}pim-schema.sql">
                   <fileset file="${project.basedir}/ddl-scripts/h2/h2-quartz-drop-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/h2/h2-pim-drop-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/h2/h2-quartz-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/h2/h2-pim-schema.sql" />
                 </concat>
-                <concat destfile="${project.build.outputDirectory}/db/migration/db2/db2${maven.pim.flyway.prefix.version}-pim-schema.sql">
+                <concat destfile="${project.build.outputDirectory}/db/migration/db2/db2${maven.pim.flyway.prefix.version}pim-schema.sql">
                   <fileset file="${project.basedir}/ddl-scripts/db2/db2-quartz-drop-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/db2/db2-pim-drop-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/db2/db2-quartz-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/db2/db2-pim-schema.sql" />
                 </concat>
-                <concat destfile="${project.build.outputDirectory}/db/migration/mariadb/mariadb${maven.pim.flyway.prefix.version}-pim-schema.sql">
+                <concat destfile="${project.build.outputDirectory}/db/migration/mariadb/mariadb${maven.pim.flyway.prefix.version}pim-schema.sql">
                   <fileset file="${project.basedir}/ddl-scripts/mariadb/mariadb-quartz-drop-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/mariadb/mariadb-pim-drop-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/mariadb/mariadb-quartz-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/mariadb/mariadb-pim-schema.sql" />
                 </concat>
-                <concat destfile="${project.build.outputDirectory}/db/migration/mssql/mssql${maven.pim.flyway.prefix.version}-pim-schema.sql">
+                <concat destfile="${project.build.outputDirectory}/db/migration/mssql/mssql${maven.pim.flyway.prefix.version}pim-schema.sql">
                   <fileset file="${project.basedir}/ddl-scripts/mssql/mssql-quartz-drop-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/mssql/mssql-pim-drop-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/mssql/mssql-quartz-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/mssql/mssql-pim-schema.sql" />
                 </concat>
-                <concat destfile="${project.build.outputDirectory}/db/migration/mysql/mysql${maven.pim.flyway.prefix.version}-pim-schema.sql">
+                <concat destfile="${project.build.outputDirectory}/db/migration/mysql/mysql${maven.pim.flyway.prefix.version}pim-schema.sql">
                   <fileset file="${project.basedir}/ddl-scripts/mysql/mysql-quartz-drop-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/mysql/mysql-pim-drop-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/mysql/mysql-quartz-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/mysql/mysql-pim-schema.sql" />
                 </concat>
-                <concat destfile="${project.build.outputDirectory}/db/migration/oracle/oracle${maven.pim.flyway.prefix.version}-pim-schema.sql">
+                <concat destfile="${project.build.outputDirectory}/db/migration/oracle/oracle${maven.pim.flyway.prefix.version}pim-schema.sql">
                   <fileset file="${project.basedir}/ddl-scripts/oracle/oracle-quartz-drop-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/oracle/oracle-pim-drop-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/oracle/oracle-quartz-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/oracle/oracle-pim-schema.sql" />
                 </concat>
-                <concat destfile="${project.build.outputDirectory}/db/migration/postgresql/postgresql${maven.pim.flyway.prefix.version}-pim-schema.sql">
+                <concat destfile="${project.build.outputDirectory}/db/migration/postgresql/postgresql${maven.pim.flyway.prefix.version}pim-schema.sql">
                   <fileset file="${project.basedir}/ddl-scripts/postgresql/postgresql-quartz-drop-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/postgresql/postgresql-pim-drop-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/postgresql/postgresql-quartz-schema.sql" />
