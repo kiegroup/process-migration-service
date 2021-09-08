@@ -75,7 +75,7 @@ class KieServiceImplTest {
     }
 
     @Test
-    void testRetryErroredConfigs() throws InterruptedException, JsonProcessingException {
+    void testRetryErroredConfigs() throws InterruptedException {
         assertThat(kieService.getConfigs(), hasSize(6));
 
         //Wait for retries to the error-ed servers every 2 seconds
