@@ -1,0 +1,9 @@
+quarkus:
+  flyway:
+      connect-retries: 10
+      table: flyway_pim_history
+      migrate-at-start: true
+      baseline-on-migrate: true
+      baseline-version: 1.0
+      baseline-description: PimDB
+      sql-migration-prefix: PIM

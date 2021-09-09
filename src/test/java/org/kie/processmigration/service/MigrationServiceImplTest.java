@@ -23,7 +23,9 @@ import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.kie.processmigration.model.Execution;
 import org.kie.processmigration.model.Migration;
@@ -77,6 +79,13 @@ class MigrationServiceImplTest {
 
     @InjectMock
     SchedulerService schedulerService;
+
+    @AfterEach
+    @Transactional
+    void cleanUp() {
+        MigrationReport.deleteAll();
+        Migration.deleteAll();
+    }
 
     @Test
     void testValidateDefinition() {
@@ -204,7 +213,6 @@ class MigrationServiceImplTest {
                         assertThat(results.get(0).getEndDate(), is(r.getEndDate().toInstant()));
                         assertThat(results.get(0).getMigrationId(), is(migration.getId()));
                         assertThat(results.get(0).getLogs(), containsInAnyOrder(r.getLogs().toArray()));
-
 
                         migrationService.delete(migration.getId());
                     } catch (MigrationNotFoundException | InvalidMigrationException e) {
