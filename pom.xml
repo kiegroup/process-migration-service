@@ -258,7 +258,6 @@
   </dependencies>
 
   <build>
-    <finalName>process-migration</finalName>
     <resources>
       <resource>
         <directory>src/main/resources</directory>
