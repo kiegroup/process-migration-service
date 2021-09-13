@@ -96,7 +96,7 @@ public class ContainerKieServerLifecycleManager implements QuarkusTestResourceLi
             props.put("kieservers[0].username", "kieserver");
             props.put("kieservers[0].password", "kieserver1!");
             return props;
-        } catch (IllegalStateException e) {
+        } catch (Exception e) {
             LOGGER.warn("Unable to start Docker container for: {}:{}", CONTAINER_IMAGE, CONTAINER_TAG, e);
         }
         Iterator<String> propNames = ConfigProvider.getConfig().getPropertyNames().iterator();
