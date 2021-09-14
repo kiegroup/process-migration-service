@@ -33,6 +33,12 @@
     <maven.jdbc.username>sa</maven.jdbc.username>
     <maven.jdbc.password>sa</maven.jdbc.password>
 
+    <maven.kieserver.container.name>jboss/kie-server-showcase</maven.kieserver.container.name>
+    <maven.kieserver.container.tag>latest</maven.kieserver.container.tag>
+    <maven.kieserver.host>http://localhost:8080/kie-server/services/rest/server</maven.kieserver.host>
+    <maven.kieserver.username>yoda</maven.kieserver.username>
+    <maven.kieserver.password>usetheforce123@</maven.kieserver.password>
+
     <maven.pim.flyway.prefix.version>1.0.0__</maven.pim.flyway.prefix.version>
   </properties>
 
@@ -313,8 +319,26 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
           <systemPropertyVariables>
-            <kieserver.container.name>jboss/kie-server-showcase</kieserver.container.name>
-            <kieserver.container.tag>latest</kieserver.container.tag>
+            <property>
+              <name>kieserver.container.name</name>
+              <value>${maven.kieserver.container.name}</value>
+            </property>
+            <property>
+              <name>kieserver.container.tag</name>
+              <value>${maven.kieserver.container.tag}</value>
+            </property>
+            <property>
+              <name>kieservers[0].host</name>
+              <value>${maven.kieserver.host}</value>
+            </property>
+            <property>
+              <name>kieservers[0].username</name>
+              <value>${maven.kieserver.username}</value>
+            </property>
+            <property>
+              <name>kieservers[0].password</name>
+              <value>${maven.kieserver.password}</value>
+            </property>
           </systemPropertyVariables>
         </configuration>
         <executions>
@@ -552,97 +576,6 @@
       </build>
       <properties>
         <quarkus.package.type>native</quarkus.package.type>
-      </properties>
-    </profile>
-
-    <profile>
-      <id>h2</id>
-      <activation>
-        <property>
-          <name>maven.jdbc.driver.class</name>
-          <value>org.h2.Driver</value>
-        </property>
-      </activation>
-      <properties>
-        <maven.jdbc.db-kind>h2</maven.jdbc.db-kind>
-      </properties>
-    </profile>
-
-    <profile>
-      <id>postgresql</id>
-      <activation>
-        <property>
-          <name>maven.jdbc.driver.class</name>
-          <value>org.postgresql.Driver</value>
-        </property>
-      </activation>
-      <properties>
-        <maven.jdbc.db-kind>postgresql</maven.jdbc.db-kind>
-      </properties>
-    </profile>
-
-    <profile>
-      <id>db2</id>
-      <activation>
-        <property>
-          <name>maven.jdbc.driver.class</name>
-          <value>com.ibm.db2.jcc.DB2Driver</value>
-        </property>
-      </activation>
-      <properties>
-        <maven.jdbc.db-kind>db2</maven.jdbc.db-kind>
-      </properties>
-    </profile>
-
-    <profile>
-      <id>mariadb</id>
-      <activation>
-        <property>
-          <name>maven.jdbc.driver.class</name>
-          <value>org.mariadb.jdbc.Driver</value>
-        </property>
-      </activation>
-      <properties>
-        <maven.jdbc.db-kind>mariadb</maven.jdbc.db-kind>
-      </properties>
-    </profile>
-
-    <profile>
-      <id>mssql</id>
-      <activation>
-        <property>
-          <name>maven.jdbc.driver.class</name>
-          <value>com.microsoft.sqlserver.jdbc.SQLServerDriver</value>
-        </property>
-      </activation>
-      <properties>
-        <maven.jdbc.db-kind>mssql</maven.jdbc.db-kind>
-      </properties>
-    </profile>
-
-    <profile>
-      <id>mysql</id>
-      <activation>
-        <property>
-          <name>maven.jdbc.driver.class</name>
-          <value>com.mysql.cj.jdbc.Driver</value>
-        </property>
-      </activation>
-      <properties>
-        <maven.jdbc.db-kind>mysql</maven.jdbc.db-kind>
-      </properties>
-    </profile>
-
-    <profile>
-      <id>oracle</id>
-      <activation>
-        <property>
-          <name>maven.jdbc.driver.class</name>
-          <value>oracle.jdbc.OracleDriver</value>
-        </property>
-      </activation>
-      <properties>
-        <maven.jdbc.db-kind>oracle</maven.jdbc.db-kind>
       </properties>
     </profile>
   </profiles>
