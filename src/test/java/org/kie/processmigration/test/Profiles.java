@@ -23,13 +23,6 @@ import io.quarkus.test.junit.QuarkusTestProfile;
 
 public class Profiles {
 
-    public static class KieServerIntegrationProfile implements QuarkusTestProfile {
-        @Override
-        public List<TestResourceEntry> testResources() {
-            return Collections.singletonList(new TestResourceEntry(ContainerKieServerLifecycleManager.class));
-        }
-    }
-
     public static class MockKieServerProfile implements QuarkusTestProfile {
         @Override
         public List<TestResourceEntry> testResources() {

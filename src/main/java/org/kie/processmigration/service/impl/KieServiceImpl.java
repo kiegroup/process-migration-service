@@ -245,7 +245,7 @@ public class KieServiceImpl implements KieService {
             retryConnection(kieConfig);
         }
         configs.add(kieConfig);
-        logger.info("Loaded kie server configuration for: {}", config);
+        logger.info("Loaded kie server configuration for: {}", kieConfig);
     }
 
     private KieServicesClient createKieServicesClient(KieServerConfig config) {

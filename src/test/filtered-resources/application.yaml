@@ -1,7 +1,7 @@
 quarkus:
   log:
-    level: DEBUG
-    min-level: DEBUG
+    level: INFO
+    min-level: INFO
   # flyway to create PIM schema
   flyway:
     connect-retries: 10
@@ -11,6 +11,8 @@ quarkus:
     baseline-description: PimDB
     sql-migration-prefix: ${maven.jdbc.db-kind}
     clean-at-start: true
+    create-schemas: false
+    schemas: "${maven.jdbc.schema}"
   # Quartz configuration
   quartz:
     store-type: jdbc-cmt
@@ -26,6 +28,7 @@ quarkus:
   hibernate-orm:
     database:
       generation: validate
+      default-schema: "${maven.jdbc.schema}"
   security:
     users:
       file:
@@ -47,5 +50,5 @@ quarkus:
         search-base-dn: ou=users,o=YourCompany,c=ES
 "%test":
   pim:
-    username: admin
-    password: admin1!
+    username: ${maven.pim.username}
+    password: ${maven.pim.password}
