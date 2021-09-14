@@ -27,10 +27,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -70,7 +70,6 @@ import static org.kie.processmigration.model.Execution.ExecutionStatus.CREATED;
 import static org.kie.processmigration.model.Execution.ExecutionStatus.SCHEDULED;
 import static org.kie.processmigration.model.Execution.ExecutionType.ASYNC;
 import static org.kie.processmigration.model.Execution.ExecutionType.SYNC;
-import static org.kie.processmigration.test.ContainerKieServerLifecycleManager.KIE_SERVER_ID;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -86,6 +85,8 @@ import static org.quartz.impl.matchers.EverythingMatcher.allJobs;
 @QuarkusTest
 public class DDLScriptsTest {
 
+    private static final String KIE_SERVER_ID = System.getProperty("kie.server.id", "kie-server");
+
     @Inject
     MigrationService migrationService;
 
@@ -98,12 +99,13 @@ public class DDLScriptsTest {
     @Inject
     Scheduler scheduler;
 
+    @Inject
+    Flyway flyway;
+
     @AfterEach
-    @Transactional
     void cleanUp() {
-        MigrationReport.deleteAll();
-        Migration.deleteAll();
-        Plan.deleteAll();
+        flyway.clean();
+        flyway.migrate();
     }
 
     static Stream<Execution> getExecutionTypes() {

@@ -23,8 +23,10 @@ import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.kie.processmigration.model.Execution;
@@ -41,9 +43,6 @@ import org.kie.server.api.model.admin.MigrationReportInstance;
 import org.kie.server.api.model.instance.ProcessInstance;
 import org.kie.server.client.QueryServicesClient;
 import org.kie.server.client.admin.ProcessAdminServicesClient;
-
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -80,11 +79,13 @@ class MigrationServiceImplTest {
     @InjectMock
     SchedulerService schedulerService;
 
+    @Inject
+    Flyway flyway;
+
     @AfterEach
-    @Transactional
     void cleanUp() {
-        MigrationReport.deleteAll();
-        Migration.deleteAll();
+        flyway.clean();
+        flyway.migrate();
     }
 
     @Test
