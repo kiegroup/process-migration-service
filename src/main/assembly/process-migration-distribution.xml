@@ -7,11 +7,11 @@
     <formats>
         <format>zip</format>
     </formats>
-    <baseDirectory>/</baseDirectory>
+    <baseDirectory>/process-migration</baseDirectory>
     <fileSets>
         <fileSet>
             <directory>target/quarkus-app</directory>
-            <outputDirectory>process-migration-service</outputDirectory>
+            <outputDirectory>quarkus-app</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>ddl-scripts</directory>
