@@ -23,6 +23,7 @@
     <version.frontend.plugin>1.12.0</version.frontend.plugin>
     <version.io.quarkus>2.2.0.CR1</version.io.quarkus>
     <version.org.github.tomakehurst.wiremock-jre8>2.27.2</version.org.github.tomakehurst.wiremock-jre8>
+    <version.org.jboss.transaction.spi>7.6.1.Final</version.org.jboss.transaction.spi>
     <version.org.kie.server>${project.version}</version.org.kie.server>
     <version.org.mockito>3.7.7</version.org.mockito>
     <version.org.projectlombok.lombok>1.18.16</version.org.projectlombok.lombok>
@@ -109,6 +110,11 @@
             <artifactId>cdi-api</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-transaction-spi-jakarta</artifactId>
+        <version>${version.org.jboss.transaction.spi}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -198,6 +204,16 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-narayana-jta</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jboss</groupId>
+          <artifactId>jboss-transaction-spi</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss</groupId>
+      <artifactId>jboss-transaction-spi-jakarta</artifactId>
     </dependency>
     <!-- External dependencies -->
     <dependency>
