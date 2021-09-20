@@ -118,7 +118,7 @@ quarkus:
     removed-artifacts: com.oracle.database.jdbc:ojdbc8,com.ibm.db2:jcc,com.microsoft.sqlserver:mssql-jdbc
   package:
     type: mutable-jar
-    user-providers-directory: providers
+    user-providers-directory: providers (1)
   http:
     auth:
       basic: true
@@ -160,15 +160,15 @@ quarkus:
     baseline-on-migrate: true
     baseline-version: 1.0
     baseline-description: PimDB
-    sql-migration-prefix: h2 (1)        
+    sql-migration-prefix: h2 (2)        
 # Quartz configuration
   quartz:
     store-type: jdbc-cmt
     start-mode: forced
   resteasy:
-    path: /rest (2)
+    path: /rest (3)
   datasource:
-    db-kind: h2 (3)
+    db-kind: h2 (4)
     jdbc:
       url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
@@ -177,13 +177,14 @@ quarkus:
     database:
       generation: update
 pim:
-  auth-method: file (4)
+  auth-method: file (5)
 ```
 
-1. Flyway will automatically create PIM schema when enabled based on the DDL scripts prefix. Enabled by default.
-2. Deploy the application on `/rest`
-3. H2 in-memory datasource. Override it by one of your choice
-4. Authentication method. Defaults to `file` but `jdbc` or `ldap` are also valid options
+1. In case we wanted to enable a different database requiring a license agreement, the JDBC driver will have to be located in this `providers` folder manually.
+2. Flyway will automatically create PIM schema when enabled based on the DDL scripts prefix. Enabled by default.
+3. Deploy the application on `/rest`
+4. H2 in-memory datasource. Override it by one of your choice
+5. Authentication method. Defaults to `file` but `jdbc` or `ldap` are also valid options
 
 ### Configuration overrides
 
@@ -290,6 +291,8 @@ For instance, the below command will add a PostgreSQL database extension by re-a
 ```shell script
 java -jar -Dquarkus.launch.rebuild=true -Dquarkus.datasource.db-kind=postgresql target/quarkus-app/quarkus-run.jar
 ```
+
+Note that in case of using a database requiring a JDBC driver license agreement (such as Oracle, DB2 and MS SQL Server), we will need to drop the JDBC drivers in the `providers` folder manually before re-augmenting the Quarkus application.
 
 Afterwards, you can start up the application normally.
 ```shell script
