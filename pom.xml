@@ -333,7 +333,7 @@
         <configuration>
           <workingDirectory>frontend</workingDirectory>
           <nodeVersion>v12.16.2</nodeVersion>
-          <npmVersion>6.14.4</npmVersion>
+          <npmVersion>7.15.1</npmVersion>
           <yarnVersion>v1.22.4</yarnVersion>
         </configuration>
         <executions>
@@ -351,7 +351,7 @@
               <goal>npm</goal>
             </goals>
             <configuration>
-              <arguments>exec @kie/lock-treatment-tool</arguments>
+              <arguments>exec @kie/lock-treatment-tool --</arguments>
             </configuration>
           </execution>
           <execution>
