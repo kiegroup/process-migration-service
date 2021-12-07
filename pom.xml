@@ -333,7 +333,7 @@
         <configuration>
           <workingDirectory>frontend</workingDirectory>
           <nodeVersion>v12.16.2</nodeVersion>
-          <npmVersion>6.14.4</npmVersion>
+          <npmVersion>7.15.1</npmVersion>
           <yarnVersion>v1.22.4</yarnVersion>
         </configuration>
         <executions>
@@ -345,23 +345,13 @@
             </goals>
           </execution>
           <execution>
-            <id>npm install lock-treatment-tool and run-node</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <configuration>
-              <arguments>install lock-treatment-tool --global-style --no-package-lock</arguments>
-            </configuration>
-          </execution>
-          <execution>
             <id>lock-treatment-tool execution</id>
             <phase>initialize</phase>
             <goals>
               <goal>npm</goal>
             </goals>
             <configuration>
-              <arguments>run locktt --</arguments>
+              <arguments>exec @kie/lock-treatment-tool --</arguments>
             </configuration>
           </execution>
           <execution>
