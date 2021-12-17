@@ -40,6 +40,7 @@ import org.kie.processmigration.model.KieServerConfig;
 import org.kie.processmigration.model.ProcessInfo;
 import org.kie.processmigration.model.ProcessRef;
 import org.kie.processmigration.model.RunningInstance;
+import org.kie.processmigration.model.config.KieClientCert;
 import org.kie.processmigration.model.config.KieServers;
 import org.kie.processmigration.model.exceptions.InvalidKieServerException;
 import org.kie.processmigration.model.exceptions.ProcessDefinitionNotFoundException;
@@ -50,7 +51,6 @@ import org.kie.server.api.model.KieContainerResourceList;
 import org.kie.server.api.model.ServiceResponse;
 import org.kie.server.api.model.definition.ProcessDefinition;
 import org.kie.server.api.model.instance.ProcessInstance;
-import org.kie.server.client.CredentialsProvider;
 import org.kie.server.client.KieServicesClient;
 import org.kie.server.client.KieServicesConfiguration;
 import org.kie.server.client.KieServicesFactory;
@@ -59,6 +59,8 @@ import org.kie.server.client.QueryServicesClient;
 import org.kie.server.client.UIServicesClient;
 import org.kie.server.client.admin.ProcessAdminServicesClient;
 import org.kie.server.client.credentials.EnteredCredentialsProvider;
+import org.kie.server.client.credentials.EnteredTokenCredentialsProvider;
+import org.kie.server.common.rest.ClientCertificate;
 import org.kie.server.common.rest.NoEndpointFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +82,9 @@ public class KieServiceImpl implements KieService {
 
     @Inject
     KieServers kieServers;
+
+    @Inject
+    KieClientCert cert;
 
     @PostConstruct
     void loadConfigs() {
@@ -218,10 +223,13 @@ public class KieServiceImpl implements KieService {
     }
 
     private void loadConfig(KieServers.KieServer config) {
-        CredentialsProvider credentialsProvider = new EnteredCredentialsProvider(config.username(), config.password());
-        KieServerConfig kieConfig = new KieServerConfig();
-        kieConfig.setHost(config.host())
-                .setCredentialsProvider(credentialsProvider);
+        KieServerConfig kieConfig = new KieServerConfig().setHost(config.host());
+        if (config.username().isPresent() && config.password().isPresent()) {
+            kieConfig.setCredentialsProvider(new EnteredCredentialsProvider(config.username().get(), config.password().get()));
+        }
+        if (config.token().isPresent()) {
+            kieConfig.setCredentialsProvider(new EnteredTokenCredentialsProvider(config.token().get()));
+        }
         try {
             KieServicesClient client = createKieServicesClient(kieConfig);
             if (client != null) {
@@ -244,6 +252,15 @@ public class KieServiceImpl implements KieService {
         KieServicesConfiguration configuration = KieServicesFactory.newRestConfiguration(config.getHost(), config.getCredentialsProvider());
         configuration.setTimeout(CONFIGURATION_TIMEOUT);
         configuration.setMarshallingFormat(MarshallingFormat.JSON);
+        if (cert.clientCert().isPresent()) {
+            configuration.setClientCertificate(new ClientCertificate()
+                    .setCertName(cert.clientCert().get().certName())
+                    .setCertPassword(cert.clientCert().get().certPassword())
+                    .setKeystore(cert.clientCert().get().keystorePath())
+                    .setKeystorePassword(cert.clientCert().get().keystorePassword())
+                    .setTruststore(cert.clientCert().get().truststorePath())
+                    .setTruststorePassword(cert.clientCert().get().truststorePassword()));
+        }
         return KieServicesFactory.newKieServicesClient(configuration);
     }
 
