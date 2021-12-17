@@ -16,26 +16,38 @@
 
 package org.kie.processmigration.model.config;
 
-import java.util.List;
 import java.util.Optional;
 
 import io.smallrye.config.ConfigMapping;
+import io.smallrye.config.WithName;
 import io.smallrye.config.WithParentName;
 
-@ConfigMapping(prefix = "kieservers")
-public interface KieServers {
+@ConfigMapping(prefix = "client-cert")
+public interface KieClientCert {
 
     @WithParentName
-    List<KieServer> kieservers();
+    Optional<ClientCertConfig> clientCert();
 
-    interface KieServer {
+    interface ClientCertConfig {
+        @WithName("cert-name")
+        String certName();
 
-        String host();
+        @WithName("cert-password")
+        String certPassword();
 
-        Optional<String> username();
+        @WithName("keystore-path")
+        String keystorePath();
 
-        Optional<String> password();
+        @WithName("keystore-password")
+        String keystorePassword();
 
-        Optional<String> token();
+        @WithName("truststore-path")
+        String truststorePath();
+
+        @WithName("truststore-password")
+        String truststorePassword();
     }
+
+
+
 }
