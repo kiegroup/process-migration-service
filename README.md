@@ -205,7 +205,7 @@ As an example, if you want to replace the H2 default persistence configuration b
 #### Defining KIE Servers
 
 The right way to configure the connection to one or more KIE Servers in order to perform the migrations, a list of 
-KIE servers should exist in the configuration file. [Example](./examples/kieservers.yml)
+KIE servers should exist in the configuration file. [Example](examples/kieservers/basic-auth.yml)
 
 ```yaml
 kieservers:

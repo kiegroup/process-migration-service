@@ -1,0 +1,12 @@
+kieservers:
+  - host: http://localhost:18080/kie-server/services/rest/server
+# HTTP Basic or Token Authentication can still be used, but usually a client identity is sufficient.
+#   username: foo
+#   password: bar
+client-cert:
+    cert-name: pim
+    cert-password: pim-secret
+    keystore-path: /path/to/keystore.jks
+    keystore-password: ks-secret
+    truststore-path: /path/to/truststore.jks
+    truststore-password: ts-secret
