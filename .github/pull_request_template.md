@@ -1,6 +1,6 @@
 **Thank you for submitting this pull request**
 
-**JIRA**: _(please edit the JIRA link if it exists)_
+**JIRA**: _(please edit the JIRA link if it exists)_ 
 
 [link](https://www.example.com)
 
@@ -25,7 +25,15 @@ Build Chain tool does "simple" maven build(s), the builds are just Maven command
 How to retest this PR or trigger a specific build:
 </summary>
 
-* <b>a pull request</b> please add comment: <b>Jenkins retest this</b>
-* <b>a full downstream build</b> please add comment: <b>Jenkins run fdb</b>
+* <b>a pull request</b> please add comment: <b>Jenkins retest</b> (using <i>this</i> e.g. <b>Jenkins retest this</b> optional but no longer required)
+ 
+* for a <b>full downstream build</b> 
+  * for <b>jenkins</b> job: please add comment: <b>Jenkins run fdb</b>
+  * for <b>github actions</b> job: add the label `run_fdb`
+    
+* <b>a compile downstream build</b> please  add comment: <b>Jenkins run cdb</b>
 
+* <b>a full production downstream build</b> please add comment: <b>Jenkins execute product fdb</b>
+
+* <b>an upstream build</b> please add comment: <b>Jenkins run upstream</b>
 </details>
