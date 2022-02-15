@@ -204,7 +204,7 @@ export default class WizardAddPlan extends WizardBase {
           name="form_migration_plan"
           id="WizardAddPlan_id_form1"
         >
-          <Wizard show={true} onHide={this.props.closeAddPlanWizard}>
+          <Wizard show={true}>
             <Wizard.Header
               onClose={this.props.closeAddPlanWizard}
               title={this.state.wizardHeaderTitle}
