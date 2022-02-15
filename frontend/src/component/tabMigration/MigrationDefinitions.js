@@ -295,7 +295,7 @@ export default class MigrationDefinitions extends React.Component {
     return (
       <React.Fragment>
         {/* View migration logs pop-up */}
-        <Wizard show={this.state.showLogDialog} onHide={this.hideDetailDialog}>
+        <Wizard show={this.state.showLogDialog}>
           <Wizard.Header
             onClose={this.hideDetailDialog}
             title="View Migration Logs"
