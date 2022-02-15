@@ -184,7 +184,7 @@ export default class WizardExecuteMigration extends WizardBase {
     return (
       <div>
         <form className="form-horizontal" name="form_migration">
-          <Wizard show={this.props.isOpen} onHide={this.props.onClose}>
+          <Wizard show={this.props.isOpen}>
             <Wizard.Header
               onClose={this.props.onClose}
               title="Execute Migration Plan Wizard"
