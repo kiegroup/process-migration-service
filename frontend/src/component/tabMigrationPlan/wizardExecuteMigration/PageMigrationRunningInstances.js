@@ -7,8 +7,6 @@ import {
   paginate,
   PAGINATION_VIEW,
   PaginationRow,
-  selectionCellFormatter,
-  selectionHeaderCellFormatter,
   sortableHeaderCellFormatter,
   Table,
   TABLE_SORT_DIRECTION,
@@ -81,38 +79,11 @@ export default class PageMigrationRunningInstances extends React.Component {
       // column definitions
       columns: [
         {
-          property: "select",
-          header: {
-            label: "Select all rows",
-            props: {
-              index: 0,
-              rowSpan: 1,
-              colSpan: 1,
-              id: "SelectId"
-            },
-            customFormatters: [selectionHeaderCellFormatter]
-          },
-          cell: {
-            props: {
-              index: 0
-            },
-            formatters: [
-              (value, { rowData, rowIndex }) =>
-                selectionCellFormatter(
-                  { rowData, rowIndex },
-                  this.onSelectRow,
-                  `${rowIndex}`,
-                  `${rowIndex}`
-                )
-            ]
-          }
-        },
-        {
           property: "processInstanceId",
           header: {
             label: "ID",
             props: {
-              index: 1,
+              index: 0,
               rowSpan: 1,
               colSpan: 1
             },
@@ -132,6 +103,26 @@ export default class PageMigrationRunningInstances extends React.Component {
           header: {
             label: "Name",
             props: {
+              index: 1,
+              rowSpan: 1,
+              colSpan: 1
+            },
+            transforms: [sortableTransform],
+            formatters: [sortingFormatter],
+            customFormatters: [sortableHeaderCellFormatter]
+          },
+          cell: {
+            props: {
+              index: 1
+            },
+            formatters: [tableCellFormatter]
+          }
+        },
+        {
+          property: "description",
+          header: {
+            label: "Description",
+            props: {
               index: 2,
               rowSpan: 1,
               colSpan: 1
@@ -148,9 +139,9 @@ export default class PageMigrationRunningInstances extends React.Component {
           }
         },
         {
-          property: "description",
+          property: "startTime",
           header: {
-            label: "Description",
+            label: "Start Time",
             props: {
               index: 3,
               rowSpan: 1,
@@ -168,9 +159,9 @@ export default class PageMigrationRunningInstances extends React.Component {
           }
         },
         {
-          property: "startTime",
+          property: "state",
           header: {
-            label: "Start Time",
+            label: "State",
             props: {
               index: 4,
               rowSpan: 1,
@@ -183,26 +174,6 @@ export default class PageMigrationRunningInstances extends React.Component {
           cell: {
             props: {
               index: 4
-            },
-            formatters: [tableCellFormatter]
-          }
-        },
-        {
-          property: "state",
-          header: {
-            label: "State",
-            props: {
-              index: 5,
-              rowSpan: 1,
-              colSpan: 1
-            },
-            transforms: [sortableTransform],
-            formatters: [sortingFormatter],
-            customFormatters: [sortableHeaderCellFormatter]
-          },
-          cell: {
-            props: {
-              index: 5
             },
             formatters: [stateFormatter]
           }
@@ -267,46 +238,10 @@ export default class PageMigrationRunningInstances extends React.Component {
     const { selectedRows } = this.state;
     const selected = selectedRows.includes(row.processInstanceId);
     return {
+      onClick: () => this.onSelectRow(row),
       className: classNames({ selected }),
       role: "row"
     };
-  };
-  onSelectAllRows = event => {
-    const { rows, selectedRows } = this.state;
-    const { checked } = event.target;
-    const currentRows = this.currentRows().rows;
-
-    if (checked) {
-      const updatedSelections = [
-        ...new Set([
-          ...currentRows.map(r => r.processInstanceId),
-          ...selectedRows
-        ])
-      ];
-      const updatedRows = rows.map(r =>
-        updatedSelections.includes(r.processInstanceId) ? this.selectRow(r) : r
-      );
-      this.setState({
-        // important: you must update rows to force a re-render and trigger onRow hook
-        rows: updatedRows,
-        selectedRows: updatedSelections
-      });
-      this.updateSelectedProcessIds(rows, updatedSelections);
-    } else {
-      const ids = currentRows.map(r => r.processInstanceId);
-      const updatedSelections = selectedRows.filter(r => !ids.includes(r));
-      const updatedRows = rows.map(r =>
-        updatedSelections.includes(r.processInstanceId)
-          ? r
-          : this.deselectRow(r)
-      );
-      this.setState({
-        rows: updatedRows,
-        selectedRows: updatedSelections
-      });
-
-      this.updateSelectedProcessIds(rows, updatedSelections);
-    }
   };
 
   updateSelectedProcessIds = (rows, selectedRows) => {
@@ -314,7 +249,25 @@ export default class PageMigrationRunningInstances extends React.Component {
     this.props.onIsValid(selectedRows.length > 0);
   };
 
-  onSelectRow = (event, row) => {
+  componentDidUpdate() {
+    if (this.props.migrateAll && this.state.selectedRows.length > 0) {
+      this.clearSelection();
+    }
+  }
+
+  clearSelection = () => {
+    const { rows, selectedRows } = this.state;
+    const updatedRows = rows.map(r =>
+      selectedRows.includes(r.processInstanceId) ? r : this.deselectRow(r)
+    );
+    this.setState({
+      rows: updatedRows,
+      selectedRows: []
+    });
+    this.updateSelectedProcessIds(rows, []);
+  };
+
+  onSelectRow = row => {
     const { rows, selectedRows } = this.state;
     const selectedRowIndex = rows.findIndex(r => r.id === row.id);
     if (selectedRowIndex > -1) {
@@ -349,6 +302,7 @@ export default class PageMigrationRunningInstances extends React.Component {
       this.setState({ pagination: newPaginationState, pageChangeValue: page });
     }
   };
+
   currentRows() {
     const { rows, sortingColumns, columns, pagination } = this.state;
     return compose(
@@ -361,10 +315,12 @@ export default class PageMigrationRunningInstances extends React.Component {
       })
     )(rows);
   }
+
   totalPages = () => {
     const { perPage } = this.state.pagination;
     return Math.ceil(this.props.runningInstances.length / perPage);
   };
+
   render() {
     const { columns, pagination, sortingColumns, pageChangeValue } = this.state;
     const sortedPaginatedRows = this.currentRows();
@@ -384,8 +340,7 @@ export default class PageMigrationRunningInstances extends React.Component {
                   cellProps,
                   columns,
                   sortingColumns,
-                  rows: sortedPaginatedRows.rows,
-                  onSelectAllRows: this.onSelectAllRows
+                  rows: sortedPaginatedRows.rows
                 })
             }
           }}
@@ -421,5 +376,6 @@ export default class PageMigrationRunningInstances extends React.Component {
 PageMigrationRunningInstances.propTypes = {
   runningInstances: PropTypes.array.isRequired,
   setRunningInstancesIds: PropTypes.func.isRequired,
-  onIsValid: PropTypes.func.isRequired
+  onIsValid: PropTypes.func.isRequired,
+  migrateAll: PropTypes.bool.isRequired
 };
