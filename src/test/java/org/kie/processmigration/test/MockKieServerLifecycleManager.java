@@ -83,6 +83,11 @@ public class MockKieServerLifecycleManager implements QuarkusTestResourceLifecyc
                 .withBasicAuth("admin", "admin123")
                 .willReturn(okJson(mapper.writeValueAsString(server2Response))));
 
+        ServiceResponse<KieServerInfo> vaultServerResponse = getResponseFor("vault");
+        stubFor(get(urlPathEqualTo(URI.create(vaultServerResponse.getResult().getLocation()).getPath()))
+                .withBasicAuth("kieserver6", "kieserver6-password")
+                .willReturn(okJson(mapper.writeValueAsString(vaultServerResponse))));
+
         stubFor(get(urlPathEqualTo(wireMockServer.baseUrl() + "/not-found/services/rest/server"))
                 .willReturn(notFound()));
 
@@ -114,6 +119,12 @@ public class MockKieServerLifecycleManager implements QuarkusTestResourceLifecyc
         kieservers.put("kieservers[5].host", wireMockServer.baseUrl() + "/retry/services/rest/server");
         kieservers.put("kieservers[5].username", "other");
         kieservers.put("kieservers[5].password", "other123");
+
+        // Quarkus File Vault Config
+        kieservers.put("quarkus.file.vault.provider.pim.path", "testvault.p12");
+        kieservers.put("quarkus.file.vault.provider.pim.secret", "password");
+        kieservers.put("kieservers[6].host", vaultServerResponse.getResult().getLocation());
+        kieservers.put("kieservers[6].credentials-provider", "quarkus.file.vault.provider.pim.kieserver6");
         return kieservers;
     }
 
