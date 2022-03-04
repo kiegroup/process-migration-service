@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,6 +43,7 @@ import org.kie.processmigration.model.ProcessRef;
 import org.kie.processmigration.model.RunningInstance;
 import org.kie.processmigration.model.config.KieClientCert;
 import org.kie.processmigration.model.config.KieServers;
+import org.kie.processmigration.model.exceptions.CredentialsException;
 import org.kie.processmigration.model.exceptions.InvalidKieServerException;
 import org.kie.processmigration.model.exceptions.ProcessDefinitionNotFoundException;
 import org.kie.processmigration.service.KieService;
@@ -65,6 +67,8 @@ import org.kie.server.common.rest.NoEndpointFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.quarkus.credentials.CredentialsProvider;
+import io.quarkus.credentials.runtime.CredentialsProviderFinder;
 import io.quarkus.runtime.Startup;
 
 @ApplicationScoped
@@ -76,7 +80,10 @@ public class KieServiceImpl implements KieService {
     private static final long AWAIT_EXECUTOR = 5;
     private static final long RETRY_DELAY = 2;
     private static final Logger logger = LoggerFactory.getLogger(KieServiceImpl.class);
+    private static final String CREDENTIALS_PROVIDER_USER_KEY = "user";
+    private static final String CREDENTIALS_PROVIDER_PASSWORD_KEY = "password";
 
+    private CredentialsProvider credentialsProvider = CredentialsProviderFinder.find("quarkus.file.vault");
     final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     final Collection<KieServerConfig> configs = new ArrayList<>();
 
@@ -224,7 +231,14 @@ public class KieServiceImpl implements KieService {
 
     private void loadConfig(KieServers.KieServer config) {
         KieServerConfig kieConfig = new KieServerConfig().setHost(config.host());
-        if (config.username().isPresent() && config.password().isPresent()) {
+        if (config.credentialsProvider().isPresent()) {
+            String user = credentialsProvider.getCredentials(config.credentialsProvider().get()).get(CREDENTIALS_PROVIDER_USER_KEY);
+            String password = credentialsProvider.getCredentials(config.credentialsProvider().get()).get(CREDENTIALS_PROVIDER_PASSWORD_KEY);
+            if (user == null) {
+                throw new CredentialsException("Missing credential in vault with key " + config.credentialsProvider().get());
+            }
+            kieConfig.setCredentialsProvider(new EnteredCredentialsProvider(user, password));
+        } else if (config.username().isPresent() && config.password().isPresent()) {
             kieConfig.setCredentialsProvider(new EnteredCredentialsProvider(config.username().get(), config.password().get()));
         }
         if (config.token().isPresent()) {
@@ -255,13 +269,27 @@ public class KieServiceImpl implements KieService {
         if (cert.clientCert().isPresent()) {
             configuration.setClientCertificate(new ClientCertificate()
                     .setCertName(cert.clientCert().get().certName())
-                    .setCertPassword(cert.clientCert().get().certPassword())
+                    .setCertPassword(resolvePassword(cert.clientCert().get().certCredentialsProvider(), cert.clientCert().get().certPassword()))
                     .setKeystore(cert.clientCert().get().keystorePath())
-                    .setKeystorePassword(cert.clientCert().get().keystorePassword())
+                    .setKeystorePassword(resolvePassword(cert.clientCert().get().keystoreCredentialsProvider(), cert.clientCert().get().keystorePassword()))
                     .setTruststore(cert.clientCert().get().truststorePath())
-                    .setTruststorePassword(cert.clientCert().get().truststorePassword()));
+                    .setTruststorePassword(resolvePassword(cert.clientCert().get().truststoreCredentialsProvider(), cert.clientCert().get().truststorePassword())));
         }
         return KieServicesFactory.newKieServicesClient(configuration);
+    }
+
+    private String resolvePassword(Optional<String> credentialsProviderKey, Optional<String> passwordKey) {
+        if(credentialsProviderKey.isPresent()) {
+            String password = credentialsProvider.getCredentials(credentialsProviderKey.get()).get(CREDENTIALS_PROVIDER_PASSWORD_KEY);
+            if (password == null) {
+                throw new CredentialsException("Missing credential in vault with key " + credentialsProviderKey.get());
+            }
+            return password;
+        }
+        if(passwordKey.isEmpty()) {
+            throw new CredentialsException("Either the password or the credentials-provider key must be defined");
+        }
+        return passwordKey.get();
     }
 
     private UIServicesClient getUIServicesClient(String kieServerId) throws InvalidKieServerException {
