@@ -18,6 +18,8 @@ package org.kie.processmigration.model.config;
 
 import java.util.Optional;
 
+import javax.swing.text.html.Option;
+
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithName;
 import io.smallrye.config.WithParentName;
@@ -32,20 +34,29 @@ public interface KieClientCert {
         @WithName("cert-name")
         String certName();
 
+        @WithName("cert-credentials-provider")
+        Optional<String> certCredentialsProvider();
+
         @WithName("cert-password")
-        String certPassword();
+        Optional<String> certPassword();
 
         @WithName("keystore-path")
         String keystorePath();
 
+        @WithName("keystore-credentials-provider")
+        Optional<String> keystoreCredentialsProvider();
+
         @WithName("keystore-password")
-        String keystorePassword();
+        Optional<String> keystorePassword();
 
         @WithName("truststore-path")
         String truststorePath();
 
+        @WithName("truststore-credentials-provider")
+        Optional<String> truststoreCredentialsProvider();
+
         @WithName("truststore-password")
-        String truststorePassword();
+        Optional<String> truststorePassword();
     }
 
 

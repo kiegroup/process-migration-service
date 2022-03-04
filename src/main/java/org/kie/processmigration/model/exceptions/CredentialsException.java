@@ -16,7 +16,7 @@
 
 package org.kie.processmigration.model.exceptions;
 
-public class CredentialsException extends Exception {
+public class CredentialsException extends RuntimeException {
 
     private static final long serialVersionUID = -6659354310702225168L;
 
@@ -24,11 +24,4 @@ public class CredentialsException extends Exception {
         super(message);
     }
 
-    public CredentialsException(String message, Exception e) {
-        super(message, e);
-    }
-
-    public CredentialsException(Exception e) {
-        super(e);
-    }
 }

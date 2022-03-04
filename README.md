@@ -202,10 +202,57 @@ As an example, if you want to replace the H2 default persistence configuration b
 
 **Note:** These files will override or extend the already defined properties in the application.yaml file
 
+#### Using Keystore Vault
+
+This feature uses the [Quarkiverse File Vault](https://github.com/quarkiverse/quarkus-file-vault) extension.
+By default, the Credentials Provider interface supports some credential consumer extensions like `agroal`, used
+for database configuration.
+In Process Instance Migration we have added support for KIE Server basic authentication and client certificate 
+definition.
+
+##### Usage
+
+Add passwords to the keystore that will be used as Vault
+
+```shell
+keytool -importpass -alias dbpwd -keystore pimvault.p12 -storepass password -storetype PKCS12 
+keytool -importpass -alias kieserver -keystore pimvault.p12 -storepass password -storetype PKCS12
+keytool -importpass -alias cert -keystore pimvault.p12 -storepass password -storetype PKCS12
+keytool -importpass -alias keystore -keystore pimvault.p12 -storepass password -storetype PKCS12
+keytool -importpass -alias truststore -keystore pimvault.p12 -storepass password -storetype PKCS12
+```
+
+Configure the vault provider to use the keystore we just created
+
+```yaml
+quarkus:
+  file:
+    vault:
+      provider:
+        pim:
+          path: pimvault.p12
+          secret: ${vault.storepassword} # This will be provided as a property
+```
+
+Configure your application to use the credentials from the vault
+
+```yaml
+quarkus:
+  datasource:
+    credentials-provider: quarkus.file.vault.provider.pim.dbpwd
+kieservers:
+  - host: http://localhost:18080/kie-server/services/rest/server
+    credentials-provider: quarkus.file.vault.provider.pim.kieserver
+```
+
 #### Defining KIE Servers
 
 The right way to configure the connection to one or more KIE Servers in order to perform the migrations, a list of 
-KIE servers should exist in the configuration file. [Example](examples/kieservers/basic-auth.yml)
+KIE servers should exist in the configuration file. 
+
+##### Basic Authentication
+
+[Example](examples/kieservers/basic-auth.yml)
 
 ```yaml
 kieservers:
@@ -215,6 +262,64 @@ kieservers:
   - host: http://kieserver2.example.com:8080/kie-server/services/rest/server
     username: jim
     password: secret
+```
+
+##### Token Based Authentication
+
+[Example](examples/kieservers/token.yml)
+
+```yaml
+kieservers:
+- host: http://localhost:18080/kie-server/services/rest/server
+  token: __REDACTED__
+```
+
+##### Credentials Provider
+
+Don't forget to configure the Vault. See [Configuring a File Vault](#using-keystore-vault). If the `credentials-provider` property is used
+the other properties will be ignored. The vault key will be the username and the value will be the password.
+
+[Example](examples/kieservers/basic-auth-vault.yml)
+
+```yaml
+kieservers:
+  - host: http://localhost:18080/kie-server/services/rest/server
+    credentials-provider: quarkus.file.vault.provider.pim.kieserver
+```
+
+##### Mutual TLS Authentication
+
+[Example](examples/kieservers/client-cert.yml)
+
+```yaml
+kieservers:
+  - host: http://localhost:18080/kie-server/services/rest/server
+# HTTP Basic or Token Authentication can still be used, but usually a client identity is sufficient.
+#   username: foo
+#   password: bar
+client-cert:
+  cert-name: pim
+  cert-password: pim-secret
+  keystore-path: /path/to/keystore.jks
+  keystore-password: ks-secret
+  truststore-path: /path/to/truststore.jks
+  truststore-password: ts-secret
+```
+
+Or using vault
+
+[Example](examples/kieservers/client-cert-vault.yml)
+
+```yaml
+kieservers:
+  - host: http://localhost:18080/kie-server/services/rest/server
+client-cert:
+  cert-name: pim
+  cert-credentials-provider: quarkus.file.vault.provider.pim.cert
+  keystore-path: /path/to/keystore.jks
+  keystore-credentials-provider: quarkus.file.vault.provider.pim.keystore
+  truststore-path: /path/to/truststore.jks
+  truststore-credentials-provider: quarkus.file.vault.provider.pim.truststore
 ```
 
 #### MariaDB Datasource
