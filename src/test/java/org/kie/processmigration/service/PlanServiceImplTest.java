@@ -19,9 +19,9 @@ package org.kie.processmigration.service;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import io.quarkus.test.junit.QuarkusTest;
+import org.flywaydb.core.Flyway;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -42,10 +42,13 @@ class PlanServiceImplTest {
     @Inject
     PlanService planService;
 
+    @Inject
+    Flyway flyway;
+
     @AfterEach
-    @Transactional
     void cleanUp() {
-        Plan.deleteAll();
+        flyway.clean();
+        flyway.migrate();
     }
 
     @Test
