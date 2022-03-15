@@ -1,3 +1,10 @@
+quarkus:
+  file:
+    vault:
+      provider:
+        pim:
+          path: pimvault.p12
+          secret: ${vault.storepassword} # This will be provided as a property
 kieservers:
   - host: http://localhost:18080/kie-server/services/rest/server
 client-cert:
