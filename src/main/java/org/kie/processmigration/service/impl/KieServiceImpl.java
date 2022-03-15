@@ -47,12 +47,16 @@ import org.kie.processmigration.model.exceptions.CredentialsException;
 import org.kie.processmigration.model.exceptions.InvalidKieServerException;
 import org.kie.processmigration.model.exceptions.ProcessDefinitionNotFoundException;
 import org.kie.processmigration.service.KieService;
+import org.kie.server.api.exception.KieServicesException;
 import org.kie.server.api.exception.KieServicesHttpException;
 import org.kie.server.api.marshalling.MarshallingFormat;
 import org.kie.server.api.model.KieContainerResourceList;
 import org.kie.server.api.model.ServiceResponse;
 import org.kie.server.api.model.definition.ProcessDefinition;
+import org.kie.server.api.model.definition.QueryDefinition;
+import org.kie.server.api.model.definition.QueryFilterSpec;
 import org.kie.server.api.model.instance.ProcessInstance;
+import org.kie.server.api.util.QueryFilterSpecBuilder;
 import org.kie.server.client.KieServicesClient;
 import org.kie.server.client.KieServicesConfiguration;
 import org.kie.server.client.KieServicesFactory;
@@ -83,6 +87,11 @@ public class KieServiceImpl implements KieService {
     private static final long AWAIT_EXECUTOR = 5;
     private static final long RETRY_DELAY = 2;
     private static final Logger logger = LoggerFactory.getLogger(KieServiceImpl.class);
+    private static final String QUERY_COUNT_ALL_RUNNING_INSTANCES = "countAllRunningInstances";
+    private static final String JDBC_JBPM_DS = "java:jboss/datasources/ExampleDS";
+    private static final String QUERY_TARGET = "CUSTOM";
+    private static final String DEFAULT_SORT_COLUMN = "processInstanceId";
+    private static final String DESC_SORT_ORDER = "desc";
 
     private CredentialsProvider credentialsProvider = CredentialsProviderFinder.find("quarkus.file.vault");
     final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -146,10 +155,12 @@ public class KieServiceImpl implements KieService {
     }
 
     @Override
-    public List<RunningInstance> getRunningInstances(String kieServerId, String containerId, Integer page, Integer
-            pageSize) throws InvalidKieServerException {
+    public List<RunningInstance> getRunningInstances(String kieServerId, String containerId, Integer page,
+                                                     Integer pageSize, String sortBy, String orderBy)
+            throws InvalidKieServerException {
         ProcessServicesClient processServicesClient = getProcessServicesClient(kieServerId);
-        List<ProcessInstance> instanceList = processServicesClient.findProcessInstances(containerId, page, pageSize);
+        List<ProcessInstance> instanceList = processServicesClient.findProcessInstances(containerId, page, pageSize,
+                translateSortColumn(sortBy), getOrderBy(orderBy));
 
         int i = 0;
         List<RunningInstance> result = new ArrayList<>();
@@ -159,6 +170,40 @@ public class KieServiceImpl implements KieService {
         }
 
         return result;
+    }
+
+    // Default to process-instance-id
+    private String translateSortColumn(String column) {
+        if(column == null) {
+            return DEFAULT_SORT_COLUMN;
+        }
+        switch (column) {
+            case "name": return "processName";
+            case "description": return "processInstanceDescription";
+            case "startTime": return "start_date";
+            case "state": return "log.status";
+            default: return DEFAULT_SORT_COLUMN;
+        }
+    }
+
+    // Default to ASC
+    private Boolean getOrderBy(String orderBy) {
+        return !DESC_SORT_ORDER.equalsIgnoreCase(orderBy);
+    }
+
+    @Override
+    public Integer countRunningInstances(String kieServerId, String containerId) throws InvalidKieServerException {
+        QueryFilterSpec filter = new QueryFilterSpecBuilder()
+                .equalsTo("externalId", containerId)
+                .get();
+        List<List> queryRes = getQueryServicesClient(kieServerId)
+                .query(QUERY_COUNT_ALL_RUNNING_INSTANCES,
+                        QueryServicesClient.QUERY_MAP_RAW,
+                        filter, 0, 1, List.class);
+        if (queryRes.isEmpty() || queryRes.get(0).isEmpty()) {
+            return 0;
+        }
+        return ((Double) queryRes.get(0).get(0)).intValue();
     }
 
     @Override
@@ -260,7 +305,41 @@ public class KieServiceImpl implements KieService {
             retryConnection(kieConfig);
         }
         configs.add(kieConfig);
-        logger.info("Loaded kie server configuration for: {}", config);
+        registerCustomQueries(kieConfig);
+        logger.info("Loaded kie server configuration for: {}", kieConfig);
+    }
+
+    private void registerCustomQueries(KieServerConfig config) {
+        if (config.getClient() == null) {
+            return;
+        }
+        try {
+            QueryServicesClient querySvc = getQueryServicesClient(config.getId());
+            QueryDefinition query = null;
+            try {
+                query = querySvc.getQuery(QUERY_COUNT_ALL_RUNNING_INSTANCES);
+            } catch (KieServicesException e) {
+                logger.debug("Error trying to fetch query {} in {}", QUERY_COUNT_ALL_RUNNING_INSTANCES, config.getId());
+            }
+            if (query == null) {
+                logger.debug("Query {} does not exist in {}. Registering it.", QUERY_COUNT_ALL_RUNNING_INSTANCES, config.getId());
+                QueryDefinition countAllRunningInstancesQuery = new QueryDefinition.Builder()
+                        .name(QUERY_COUNT_ALL_RUNNING_INSTANCES)
+                        .source(JDBC_JBPM_DS)
+                        .expression("select count (*) as total, log.externalId \n" +
+                                "from\n" +
+                                "  ProcessInstanceLog log\n" +
+                                "group by log.externalId")
+                        .target(QUERY_TARGET)
+                        .build();
+                querySvc.registerQuery(countAllRunningInstancesQuery);
+                logger.debug("Registered custom query {} for {}", QUERY_COUNT_ALL_RUNNING_INSTANCES, config.getId());
+            } else {
+                logger.debug("Query {} already exists in {}", QUERY_COUNT_ALL_RUNNING_INSTANCES, config.getId());
+            }
+        } catch (InvalidKieServerException e) {
+            logger.error("Unable to register custom queries for {}", config.getId(), e);
+        }
     }
 
     private KieServicesClient createKieServicesClient(KieServerConfig config) {

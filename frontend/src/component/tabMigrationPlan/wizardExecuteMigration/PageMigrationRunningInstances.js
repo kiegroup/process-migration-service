@@ -4,7 +4,6 @@ import {
   customHeaderFormattersDefinition,
   defaultSortingOrder,
   Grid,
-  paginate,
   PAGINATION_VIEW,
   PaginationRow,
   sortableHeaderCellFormatter,
@@ -27,13 +26,26 @@ export default class PageMigrationRunningInstances extends React.Component {
     const sortableTransform = sort.sort({
       getSortingColumns,
       onSort: selectedColumn => {
-        this.setState({
-          sortingColumns: sort.byColumn({
-            sortingColumns: this.state.sortingColumns,
-            sortingOrder: defaultSortingOrder,
-            selectedColumn
-          })
+        let sortingColumns = sort.byColumn({
+          sortingColumns: this.state.sortingColumns,
+          sortingOrder: defaultSortingOrder,
+          selectedColumn
         });
+        this.setState({
+          sortingColumns
+        });
+        this.props
+          .getRunningInstances(
+            this.state.pagination.page,
+            this.state.pagination.perPage,
+            sortingColumns
+          )
+          .then(res => {
+            this.setState({
+              rows: res.data,
+              totalInstances: parseInt(res.headers["x-total-count"])
+            });
+          });
       },
       // Use property or index dependening on the sortingColumns structure specified
       strategy: sort.strategies.byProperty
@@ -70,7 +82,7 @@ export default class PageMigrationRunningInstances extends React.Component {
     this.state = {
       // Sort the first column in an ascending way by default.
       sortingColumns: {
-        name: {
+        processInstanceId: {
           direction: TABLE_SORT_DIRECTION.ASC,
           position: 0
         }
@@ -181,7 +193,7 @@ export default class PageMigrationRunningInstances extends React.Component {
       ],
 
       // rows and row selection state
-      rows: this.props.runningInstances,
+      rows: [],
       selectedRows: [],
 
       // pagination default states
@@ -228,6 +240,18 @@ export default class PageMigrationRunningInstances extends React.Component {
     newPaginationState.perPage = eventKey;
     newPaginationState.page = 1;
     this.setState({ pagination: newPaginationState });
+    this.props
+      .getRunningInstances(
+        newPaginationState.page,
+        newPaginationState.perPage,
+        this.state.sortingColumns
+      )
+      .then(res => {
+        this.setState({
+          rows: res.data,
+          totalInstances: parseInt(res.headers["x-total-count"])
+        });
+      });
   };
   onPreviousPage = () => {
     if (this.state.pagination.page > 1) {
@@ -296,17 +320,41 @@ export default class PageMigrationRunningInstances extends React.Component {
     this.setPage(this.state.pageChangeValue);
   };
   setPage = page => {
-    if (!isNaN(page) && page !== "" && page > 0 && page <= this.totalPages()) {
-      const newPaginationState = Object.assign({}, this.state.pagination);
-      newPaginationState.page = page;
-      this.setState({ pagination: newPaginationState, pageChangeValue: page });
+    if (
+      !this.state.totalInstances ||
+      (!isNaN(page) && page !== "" && page > 0 && page <= this.totalPages())
+    ) {
+      this.props
+        .getRunningInstances(
+          page,
+          this.state.pagination.perPage,
+          this.state.sortingColumns
+        )
+        .then(res => {
+          this.setState({
+            rows: res.data,
+            totalInstances: parseInt(res.headers["x-total-count"])
+          });
+          const newPaginationState = Object.assign({}, this.state.pagination);
+          newPaginationState.page = page;
+          this.setState({
+            pagination: newPaginationState,
+            pageChangeValue: page
+          });
+        })
+        .catch(() => {
+          this.setState({
+            rows: [],
+            totalInstances: 0
+          });
+        });
     }
   };
 
   currentRows() {
     const { rows, sortingColumns, columns, pagination } = this.state;
     return compose(
-      paginate(pagination),
+      this.paginate(pagination.page, pagination.perPage),
       sort.sorter({
         columns,
         sortingColumns,
@@ -318,11 +366,44 @@ export default class PageMigrationRunningInstances extends React.Component {
 
   totalPages = () => {
     const { perPage } = this.state.pagination;
-    return Math.ceil(this.props.runningInstances.length / perPage);
+    return Math.ceil(this.state.totalInstances / perPage);
   };
+
+  async componentDidMount() {
+    const res = await this.props.getRunningInstances(
+      1,
+      this.state.pagination.perPage,
+      this.state.sortingColumns
+    );
+    this.setState({
+      rows: res.data,
+      totalInstances: parseInt(res.headers["x-total-count"])
+    });
+  }
+
+  paginate(page, perPage) {
+    const totalInstances = this.state.totalInstances;
+    const currentRows = this.state.rows;
+
+    return function() {
+      // adapt to zero indexed logic
+      var p = page - 1 || 0;
+      var amountOfPages = Math.ceil(totalInstances / perPage);
+      var startPage = p < amountOfPages ? p : 0;
+      var endOfPage = startPage * perPage + perPage;
+      return {
+        amountOfPages: amountOfPages,
+        itemCount: totalInstances,
+        itemsStart: startPage * perPage + 1,
+        itemsEnd: endOfPage > totalInstances ? totalInstances : endOfPage,
+        rows: currentRows
+      };
+    };
+  }
 
   render() {
     const { columns, pagination, sortingColumns, pageChangeValue } = this.state;
+
     const sortedPaginatedRows = this.currentRows();
 
     return (
@@ -374,7 +455,7 @@ export default class PageMigrationRunningInstances extends React.Component {
 }
 
 PageMigrationRunningInstances.propTypes = {
-  runningInstances: PropTypes.array.isRequired,
+  getRunningInstances: PropTypes.func.isRequired,
   setRunningInstancesIds: PropTypes.func.isRequired,
   onIsValid: PropTypes.func.isRequired,
   migrateAll: PropTypes.bool.isRequired

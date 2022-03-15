@@ -12,7 +12,7 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
       <tr>
         <th
           aria-label="ID"
-          className="sorting sort sort-none"
+          className="sorting_asc sort sort-asc"
           colSpan={1}
           index={0}
           onClick={[Function]}
@@ -22,7 +22,7 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
         </th>
         <th
           aria-label="Name"
-          className="sorting_asc sort sort-asc"
+          className="sorting sort sort-none"
           colSpan={1}
           index={1}
           onClick={[Function]}
@@ -62,194 +62,7 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
         </th>
       </tr>
     </thead>
-    <tbody>
-      <tr
-        className=""
-        onClick={[Function]}
-        role="row"
-      >
-        <td
-          className=""
-        >
-          2
-        </td>
-        <td
-          className=""
-        >
-          Evaluation
-        </td>
-        <td
-          className=""
-        >
-          mockup_Evaluation
-        </td>
-        <td
-          className=""
-        >
-          2019-01-06T21:06:55:123Z
-        </td>
-        <td
-          className=""
-        >
-          Active
-        </td>
-      </tr>
-      <tr
-        className=""
-        onClick={[Function]}
-        role="row"
-      >
-        <td
-          className=""
-        >
-          3
-        </td>
-        <td
-          className=""
-        >
-          Evaluation
-        </td>
-        <td
-          className=""
-        >
-          mockup_Evaluation
-        </td>
-        <td
-          className=""
-        >
-          2019-01-06T21:30:23:123Z
-        </td>
-        <td
-          className=""
-        >
-          Active
-        </td>
-      </tr>
-      <tr
-        className=""
-        onClick={[Function]}
-        role="row"
-      >
-        <td
-          className=""
-        >
-          4
-        </td>
-        <td
-          className=""
-        >
-          Evaluation
-        </td>
-        <td
-          className=""
-        >
-          mockup_Evaluation
-        </td>
-        <td
-          className=""
-        >
-          2019-01-06T21:49:27:123Z
-        </td>
-        <td
-          className=""
-        >
-          Active
-        </td>
-      </tr>
-      <tr
-        className=""
-        onClick={[Function]}
-        role="row"
-      >
-        <td
-          className=""
-        >
-          5
-        </td>
-        <td
-          className=""
-        >
-          Evaluation
-        </td>
-        <td
-          className=""
-        >
-          mockup_Evaluation
-        </td>
-        <td
-          className=""
-        >
-          2019-01-06T21:49:34:123Z
-        </td>
-        <td
-          className=""
-        >
-          Active
-        </td>
-      </tr>
-      <tr
-        className=""
-        onClick={[Function]}
-        role="row"
-      >
-        <td
-          className=""
-        >
-          6
-        </td>
-        <td
-          className=""
-        >
-          Evaluation
-        </td>
-        <td
-          className=""
-        >
-          mockup_Evaluation
-        </td>
-        <td
-          className=""
-        >
-          2019-01-06T21:58:54:123Z
-        </td>
-        <td
-          className=""
-        >
-          Active
-        </td>
-      </tr>
-      <tr
-        className=""
-        onClick={[Function]}
-        role="row"
-      >
-        <td
-          className=""
-        >
-          7
-        </td>
-        <td
-          className=""
-        >
-          Evaluation
-        </td>
-        <td
-          className=""
-        >
-          mockup_Evaluation
-        </td>
-        <td
-          className=""
-        >
-          2019-01-06T21:59:04:123Z
-        </td>
-        <td
-          className=""
-        >
-          Active
-        </td>
-      </tr>
-    </tbody>
+    <tbody />
   </table>
   <form
     className="content-view-pf-pagination table-view-pf-pagination clearfix"
@@ -347,9 +160,7 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
          
         <span
           className="pagination-pf-items-total"
-        >
-          31
-        </span>
+        />
       </span>
       <ul
         className="pagination pagination-pf-back"
@@ -401,7 +212,7 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
         <span
           className="pagination-pf-pages"
         >
-          6
+          NaN
         </span>
       </span>
       <ul
