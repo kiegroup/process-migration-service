@@ -215,7 +215,7 @@ definition.
 Add passwords to the keystore that will be used as Vault
 
 ```shell
-keytool -importpass -alias dbpwd -keystore pimvault.p12 -storepass password -storetype PKCS12 
+keytool -importpass -alias pimdb -keystore pimvault.p12 -storepass password -storetype PKCS12 
 keytool -importpass -alias kieserver -keystore pimvault.p12 -storepass password -storetype PKCS12
 keytool -importpass -alias cert -keystore pimvault.p12 -storepass password -storetype PKCS12
 keytool -importpass -alias keystore -keystore pimvault.p12 -storepass password -storetype PKCS12
@@ -239,7 +239,7 @@ Configure your application to use the credentials from the vault
 ```yaml
 quarkus:
   datasource:
-    credentials-provider: quarkus.file.vault.provider.pim.dbpwd
+    credentials-provider: quarkus.file.vault.provider.pim.pimdb
 kieservers:
   - host: http://localhost:18080/kie-server/services/rest/server
     credentials-provider: quarkus.file.vault.provider.pim.kieserver

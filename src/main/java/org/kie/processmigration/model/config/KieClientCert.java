@@ -18,8 +18,6 @@ package org.kie.processmigration.model.config;
 
 import java.util.Optional;
 
-import javax.swing.text.html.Option;
-
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithName;
 import io.smallrye.config.WithParentName;
@@ -58,7 +56,6 @@ public interface KieClientCert {
         @WithName("truststore-password")
         Optional<String> truststorePassword();
     }
-
 
 
 }
