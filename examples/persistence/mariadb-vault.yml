@@ -1,0 +1,12 @@
+quarkus:
+  file:
+    vault:
+      provider:
+        pim:
+          path: pimvault.p12
+          secret: ${vault.storepassword} # This will be provided as a property
+  datasource:
+    db-kind: mariadb
+    jdbc:
+      url: jdbc:mariadb://localhost:3306/pimdb
+    credential-provider: quarkus.file.vault.provider.pim.pimdb # the alias will be the user if not set

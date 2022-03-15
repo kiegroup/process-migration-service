@@ -71,6 +71,9 @@ import io.quarkus.credentials.CredentialsProvider;
 import io.quarkus.credentials.runtime.CredentialsProviderFinder;
 import io.quarkus.runtime.Startup;
 
+import static io.quarkus.credentials.CredentialsProvider.PASSWORD_PROPERTY_NAME;
+import static io.quarkus.credentials.CredentialsProvider.USER_PROPERTY_NAME;
+
 @ApplicationScoped
 @Startup
 public class KieServiceImpl implements KieService {
@@ -80,8 +83,6 @@ public class KieServiceImpl implements KieService {
     private static final long AWAIT_EXECUTOR = 5;
     private static final long RETRY_DELAY = 2;
     private static final Logger logger = LoggerFactory.getLogger(KieServiceImpl.class);
-    private static final String CREDENTIALS_PROVIDER_USER_KEY = "user";
-    private static final String CREDENTIALS_PROVIDER_PASSWORD_KEY = "password";
 
     private CredentialsProvider credentialsProvider = CredentialsProviderFinder.find("quarkus.file.vault");
     final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -232,8 +233,8 @@ public class KieServiceImpl implements KieService {
     private void loadConfig(KieServers.KieServer config) {
         KieServerConfig kieConfig = new KieServerConfig().setHost(config.host());
         if (config.credentialsProvider().isPresent()) {
-            String user = credentialsProvider.getCredentials(config.credentialsProvider().get()).get(CREDENTIALS_PROVIDER_USER_KEY);
-            String password = credentialsProvider.getCredentials(config.credentialsProvider().get()).get(CREDENTIALS_PROVIDER_PASSWORD_KEY);
+            String user = credentialsProvider.getCredentials(config.credentialsProvider().get()).get(USER_PROPERTY_NAME);
+            String password = credentialsProvider.getCredentials(config.credentialsProvider().get()).get(PASSWORD_PROPERTY_NAME);
             if (user == null) {
                 throw new CredentialsException("Missing credential in vault with key " + config.credentialsProvider().get());
             }
@@ -279,14 +280,14 @@ public class KieServiceImpl implements KieService {
     }
 
     private String resolvePassword(Optional<String> credentialsProviderKey, Optional<String> passwordKey) {
-        if(credentialsProviderKey.isPresent()) {
-            String password = credentialsProvider.getCredentials(credentialsProviderKey.get()).get(CREDENTIALS_PROVIDER_PASSWORD_KEY);
+        if (credentialsProviderKey.isPresent()) {
+            String password = credentialsProvider.getCredentials(credentialsProviderKey.get()).get(PASSWORD_PROPERTY_NAME);
             if (password == null) {
                 throw new CredentialsException("Missing credential in vault with key " + credentialsProviderKey.get());
             }
             return password;
         }
-        if(passwordKey.isEmpty()) {
+        if (passwordKey.isEmpty()) {
             throw new CredentialsException("Either the password or the credentials-provider key must be defined");
         }
         return passwordKey.get();

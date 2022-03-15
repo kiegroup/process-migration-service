@@ -6,4 +6,4 @@ quarkus:
           path: pimvault.p12
           secret: ${vault.storepassword} # This will be provided as a property
   datasource:
-    credentials-provider: quarkus.file.vault.provider.pim.dbpwd
+    credentials-provider: quarkus.file.vault.provider.pim.pimdb
