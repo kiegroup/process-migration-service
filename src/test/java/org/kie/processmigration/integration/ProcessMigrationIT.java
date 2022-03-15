@@ -24,8 +24,6 @@ import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.RestAssured;
 import org.apache.http.HttpStatus;
 import org.appformer.maven.integration.MavenRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +44,10 @@ import org.kie.server.client.KieServicesClient;
 import org.kie.server.client.KieServicesConfiguration;
 import org.kie.server.client.KieServicesFactory;
 import org.kie.server.client.ProcessServicesClient;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.restassured.RestAssured;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -101,10 +103,11 @@ class ProcessMigrationIT extends AbstractBaseIT {
         List<ProcessInstance> instances = processClient.findProcessInstances(SOURCE_CONTAINER_ID, 0, 10);
         assertThat(instances, hasSize(1));
         assertThat(instances.get(0).getId(), is(2L));
-
+        assertCount(1, KIE_SERVER_ID, SOURCE_CONTAINER_ID);
         instances = processClient.findProcessInstances(TARGET_CONTAINER_ID, 0, 10);
         assertThat(instances, hasSize(1));
         assertThat(instances.get(0).getId(), is(1L));
+        assertCount(1, KIE_SERVER_ID, TARGET_CONTAINER_ID);
     }
 
     private void startProcesses() {
@@ -178,6 +181,13 @@ class ProcessMigrationIT extends AbstractBaseIT {
         assertThat(resultPlan.getTarget().getProcessId(), is(resultPlan.getTarget().getProcessId()));
 
         return resultPlan;
+    }
+
+    private void assertCount(int size, String kieServerId, String containerId) {
+        given().get("/" + kieServerId + "/instances/" + containerId)
+                .then()
+                .statusCode(200)
+                .header("X-Total-Count", String.valueOf(size));
     }
 
     private KieServicesClient createClient() {
