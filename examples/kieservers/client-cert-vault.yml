@@ -1,0 +1,16 @@
+quarkus:
+  file:
+    vault:
+      provider:
+        pim:
+          path: pimvault.p12
+          secret: ${vault.storepassword} # This will be provided as a property
+kieservers:
+  - host: http://localhost:18080/kie-server/services/rest/server
+client-cert:
+    cert-name: pim
+    cert-credentials-provider: quarkus.file.vault.provider.pim.cert
+    keystore-path: /path/to/keystore.jks
+    keystore-credentials-provider: quarkus.file.vault.provider.pim.keystore
+    truststore-path: /path/to/truststore.jks
+    truststore-credentials-provider: quarkus.file.vault.provider.pim.truststore

@@ -32,22 +32,30 @@ public interface KieClientCert {
         @WithName("cert-name")
         String certName();
 
+        @WithName("cert-credentials-provider")
+        Optional<String> certCredentialsProvider();
+
         @WithName("cert-password")
-        String certPassword();
+        Optional<String> certPassword();
 
         @WithName("keystore-path")
         String keystorePath();
 
+        @WithName("keystore-credentials-provider")
+        Optional<String> keystoreCredentialsProvider();
+
         @WithName("keystore-password")
-        String keystorePassword();
+        Optional<String> keystorePassword();
 
         @WithName("truststore-path")
         String truststorePath();
 
-        @WithName("truststore-password")
-        String truststorePassword();
-    }
+        @WithName("truststore-credentials-provider")
+        Optional<String> truststoreCredentialsProvider();
 
+        @WithName("truststore-password")
+        Optional<String> truststorePassword();
+    }
 
 
 }

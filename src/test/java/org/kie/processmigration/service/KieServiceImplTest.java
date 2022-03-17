@@ -60,7 +60,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 class KieServiceImplTest {
 
     private static final String RETRY = "retry";
-    private static final Collection<String> SUCCESS = List.of("kie-server-1", "kie-server-2");
+    private static final Collection<String> SUCCESS = List.of("kie-server-1", "kie-server-2", "vault");
     private static final Collection<String> FAILED = List.of("not-found", "unauthorized", "forbidden", RETRY);
 
     @TestKieServer
@@ -76,7 +76,7 @@ class KieServiceImplTest {
 
     @Test
     void testRetryErroredConfigs() throws InterruptedException {
-        assertThat(kieService.getConfigs(), hasSize(6));
+        assertThat(kieService.getConfigs(), hasSize(7));
 
         //Wait for retries to the error-ed servers every 2 seconds
         Thread.sleep(4000L);
@@ -88,7 +88,7 @@ class KieServiceImplTest {
     @Test
     void testGetConfigs() throws JsonProcessingException, InterruptedException {
         Collection<KieServerConfig> configs = kieService.getConfigs();
-        assertThat(configs, hasSize(6));
+        assertThat(configs, hasSize(7));
         configs.stream()
                 .filter(c -> SUCCESS.stream().anyMatch(n -> Objects.equals(c.getHost(), getExpectedKieServerHost(n))))
                 .forEach(this::assertSuccessConfig);

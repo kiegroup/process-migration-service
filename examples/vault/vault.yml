@@ -1,0 +1,9 @@
+quarkus:
+  file:
+    vault:
+      provider:
+        pim:
+          path: pimvault.p12
+          secret: ${vault.storepassword} # This will be provided as a property
+  datasource:
+    credentials-provider: quarkus.file.vault.provider.pim.pimdb
