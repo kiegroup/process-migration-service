@@ -43,9 +43,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.matching.EqualToJsonPattern;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
-import com.github.tomakehurst.wiremock.matching.MatchesJsonPathPattern;
 
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
@@ -58,7 +56,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.okXml;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.unauthorized;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
@@ -82,14 +79,14 @@ public class MockKieServerLifecycleManager implements QuarkusTestResourceLifecyc
         stubFor(get(urlPathEqualTo(URI.create(server1Response.getResult().getLocation()).getPath()))
                 .withBasicAuth("admin", "admin123")
                 .willReturn(okJson(mapper.writeValueAsString(server1Response))));
-        stubCustomQueries(server1Response);
+        stubCountQuery(server1Response, "example-1.0.1", 10);
+        stubCountQuery(server1Response, "example-2.0.1", 0);
 
         ServiceResponse<KieServerInfo> server2Response = getResponseFor("kie-server-2");
         stubFor(get(urlPathEqualTo(URI.create(server2Response.getResult().getLocation()).getPath()))
                 .withBasicAuth("admin", "admin123")
                 .willReturn(okJson(mapper.writeValueAsString(server2Response))));
-        stubCustomQueries(server2Response);
-
+        
         ServiceResponse<KieServerInfo> vaultServerResponse = getResponseFor("vault");
         stubFor(get(urlPathEqualTo(URI.create(vaultServerResponse.getResult().getLocation()).getPath()))
                 .withBasicAuth("kieserver6", "kieserver6-password")
@@ -214,54 +211,36 @@ public class MockKieServerLifecycleManager implements QuarkusTestResourceLifecyc
         instance1.setState(1);
         instance1.setDate(new Date());
         ProcessInstanceList instances = new ProcessInstanceList(new ProcessInstance[]{instance1});
-        stubFor(get(urlPathEqualTo("/kie-server-2/services/rest/server/containers/example-1.0.1/processes/instances"))
+        stubFor(get(urlPathEqualTo("/kie-server-2/services/rest/server/queries/containers/example-1.0.1/process/instances"))
                 .withBasicAuth("admin", "admin123")
                 .withQueryParam("sort", new EqualToPattern("processInstanceId"))
                 .withQueryParam("sortOrder", new EqualToPattern("true"))
                 .withQueryParam("page", new EqualToPattern("0"))
                 .withQueryParam("pageSize", new EqualToPattern("10"))
+                .withQueryParam("status", new EqualToPattern("1"))
+                .withQueryParam("status", new EqualToPattern("0"))
+                .withQueryParam("status", new EqualToPattern("4"))
                 .willReturn(okJson(mapper.writeValueAsString(instances))));
 
-        stubFor(get(urlPathEqualTo("/kie-server-2/services/rest/server/containers/example-3.0.1/processes/instances"))
+        stubFor(get(urlPathEqualTo("/kie-server-2/services/rest/server/queries/containers/example-3.0.1/process/instances"))
                 .withBasicAuth("admin", "admin123")
                 .withQueryParam("sort", new EqualToPattern("start_date"))
                 .withQueryParam("sortOrder", new EqualToPattern("false"))
                 .withQueryParam("page", new EqualToPattern("0"))
                 .withQueryParam("pageSize", new EqualToPattern("10"))
+                .withQueryParam("status", new EqualToPattern("1"))
+                .withQueryParam("status", new EqualToPattern("0"))
+                .withQueryParam("status", new EqualToPattern("4"))
                 .willReturn(okJson(mapper.writeValueAsString(instances))));
     }
 
-    private void stubCustomQueries(ServiceResponse<KieServerInfo> response) {
+    private void stubCountQuery(ServiceResponse<KieServerInfo> response, String containerId, int count) {
         stubFor(get(urlPathEqualTo(URI.create(response.getResult().getLocation()).getPath()
-                + "/queries/definitions/countAllRunningInstances"))
-                .withBasicAuth("admin", "admin123")
-                .willReturn(notFound()));
-        stubFor(post(urlPathEqualTo(URI.create(response.getResult().getLocation()).getPath()
-                + "/queries/definitions/countAllRunningInstances"))
-                .withBasicAuth("admin", "admin123")
-                .willReturn(ok()));
-        stubFor(post(urlPathEqualTo(URI.create(response.getResult().getLocation()).getPath()
-                + "/queries/definitions/countAllRunningInstances/filtered-data"))
-                .withQueryParam("mapper", new EqualToPattern("RawList"))
-                .withQueryParam("page", new EqualToPattern("0"))
-                .withQueryParam("pageSize", new EqualToPattern("1"))
-                .withRequestBody(
-                        new MatchesJsonPathPattern("query-params[0]",
-                                new EqualToJsonPattern("{'cond-column': 'externalId', 'cond-operator': 'EQUALS_TO', 'cond-values': ['example-1.0.1']}",
-                                        true, false)))
-                .withBasicAuth("admin", "admin123")
-                .willReturn(ok("[[10.0]]")));
-        stubFor(post(urlPathEqualTo(URI.create(response.getResult().getLocation()).getPath()
-                + "/queries/definitions/countAllRunningInstances/filtered-data"))
-                .withQueryParam("mapper", new EqualToPattern("RawList"))
-                .withQueryParam("page", new EqualToPattern("0"))
-                .withQueryParam("pageSize", new EqualToPattern("1"))
-                .withRequestBody(
-                        new MatchesJsonPathPattern("query-params[0]",
-                                new EqualToJsonPattern("{'cond-column': 'externalId', 'cond-operator': 'EQUALS_TO', 'cond-values': ['example-2.0.1']}",
-                                        true, false)))
-                .withBasicAuth("admin", "admin123")
-                .willReturn(ok()));
+                + "/queries/containers/" + containerId + "/process/instances/count"))
+                .withQueryParam("status", new EqualToPattern("1"))
+                .withQueryParam("status", new EqualToPattern("0"))
+                .withQueryParam("status", new EqualToPattern("4"))
+                .willReturn(ok("{\"count\": " + count + "}")));
     }
 
     public void enableRetryServer() throws JsonProcessingException {

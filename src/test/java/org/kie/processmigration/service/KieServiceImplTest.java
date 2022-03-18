@@ -185,8 +185,8 @@ class KieServiceImplTest {
 
     @Test
     void testCountRunningInstances() throws InvalidKieServerException {
-        assertThat(kieService.countRunningInstances("kie-server-1", "example-1.0.1"), is(10));
-        assertThat(kieService.countRunningInstances("kie-server-1", "example-2.0.1"), is(0));
+        assertThat(kieService.countRunningInstances("kie-server-1", "example-1.0.1"), is(10L));
+        assertThat(kieService.countRunningInstances("kie-server-1", "example-2.0.1"), is(0L));
     }
 
     private void assertSuccessConfig(KieServerConfig config) {
