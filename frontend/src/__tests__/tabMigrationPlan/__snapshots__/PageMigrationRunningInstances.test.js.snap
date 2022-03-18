@@ -11,31 +11,10 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
     <thead>
       <tr>
         <th
-          aria-label="Select all rows"
-          className="table-view-pf-select"
-          colSpan={1}
-          id="SelectId"
-          index={0}
-          rowSpan={1}
-        >
-          <label
-            className="control-label sr-only"
-            htmlFor="SelectId"
-          >
-            Select all rows
-          </label>
-          <input
-            checked={false}
-            id="SelectId"
-            onChange={[Function]}
-            type="checkbox"
-          />
-        </th>
-        <th
           aria-label="ID"
           className="sorting sort sort-none"
           colSpan={1}
-          index={1}
+          index={0}
           onClick={[Function]}
           rowSpan={1}
         >
@@ -45,7 +24,7 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
           aria-label="Name"
           className="sorting_asc sort sort-asc"
           colSpan={1}
-          index={2}
+          index={1}
           onClick={[Function]}
           rowSpan={1}
         >
@@ -55,7 +34,7 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
           aria-label="Description"
           className="sorting sort sort-none"
           colSpan={1}
-          index={3}
+          index={2}
           onClick={[Function]}
           rowSpan={1}
         >
@@ -65,7 +44,7 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
           aria-label="Start Time"
           className="sorting sort sort-none"
           colSpan={1}
-          index={4}
+          index={3}
           onClick={[Function]}
           rowSpan={1}
         >
@@ -75,7 +54,7 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
           aria-label="State"
           className="sorting sort sort-none"
           colSpan={1}
-          index={5}
+          index={4}
           onClick={[Function]}
           rowSpan={1}
         >
@@ -86,24 +65,9 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
     <tbody>
       <tr
         className=""
+        onClick={[Function]}
         role="row"
       >
-        <td
-          className="table-view-pf-select"
-        >
-          <label
-            className="control-label sr-only"
-            htmlFor="0"
-          >
-            0
-          </label>
-          <input
-            checked={false}
-            id="0"
-            onChange={[Function]}
-            type="checkbox"
-          />
-        </td>
         <td
           className=""
         >
@@ -132,24 +96,9 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
       </tr>
       <tr
         className=""
+        onClick={[Function]}
         role="row"
       >
-        <td
-          className="table-view-pf-select"
-        >
-          <label
-            className="control-label sr-only"
-            htmlFor="1"
-          >
-            1
-          </label>
-          <input
-            checked={false}
-            id="1"
-            onChange={[Function]}
-            type="checkbox"
-          />
-        </td>
         <td
           className=""
         >
@@ -178,24 +127,9 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
       </tr>
       <tr
         className=""
+        onClick={[Function]}
         role="row"
       >
-        <td
-          className="table-view-pf-select"
-        >
-          <label
-            className="control-label sr-only"
-            htmlFor="2"
-          >
-            2
-          </label>
-          <input
-            checked={false}
-            id="2"
-            onChange={[Function]}
-            type="checkbox"
-          />
-        </td>
         <td
           className=""
         >
@@ -224,24 +158,9 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
       </tr>
       <tr
         className=""
+        onClick={[Function]}
         role="row"
       >
-        <td
-          className="table-view-pf-select"
-        >
-          <label
-            className="control-label sr-only"
-            htmlFor="3"
-          >
-            3
-          </label>
-          <input
-            checked={false}
-            id="3"
-            onChange={[Function]}
-            type="checkbox"
-          />
-        </td>
         <td
           className=""
         >
@@ -270,24 +189,9 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
       </tr>
       <tr
         className=""
+        onClick={[Function]}
         role="row"
       >
-        <td
-          className="table-view-pf-select"
-        >
-          <label
-            className="control-label sr-only"
-            htmlFor="4"
-          >
-            4
-          </label>
-          <input
-            checked={false}
-            id="4"
-            onChange={[Function]}
-            type="checkbox"
-          />
-        </td>
         <td
           className=""
         >
@@ -316,24 +220,9 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
       </tr>
       <tr
         className=""
+        onClick={[Function]}
         role="row"
       >
-        <td
-          className="table-view-pf-select"
-        >
-          <label
-            className="control-label sr-only"
-            htmlFor="5"
-          >
-            5
-          </label>
-          <input
-            checked={false}
-            id="5"
-            onChange={[Function]}
-            type="checkbox"
-          />
-        </td>
         <td
           className=""
         >
@@ -459,7 +348,7 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
         <span
           className="pagination-pf-items-total"
         >
-          6
+          31
         </span>
       </span>
       <ul
@@ -512,14 +401,14 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
         <span
           className="pagination-pf-pages"
         >
-          1
+          6
         </span>
       </span>
       <ul
         className="pagination pagination-pf-forward"
       >
         <li
-          className="disabled"
+          className=""
         >
           <a
             href="#"
@@ -533,7 +422,7 @@ exports[`PageMigrationRunningInstances renders correctly using snapshot 1`] = `
           </a>
         </li>
         <li
-          className="disabled"
+          className=""
         >
           <a
             href="#"

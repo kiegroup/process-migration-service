@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { Wizard, Button, Icon } from "patternfly-react";
+import { Button, Icon, Wizard } from "patternfly-react";
 
 import MigrationClient from "../../../clients/migrationClient";
 import { ExecuteMigrationItems } from "../../common/WizardItems";
@@ -28,7 +28,8 @@ export default class WizardExecuteMigration extends WizardBase {
         kieServerId: props.kieServerId,
         execution: {
           type: "ASYNC"
-        }
+        },
+        processInstanceIds: []
       },
       migration: {},
       stepValidation: {}
@@ -61,7 +62,9 @@ export default class WizardExecuteMigration extends WizardBase {
   setRunningInstancesIds = ids => {
     const { definition } = this.state;
     definition.processInstanceIds = ids;
-    this.setState({ definition });
+    if (ids.length > 0) {
+      this.setState({ migrateAll: false });
+    }
   };
 
   onExecutionFieldChange = (field, value) => {
@@ -82,6 +85,11 @@ export default class WizardExecuteMigration extends WizardBase {
 
   isStepValid = step => {
     return this.state.stepValidation[step];
+  };
+
+  onMigrateAllButtonClick = () => {
+    this.setState({ migrateAll: true });
+    this.onNextButtonClick();
   };
 
   render() {
@@ -112,6 +120,7 @@ export default class WizardExecuteMigration extends WizardBase {
                     runningInstances={this.state.runningInstances}
                     setRunningInstancesIds={this.setRunningInstancesIds}
                     onIsValid={isValid => this.setStepIsValid(0, isValid)}
+                    migrateAll={this.state.migrateAll}
                   />
                 )}
               </Wizard.Contents>
@@ -184,7 +193,7 @@ export default class WizardExecuteMigration extends WizardBase {
     return (
       <div>
         <form className="form-horizontal" name="form_migration">
-          <Wizard show={this.props.isOpen} onHide={this.props.onClose}>
+          <Wizard show={this.props.isOpen}>
             <Wizard.Header
               onClose={this.props.onClose}
               title="Execute Migration Plan Wizard"
@@ -227,6 +236,19 @@ export default class WizardExecuteMigration extends WizardBase {
                     Back
                   </Button>
                 </React.Fragment>
+              )}
+              {activeStepIndex === 0 && (
+                <Button
+                  bsStyle="primary"
+                  disabled={
+                    !this.state.runningInstances ||
+                    this.state.runningInstances.length == 0
+                  }
+                  onClick={this.onMigrateAllButtonClick}
+                >
+                  Migrate all
+                  <Icon type="fa" name="angle-right" />
+                </Button>
               )}
               {(activeStepIndex === 0 || activeStepIndex === 1) && (
                 <Button
