@@ -84,7 +84,7 @@ public class KieServiceResource {
                                         @DefaultValue(DEFAULT_SORT_COLUMN) @QueryParam("sortBy") String sortBy,
                                         @DefaultValue(DEFAULT_SORT_ORDER) @QueryParam("orderBy") String orderBy) throws InvalidKieServerException {
         List<RunningInstance> result = kieService.getRunningInstances(kieServerId, containerId, page, pageSize, sortBy, orderBy);
-        Integer total = kieService.countRunningInstances(kieServerId, containerId);
+        Long total = kieService.countRunningInstances(kieServerId, containerId);
         return Response.ok(result)
                 .header("X-Total-Count", total)
                 .build();
