@@ -108,7 +108,6 @@ class ProcessMigrationIT {
         List<ProcessInstance> instances = processClient.findProcessInstances(SOURCE_CONTAINER_ID, 0, 10);
         assertThat(instances, hasSize(1));
         assertThat(instances.get(0).getId(), is(2L));
-
         instances = processClient.findProcessInstances(TARGET_CONTAINER_ID, 0, 10);
         assertThat(instances, hasSize(1));
         assertThat(instances.get(0).getId(), is(1L));
@@ -120,7 +119,7 @@ class ProcessMigrationIT {
         client.startProcess(SOURCE_CONTAINER_ID, PROCESS_ID);
     }
 
-    private Migration createMigration() throws IOException {
+    private void createMigration() throws IOException {
         Plan plan = createPlan();
         MigrationDefinition def = new MigrationDefinition();
         def.setPlanId(plan.getId());
@@ -150,7 +149,6 @@ class ProcessMigrationIT {
         assertThat(migration.getReports(), empty());
         assertThat(migration.getDefinition(), notNullValue());
         assertThat(migration.getDefinition().getRequester(), is(username));
-        return migration;
     }
 
     private Plan createPlan() throws IOException {

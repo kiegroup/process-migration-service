@@ -167,13 +167,26 @@ class KieServiceImplTest {
 
     @Test
     void testGetRunningInstances() throws InvalidKieServerException {
-        assertThrows(InvalidKieServerException.class, () -> kieService.getRunningInstances("not-found", "foo", 0, 10));
-        List<RunningInstance> runningInstances = kieService.getRunningInstances("kie-server-2", "example-1.0.1", 0, 10);
+        assertThrows(InvalidKieServerException.class, () -> kieService.getRunningInstances("not-found", "foo", 0, 10, "", ""));
+        List<RunningInstance> runningInstances = kieService.getRunningInstances("kie-server-2", "example-1.0.1", 0, 10, "", "");
         assertThat(runningInstances, hasSize(1));
         RunningInstance instance = runningInstances.get(0);
         assertThat(instance.getId(), is(1));
         assertThat(instance.getStartTime(), notNullValue());
         assertThat(instance.getProcessInstanceId(), is(9L));
+
+        runningInstances = kieService.getRunningInstances("kie-server-2", "example-3.0.1", 0, 10, "startTime", "desc");
+        assertThat(runningInstances, hasSize(1));
+        instance = runningInstances.get(0);
+        assertThat(instance.getId(), is(1));
+        assertThat(instance.getStartTime(), notNullValue());
+        assertThat(instance.getProcessInstanceId(), is(9L));
+    }
+
+    @Test
+    void testCountRunningInstances() throws InvalidKieServerException {
+        assertThat(kieService.countRunningInstances("kie-server-1", "example-1.0.1"), is(10L));
+        assertThat(kieService.countRunningInstances("kie-server-1", "example-2.0.1"), is(0L));
     }
 
     private void assertSuccessConfig(KieServerConfig config) {

@@ -83,6 +83,13 @@ public class KieServiceImpl implements KieService {
     private static final long AWAIT_EXECUTOR = 5;
     private static final long RETRY_DELAY = 2;
     private static final Logger logger = LoggerFactory.getLogger(KieServiceImpl.class);
+    private static final List<Integer> RUNNING_STATUSES = List.of(
+            org.kie.api.runtime.process.ProcessInstance.STATE_ACTIVE,
+            org.kie.api.runtime.process.ProcessInstance.STATE_PENDING,
+            org.kie.api.runtime.process.ProcessInstance.STATE_SUSPENDED
+    );
+    private static final String DEFAULT_SORT_COLUMN = "processInstanceId";
+    private static final String DESC_SORT_ORDER = "desc";
 
     private CredentialsProvider credentialsProvider = CredentialsProviderFinder.find("quarkus.file.vault");
     final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -146,10 +153,12 @@ public class KieServiceImpl implements KieService {
     }
 
     @Override
-    public List<RunningInstance> getRunningInstances(String kieServerId, String containerId, Integer page, Integer
-            pageSize) throws InvalidKieServerException {
-        ProcessServicesClient processServicesClient = getProcessServicesClient(kieServerId);
-        List<ProcessInstance> instanceList = processServicesClient.findProcessInstances(containerId, page, pageSize);
+    public List<RunningInstance> getRunningInstances(String kieServerId, String containerId, Integer page,
+                                                     Integer pageSize, String sortBy, String orderBy)
+            throws InvalidKieServerException {
+        QueryServicesClient queryServicesClient = getQueryServicesClient(kieServerId);
+        List<ProcessInstance> instanceList = queryServicesClient.findProcessInstancesByContainerId(containerId, RUNNING_STATUSES, page, pageSize,
+                translateSortColumn(sortBy), getOrderBy(orderBy));
 
         int i = 0;
         List<RunningInstance> result = new ArrayList<>();
@@ -159,6 +168,35 @@ public class KieServiceImpl implements KieService {
         }
 
         return result;
+    }
+
+    // Default to process-instance-id
+    private String translateSortColumn(String column) {
+        if (column == null) {
+            return DEFAULT_SORT_COLUMN;
+        }
+        switch (column) {
+            case "name":
+                return "processName";
+            case "description":
+                return "processInstanceDescription";
+            case "startTime":
+                return "start_date";
+            case "state":
+                return "log.status";
+            default:
+                return DEFAULT_SORT_COLUMN;
+        }
+    }
+
+    // Default to ASC
+    private Boolean getOrderBy(String orderBy) {
+        return !DESC_SORT_ORDER.equalsIgnoreCase(orderBy);
+    }
+
+    @Override
+    public Long countRunningInstances(String kieServerId, String containerId) throws InvalidKieServerException {
+        return getQueryServicesClient(kieServerId).countProcessInstancesByContainerId(containerId, RUNNING_STATUSES);
     }
 
     @Override
@@ -247,20 +285,18 @@ public class KieServiceImpl implements KieService {
         }
         try {
             KieServicesClient client = createKieServicesClient(kieConfig);
-            if (client != null) {
-                kieConfig.setClient(client);
-                if (client.getServerInfo().getResult() != null) {
-                    kieConfig
-                            .setName(client.getServerInfo().getResult().getName())
-                            .setId(client.getServerInfo().getResult().getServerId());
-                }
+            kieConfig.setClient(client);
+            if (client.getServerInfo().getResult() != null) {
+                kieConfig
+                        .setName(client.getServerInfo().getResult().getName())
+                        .setId(client.getServerInfo().getResult().getServerId());
             }
         } catch (Exception e) {
             logger.info("Unable to create kie server configuration for {}. Retry asynchronously", config);
             retryConnection(kieConfig);
         }
         configs.add(kieConfig);
-        logger.info("Loaded kie server configuration for: {}", config);
+        logger.info("Loaded kie server configuration for: {}", kieConfig);
     }
 
     private KieServicesClient createKieServicesClient(KieServerConfig config) {

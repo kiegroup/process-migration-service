@@ -47,7 +47,9 @@ public interface KieService {
 
     boolean existsProcessDefinition(String kieServerId, ProcessRef processRef) throws InvalidKieServerException;
 
-    List<RunningInstance> getRunningInstances(String kieServerId, String containerId, Integer page, Integer pageSize) throws InvalidKieServerException;
+    List<RunningInstance> getRunningInstances(String kieServerId, String containerId, Integer page, Integer pageSize, String sortBy, String orderBy) throws InvalidKieServerException;
+
+    Long countRunningInstances(String kieServerId, String containerId) throws InvalidKieServerException;
 
     KieServicesClient getClient(String kieServerId) throws InvalidKieServerException;
 }

@@ -41,7 +41,9 @@ import org.kie.processmigration.service.KieService;
 public class KieServiceResource {
 
     private static final String DEFAULT_PAGE = "0";
-    private static final String DEFAULT_PAGE_SIZE = "1000";
+    private static final String DEFAULT_PAGE_SIZE = "100";
+    private static final String DEFAULT_SORT_COLUMN = "processInstanceId";
+    private static final String DEFAULT_SORT_ORDER = "asc";
 
     @Inject
     KieService kieService;
@@ -61,9 +63,9 @@ public class KieServiceResource {
     @GET
     @Path("/{kieServerId}/definitions/{containerId}/{processId}")
     public Response getDefinition(
-        @PathParam("kieServerId") String kieServerId,
-        @PathParam("containerId") String containerId,
-        @PathParam("processId") String processId
+            @PathParam("kieServerId") String kieServerId,
+            @PathParam("containerId") String containerId,
+            @PathParam("processId") String processId
     ) throws InvalidKieServerException {
         try {
             ProcessInfo definition = kieService.getDefinition(kieServerId, new ProcessRef().setContainerId(containerId).setProcessId(processId));
@@ -78,8 +80,13 @@ public class KieServiceResource {
     public Response getRunningInstances(@PathParam("kieServerId") String kieServerId,
                                         @PathParam("containerId") String containerId,
                                         @DefaultValue(DEFAULT_PAGE) @QueryParam("page") Integer page,
-                                        @DefaultValue(DEFAULT_PAGE_SIZE) @QueryParam("pageSize") Integer pageSize) throws InvalidKieServerException {
-        List<RunningInstance> result = kieService.getRunningInstances(kieServerId, containerId, page, pageSize);
-        return Response.ok(result).build();
+                                        @DefaultValue(DEFAULT_PAGE_SIZE) @QueryParam("pageSize") Integer pageSize,
+                                        @DefaultValue(DEFAULT_SORT_COLUMN) @QueryParam("sortBy") String sortBy,
+                                        @DefaultValue(DEFAULT_SORT_ORDER) @QueryParam("orderBy") String orderBy) throws InvalidKieServerException {
+        List<RunningInstance> result = kieService.getRunningInstances(kieServerId, containerId, page, pageSize, sortBy, orderBy);
+        Long total = kieService.countRunningInstances(kieServerId, containerId);
+        return Response.ok(result)
+                .header("X-Total-Count", total)
+                .build();
     }
 }

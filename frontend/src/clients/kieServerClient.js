@@ -21,15 +21,25 @@ class KieServerClient extends BaseClient {
       .then(res => res.data);
   }
 
-  getInstances(kieServerId, containerId, page, pageSize) {
-    return this.instance
-      .get(this.buildUrl(kieServerId, "instances", containerId), {
+  getInstances(
+    kieServerId,
+    containerId,
+    page,
+    pageSize,
+    sortingColumn,
+    sortingOrder
+  ) {
+    return this.instance.get(
+      this.buildUrl(kieServerId, "instances", containerId),
+      {
         params: {
-          page,
-          pageSize
+          page: page - 1,
+          pageSize,
+          sortBy: sortingColumn,
+          orderBy: sortingOrder
         }
-      })
-      .then(res => res.data);
+      }
+    );
   }
 }
 
