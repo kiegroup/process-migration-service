@@ -182,7 +182,7 @@ class ProcessMigrationIT extends AbstractBaseIT {
     private void assertCount(int size, String kieServerId, String containerId) {
         given().auth()
                 .basic(PIM_USERNAME, PIM_PASSWORD)
-                .get("/" + kieServerId + "/instances/" + containerId)
+                .get("/rest/kieservers/" + kieServerId + "/instances/" + containerId)
                 .then()
                 .statusCode(200)
                 .header("X-Total-Count", String.valueOf(size));
