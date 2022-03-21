@@ -15,35 +15,37 @@
  */
 package org.kie.processmigration.integration;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.http.HttpStatus;
-import org.appformer.maven.integration.MavenRepository;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.kie.api.KieServices;
 import org.kie.processmigration.model.Execution;
 import org.kie.processmigration.model.Migration;
 import org.kie.processmigration.model.MigrationDefinition;
 import org.kie.processmigration.model.Plan;
 import org.kie.processmigration.model.ProcessRef;
-import org.kie.server.api.marshalling.MarshallingFormat;
+import org.kie.processmigration.model.exceptions.InvalidKieServerException;
+import org.kie.processmigration.service.KieService;
+import org.kie.processmigration.test.Profiles;
 import org.kie.server.api.model.KieContainerResource;
 import org.kie.server.api.model.KieServiceResponse;
 import org.kie.server.api.model.ReleaseId;
 import org.kie.server.api.model.ServiceResponse;
 import org.kie.server.api.model.instance.ProcessInstance;
 import org.kie.server.client.KieServicesClient;
-import org.kie.server.client.KieServicesConfiguration;
-import org.kie.server.client.KieServicesFactory;
 import org.kie.server.client.ProcessServicesClient;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.restassured.RestAssured;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -53,8 +55,14 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.kie.processmigration.test.ContainerKieServerLifecycleManager.ARTIFACT_ID;
+import static org.kie.processmigration.test.ContainerKieServerLifecycleManager.CONTAINER_ID;
+import static org.kie.processmigration.test.ContainerKieServerLifecycleManager.GROUP_ID;
+import static org.kie.processmigration.test.ContainerKieServerLifecycleManager.KIE_SERVER_ID;
 
-class ProcessMigrationIT extends AbstractBaseIT {
+@QuarkusTest
+@TestProfile(Profiles.KieServerIntegrationProfile.class)
+class ProcessMigrationIT {
 
     static {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
@@ -64,30 +72,31 @@ class ProcessMigrationIT extends AbstractBaseIT {
     private static final String SOURCE_CONTAINER_ID = "test_1.0.0";
     private static final String TARGET_CONTAINER_ID = "test_2.0.0";
 
-    private KieServicesClient kieClient;
-    private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+    @ConfigProperty(name = "pim.username")
+    String username;
+
+    @ConfigProperty(name = "pim.password")
+    String password;
+
+    @Inject
+    KieService kieService;
+
+    @Inject
+    ObjectMapper mapper;
 
     @BeforeEach
-    void deployProcesses() throws IOException {
-        kieClient = createClient();
-        KieServices ks = KieServices.Factory.get();
-        MavenRepository repo = MavenRepository.getMavenRepository();
+    void deployProcesses() throws Exception {
+        KieServicesClient client = kieService.getClient(KIE_SERVER_ID);
         for (String version : List.of("1.0.0", "2.0.0")) {
-
-            org.kie.api.builder.ReleaseId builderReleaseId = ks.newReleaseId(GROUP_ID, ARTIFACT_ID, version);
-            File kjar = readFile(CONTAINER_ID + "-" + version + ".jar");
-            File pom = readFile(CONTAINER_ID + "-" + version + ".pom");
-            repo.installArtifact(builderReleaseId, kjar, pom);
-
             ReleaseId releaseId = new ReleaseId(GROUP_ID, ARTIFACT_ID, version);
             KieContainerResource resource = new KieContainerResource(CONTAINER_ID, releaseId);
-            ServiceResponse<KieContainerResource> response = kieClient.createContainer(CONTAINER_ID + "_" + version, resource);
+            ServiceResponse<KieContainerResource> response = client.createContainer(CONTAINER_ID + "_" + version, resource);
             assertThat(response.getType(), is(KieServiceResponse.ResponseType.SUCCESS));
         }
     }
 
     @Test
-    void testBasicMigration() throws IOException {
+    void testBasicMigration() throws InvalidKieServerException, IOException {
         // Given
         startProcesses();
 
@@ -95,19 +104,17 @@ class ProcessMigrationIT extends AbstractBaseIT {
         createMigration();
 
         // Then
-        ProcessServicesClient processClient = kieClient.getServicesClient(ProcessServicesClient.class);
+        ProcessServicesClient processClient = kieService.getClient(KIE_SERVER_ID).getServicesClient(ProcessServicesClient.class);
         List<ProcessInstance> instances = processClient.findProcessInstances(SOURCE_CONTAINER_ID, 0, 10);
         assertThat(instances, hasSize(1));
         assertThat(instances.get(0).getId(), is(2L));
-        assertCount(1, KIE_SERVER_ID, SOURCE_CONTAINER_ID);
         instances = processClient.findProcessInstances(TARGET_CONTAINER_ID, 0, 10);
         assertThat(instances, hasSize(1));
         assertThat(instances.get(0).getId(), is(1L));
-        assertCount(1, KIE_SERVER_ID, TARGET_CONTAINER_ID);
     }
 
-    private void startProcesses() {
-        ProcessServicesClient client = kieClient.getServicesClient(ProcessServicesClient.class);
+    private void startProcesses() throws InvalidKieServerException {
+        ProcessServicesClient client = kieService.getClient(KIE_SERVER_ID).getServicesClient(ProcessServicesClient.class);
         client.startProcess(SOURCE_CONTAINER_ID, PROCESS_ID);
         client.startProcess(SOURCE_CONTAINER_ID, PROCESS_ID);
     }
@@ -123,7 +130,7 @@ class ProcessMigrationIT extends AbstractBaseIT {
         String result = given()
                 .body(mapper.writeValueAsString(def))
                 .auth()
-                .basic(PIM_USERNAME, PIM_PASSWORD)
+                .basic(username, password)
                 .contentType(MediaType.APPLICATION_JSON)
                 .post("/rest/migrations")
                 .then()
@@ -141,7 +148,7 @@ class ProcessMigrationIT extends AbstractBaseIT {
         assertThat(migration.getErrorMessage(), nullValue());
         assertThat(migration.getReports(), empty());
         assertThat(migration.getDefinition(), notNullValue());
-        assertThat(migration.getDefinition().getRequester(), is(PIM_USERNAME));
+        assertThat(migration.getDefinition().getRequester(), is(username));
     }
 
     private Plan createPlan() throws IOException {
@@ -159,7 +166,7 @@ class ProcessMigrationIT extends AbstractBaseIT {
                 .body(mapper.writeValueAsString(plan))
                 .contentType(MediaType.APPLICATION_JSON)
                 .auth()
-                .basic(PIM_USERNAME, PIM_PASSWORD)
+                .basic(username, password)
                 .post("/rest/plans")
                 .then()
                 .statusCode(HttpStatus.SC_CREATED)
@@ -179,31 +186,4 @@ class ProcessMigrationIT extends AbstractBaseIT {
         return resultPlan;
     }
 
-    private void assertCount(int size, String kieServerId, String containerId) {
-        given().auth()
-                .basic(PIM_USERNAME, PIM_PASSWORD)
-                .get("/rest/kieservers/" + kieServerId + "/instances/" + containerId)
-                .then()
-                .statusCode(200)
-                .header("X-Total-Count", String.valueOf(size));
-    }
-
-    private KieServicesClient createClient() {
-        KieServicesConfiguration configuration = KieServicesFactory.newRestConfiguration(KIE_ENDPOINT, KIE_USERNAME, KIE_PASSWORD);
-        configuration.setTimeout(60000);
-        configuration.setMarshallingFormat(MarshallingFormat.JSON);
-        return KieServicesFactory.newKieServicesClient(configuration);
-    }
-
-    private File readFile(String resource) throws IOException {
-        File tmpFile = new File(resource);
-        tmpFile.deleteOnExit();
-        try (OutputStream os = new FileOutputStream(tmpFile)) {
-            InputStream is = ProcessMigrationIT.class.getResource("/kjars/" + resource).openStream();
-            byte[] buffer = new byte[is.available()];
-            is.read(buffer);
-            os.write(buffer);
-        }
-        return tmpFile;
-    }
 }
