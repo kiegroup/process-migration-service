@@ -11,9 +11,9 @@ import { renderWizardSteps } from "../PfWizardRenderers";
 import WizardBase from "../WizardBase";
 
 import PageMigrationScheduler from "./PageMigrationScheduler";
-import kieServerClient from "../../../clients/kieServerClient";
 import { ALERT_TYPE_ERROR } from "patternfly-react/dist/js/components/Alert/AlertConstants";
 import Notification from "../../Notification";
+import kieServerClient from "../../../clients/kieServerClient";
 
 export default class WizardExecuteMigration extends WizardBase {
   constructor(props) {
@@ -34,16 +34,6 @@ export default class WizardExecuteMigration extends WizardBase {
       migration: {},
       stepValidation: {}
     };
-    kieServerClient
-      .getInstances(this.props.kieServerId, this.props.containerId)
-      .then(runningInstances => this.setState({ runningInstances }))
-      .catch(() => {
-        this.setState({
-          runningInstances: [],
-          errorMsg: `Unable to retrieve running instances for " +
-            "containerID ${this.props.containerId} and KIE Server: ${this.props.kieServerId}`
-        });
-      });
   }
 
   onSubmitMigrationPlan = () => {
@@ -57,6 +47,28 @@ export default class WizardExecuteMigration extends WizardBase {
           errorMsg: `Unable to execute migration on KIE Server ${this.props.kieServerId}`
         });
       });
+  };
+
+  getRunningInstances = (page, perPage, sortingColumn) => {
+    const sorting = this.translateRunningInstancesColumn(sortingColumn);
+    return kieServerClient.getInstances(
+      this.props.kieServerId,
+      this.props.containerId,
+      page,
+      perPage,
+      sorting.column,
+      sorting.order
+    );
+  };
+
+  translateRunningInstancesColumn = sortingColumns => {
+    const columnKeys = Object.keys(sortingColumns);
+    if (columnKeys.length > 0) {
+      return {
+        column: columnKeys[0],
+        order: sortingColumns[columnKeys[0]].direction
+      };
+    }
   };
 
   setRunningInstancesIds = ids => {
@@ -115,14 +127,12 @@ export default class WizardExecuteMigration extends WizardBase {
                     onDismiss={() => this.setState({ errorMsg: "" })}
                   />
                 )}
-                {this.state.runningInstances && (
-                  <PageMigrationRunningInstances
-                    runningInstances={this.state.runningInstances}
-                    setRunningInstancesIds={this.setRunningInstancesIds}
-                    onIsValid={isValid => this.setStepIsValid(0, isValid)}
-                    migrateAll={this.state.migrateAll}
-                  />
-                )}
+                <PageMigrationRunningInstances
+                  getRunningInstances={this.getRunningInstances}
+                  setRunningInstancesIds={this.setRunningInstancesIds}
+                  onIsValid={isValid => this.setStepIsValid(0, isValid)}
+                  migrateAll={this.state.migrateAll}
+                />
               </Wizard.Contents>
             );
           } else if (stepIndex === 1) {
@@ -240,10 +250,6 @@ export default class WizardExecuteMigration extends WizardBase {
               {activeStepIndex === 0 && (
                 <Button
                   bsStyle="primary"
-                  disabled={
-                    !this.state.runningInstances ||
-                    this.state.runningInstances.length == 0
-                  }
                   onClick={this.onMigrateAllButtonClick}
                 >
                   Migrate all
