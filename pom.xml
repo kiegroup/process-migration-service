@@ -24,7 +24,7 @@
     <version.com.fasterxml.jackson.core.jackson-databind>2.10.5.1</version.com.fasterxml.jackson.core.jackson-databind>
     <version.frontend.plugin>1.12.0</version.frontend.plugin>
     <version.io.quarkus>2.2.3.Final</version.io.quarkus>
-    <version.io.quarkiverse.file-vault>0.2.0</version.io.quarkiverse.file-vault>
+    <version.io.quarkiverse.file-vault>0.3.0</version.io.quarkiverse.file-vault>
     <version.org.github.tomakehurst.wiremock-jre8>2.27.2</version.org.github.tomakehurst.wiremock-jre8>
     <version.org.kie.server>${project.version}</version.org.kie.server>
     <version.org.mockito>3.7.7</version.org.mockito>
