@@ -87,11 +87,15 @@ public class MockKieServerLifecycleManager implements QuarkusTestResourceLifecyc
                 .withBasicAuth("admin", "admin123")
                 .willReturn(okJson(mapper.writeValueAsString(server2Response))));
         
-        ServiceResponse<KieServerInfo> vaultServerResponse = getResponseFor("vault");
-        stubFor(get(urlPathEqualTo(URI.create(vaultServerResponse.getResult().getLocation()).getPath()))
+        ServiceResponse<KieServerInfo> classpathVaultServerResponse = getResponseFor("classpath-vault");
+        stubFor(get(urlPathEqualTo(URI.create(classpathVaultServerResponse.getResult().getLocation()).getPath()))
                 .withBasicAuth("kieserver6", "kieserver6-password")
-                .willReturn(okJson(mapper.writeValueAsString(vaultServerResponse))));
-
+                .willReturn(okJson(mapper.writeValueAsString(classpathVaultServerResponse))));
+        ServiceResponse<KieServerInfo> fileVaultServerResponse = getResponseFor("file-vault");
+        stubFor(get(urlPathEqualTo(URI.create(fileVaultServerResponse.getResult().getLocation()).getPath()))
+                .withBasicAuth("kieserver7", "kieserver7-password")
+                .willReturn(okJson(mapper.writeValueAsString(fileVaultServerResponse))));
+        
         stubFor(get(urlPathEqualTo(wireMockServer.baseUrl() + "/not-found/services/rest/server"))
                 .willReturn(notFound()));
 
@@ -125,10 +129,15 @@ public class MockKieServerLifecycleManager implements QuarkusTestResourceLifecyc
         kieservers.put("kieservers[5].password", "other123");
 
         // Quarkus File Vault Config
-        kieservers.put("quarkus.file.vault.provider.pim.path", "testvault.p12");
-        kieservers.put("quarkus.file.vault.provider.pim.secret", "password");
-        kieservers.put("kieservers[6].host", vaultServerResponse.getResult().getLocation());
-        kieservers.put("kieservers[6].credentials-provider", "quarkus.file.vault.provider.pim.kieserver6");
+        kieservers.put("quarkus.file.vault.provider.cpvault.path", "testvault.p12");
+        kieservers.put("quarkus.file.vault.provider.cpvault.secret", "password");
+        kieservers.put("kieservers[6].host", classpathVaultServerResponse.getResult().getLocation());
+        kieservers.put("kieservers[6].credentials-provider", "quarkus.file.vault.provider.cpvault.kieserver6");
+        
+        kieservers.put("quarkus.file.vault.provider.filevault.path", "./src/test/resources/testvault.p12");
+        kieservers.put("quarkus.file.vault.provider.filevault.secret", "password");
+        kieservers.put("kieservers[7].host", fileVaultServerResponse.getResult().getLocation());
+        kieservers.put("kieservers[7].credentials-provider", "quarkus.file.vault.provider.filevault.kieserver7");
         return kieservers;
     }
 
