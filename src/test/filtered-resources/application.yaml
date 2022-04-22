@@ -9,7 +9,7 @@ quarkus:
     migrate-at-start: true
     baseline-version: 1.0
     baseline-description: PimDB
-    sql-migration-prefix: ${maven.jdbc.db-kind}
+    sql-migration-prefix: ${maven.flyway.sql-prefix}
     clean-at-start: true
     create-schemas: false
     schemas: "${maven.jdbc.schema}"

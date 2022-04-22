@@ -820,5 +820,17 @@
         <maven.skip.it.tests>true</maven.skip.it.tests>
       </properties>
     </profile>
+
+    <profile>
+      <id>other-database</id>
+      <activation>
+        <property>
+          <name>!maven.flyway.sql-prefix</name>
+        </property>
+      </activation>
+      <properties>
+        <maven.flyway.sql-prefix>${maven.jdbc.db-kind}</maven.flyway.sql-prefix>
+      </properties>
+    </profile>
   </profiles>
 </project>
