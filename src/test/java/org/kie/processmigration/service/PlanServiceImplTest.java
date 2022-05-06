@@ -21,9 +21,9 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.quarkus.test.junit.QuarkusTest;
-import org.flywaydb.core.Flyway;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.processmigration.model.Plan;
 import org.kie.processmigration.model.ProcessRef;
@@ -42,13 +42,15 @@ class PlanServiceImplTest {
     @Inject
     PlanService planService;
 
-    @Inject
-    Flyway flyway;
-
-    @AfterEach
+    @BeforeEach
     void cleanUp() {
-        flyway.clean();
-        flyway.migrate();
+        planService.findAll().forEach(plan -> {
+            try {
+                planService.delete(plan.getId());
+            } catch (PlanNotFoundException e) {
+                // ignore
+            }
+        });
     }
 
     @Test

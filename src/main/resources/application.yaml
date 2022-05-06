@@ -46,7 +46,6 @@ quarkus:
     baseline-on-migrate: true
     baseline-version: 1.0
     baseline-description: PimDB
-    sql-migration-prefix: h2
   # Quartz configuration
   quartz:
     store-type: jdbc-cmt

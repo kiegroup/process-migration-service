@@ -156,11 +156,10 @@ quarkus:
   flyway:
     connect-retries: 10
     table: flyway_pim_history
-    migrate-at-start: true
+    migrate-at-start: true (2)
     baseline-on-migrate: true
     baseline-version: 1.0
-    baseline-description: PimDB
-    sql-migration-prefix: h2 (2)        
+    baseline-description: PimDB      
 # Quartz configuration
   quartz:
     store-type: jdbc-cmt
@@ -181,7 +180,7 @@ pim:
 ```
 
 1. In case we wanted to enable a different database requiring a license agreement, the JDBC driver will have to be located in this `providers` folder manually.
-2. Flyway will automatically create PIM schema when enabled based on the DDL scripts prefix. Enabled by default.
+2. Out of the box, Flyway will automatically create PIM database schema for H2 in-memory database. Disable it (`-Dquarkus.flyway.migrate-at-start=false`) when you do not want PIM to handle the schema creation.
 3. Deploy the application on `/rest`
 4. H2 in-memory datasource. Override it by one of your choice
 5. Authentication method. Defaults to `file` but `jdbc` or `ldap` are also valid options
@@ -196,9 +195,10 @@ folder.
 
 As an example, if you want to replace the H2 default persistence configuration by 
 [MariaDB](./examples/persistence/mariadb.yml) and the authentication mechanism to use 
-[LDAP](examples/authentication/ldap/ldap.yml), see below.
+[LDAP](examples/authentication/ldap/ldap.yml), see sample config files below.
 
-**Note:** As the MariaDB jdbc driver is not included in the classpath. It must be added.
+- [MariaDB database configuration file](./examples/persistence/mariadb.yml)
+- [LDAP configuration file](examples/authentication/ldap/ldap.yml)
 
 **Note:** These files will override or extend the already defined properties in the application.yaml file
 
@@ -401,9 +401,8 @@ Note that in case of using a database requiring a JDBC driver license agreement 
 
 Afterwards, you can start up the application normally.
 ```shell script
-java -jar -Dquarkus.datasource.username=jbpm -Dquarkus.datasource.password=jbpm -Dquarkus.flyway.sql-migration-prefix=postgresql -Dquarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/jbpm?pinGlobalTxToPhysicalConnection=true target/quarkus-app/quarkus-run.jar
+java -jar -Dquarkus.flyway.migrate-at-start=false -Dquarkus.datasource.username=jbpm -Dquarkus.datasource.password=jbpm -Dquarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/jbpm?pinGlobalTxToPhysicalConnection=true target/quarkus-app/quarkus-run.jar
 ```
-Also, note that Flyway prefix property `quarkus.flyway.sql-migration-prefix` must be set accordingly to the right database used.
 
 Reference:
 
@@ -413,8 +412,8 @@ Reference:
 
 ## Disabling database schema auto-creation
 
-Process Migration service generates the database schema automatically if it is not already present by using the DDL scripts bundled in the application.
-You should be able to disable and manage the schema creation by disabling the `quarkus.flyway.migrate-at-start` property.
+By default, Process Migration service generates an in-memory database schema automatically.
+You should be able to disable it and manage the schema creation by setting and passing the `quarkus.flyway.migrate-at-start=false` system property.
 
 ```shell script
 java -jar -Dquarkus.flyway.migrate-at-start=false target/quarkus-app/quarkus-run.jar
@@ -428,7 +427,7 @@ property is changed at runtime. If you want to change a build-time property it i
 build.
 
 ```shell script
-java -jar -Dquarkus.launch.rebuild=true -Dquarkus.datasource.db-kind=mariadb -Dquarkus.flyway.sql-migration-prefix=mariadb target/quarkus-app/quarkus-run.jar
+java -jar -Dquarkus.launch.rebuild=true -Dquarkus.datasource.db-kind=mariadb target/quarkus-app/quarkus-run.jar
 ```
 
 ## Usage
