@@ -2,17 +2,9 @@ quarkus:
   log:
     level: INFO
     min-level: INFO
-  # flyway to create PIM schema
+  # Disabling flyway to test ddl scripts
   flyway:
-    connect-retries: 10
-    table: flyway_pim_history
-    migrate-at-start: true
-    baseline-version: 1.0
-    baseline-description: PimDB
-    sql-migration-prefix: ${maven.jdbc.db-kind}
-    clean-at-start: true
-    create-schemas: false
-    schemas: "${maven.jdbc.schema}"
+    migrate-at-start: false
   # Quartz configuration
   quartz:
     store-type: jdbc-cmt
