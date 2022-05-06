@@ -21,21 +21,32 @@
     <maven.compiler.parameters>true</maven.compiler.parameters>
     <maven.skip.unit.tests>false</maven.skip.unit.tests>
     <maven.skip.it.tests>false</maven.skip.it.tests>
-    <version.com.fasterxml.jackson.core.jackson-databind>2.10.5.1</version.com.fasterxml.jackson.core.jackson-databind>
+    <version.com.fasterxml.jackson.core.jackson-databind>2.13.2.2</version.com.fasterxml.jackson.core.jackson-databind>
     <version.frontend.plugin>1.12.0</version.frontend.plugin>
-    <version.io.quarkus>2.2.3.Final</version.io.quarkus>
+    <version.io.quarkus>2.7.5.Final</version.io.quarkus>
     <version.io.quarkiverse.file-vault>0.3.0</version.io.quarkiverse.file-vault>
     <version.org.github.tomakehurst.wiremock-jre8>2.27.2</version.org.github.tomakehurst.wiremock-jre8>
     <version.org.kie.server>${project.version}</version.org.kie.server>
     <version.org.mockito>3.7.7</version.org.mockito>
     <version.org.projectlombok.lombok>1.18.16</version.org.projectlombok.lombok>
+    <version.com.h2database>1.4.197</version.com.h2database>
+    <version.org.apache.maven>3.3.9</version.org.apache.maven> <!-- Need to force the version of the maven-core artifact to be in sync with kie. Otherwise it might pick a wrong version coming from quarkus bom import -->
+    <version.org.codehaus.mojo.sql-maven-plugin>1.5</version.org.codehaus.mojo.sql-maven-plugin>
 
     <!-- Quarkus database setup -->
     <maven.jdbc.db-kind>h2</maven.jdbc.db-kind>
-    <maven.jdbc.url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</maven.jdbc.url>
+    <maven.jdbc.url>jdbc:h2:file:./target/testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE</maven.jdbc.url>
     <maven.jdbc.username>sa</maven.jdbc.username>
     <maven.jdbc.password>sa</maven.jdbc.password>
     <maven.jdbc.schema>PUBLIC</maven.jdbc.schema>
+    <maven.jdbc.driver.class>org.h2.Driver</maven.jdbc.driver.class>
+    <maven.jdbc.driver.path>/non-h2-driver-path-has-to-be-set</maven.jdbc.driver.path>
+    <maven.jdbc.pim.create-db-schema>true</maven.jdbc.pim.create-db-schema>
+    <maven.jdbc.pim.scripts.root.folder>${project.basedir}/ddl-scripts</maven.jdbc.pim.scripts.root.folder>
+    <maven.jdbc.pim.create.script.file>${maven.jdbc.pim.scripts.root.folder}/${maven.jdbc.db-kind}/${maven.jdbc.db-kind}-pim-schema.sql</maven.jdbc.pim.create.script.file>
+    <maven.jdbc.pim.drop.script.file>${maven.jdbc.pim.scripts.root.folder}/${maven.jdbc.db-kind}/${maven.jdbc.db-kind}-pim-drop-schema.sql</maven.jdbc.pim.drop.script.file>
+    <maven.jdbc.quartz.drop.script.file>${maven.jdbc.pim.scripts.root.folder}/${maven.jdbc.db-kind}/${maven.jdbc.db-kind}-quartz-drop-schema.sql</maven.jdbc.quartz.drop.script.file>
+    <maven.jdbc.quartz.create.script.file>${maven.jdbc.pim.scripts.root.folder}/${maven.jdbc.db-kind}/${maven.jdbc.db-kind}-quartz-schema.sql</maven.jdbc.quartz.create.script.file>
 
     <!-- Cargo plugin configuration -->
     <container.port>8080</container.port>
@@ -66,7 +77,6 @@
     <maven.pim.server.http.url>http://${maven.pim.server.host}:${maven.pim.server.http.port}</maven.pim.server.http.url>
     <maven.pim.server.http.health>${maven.pim.server.http.url}/q/health</maven.pim.server.http.health>
 
-    <maven.pim.flyway.prefix.version>1.0.0__</maven.pim.flyway.prefix.version>
   </properties>
 
   <repositories>
@@ -160,6 +170,12 @@
             <artifactId>cdi-api</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-core</artifactId>
+        <version>${version.org.apache.maven}</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -331,6 +347,59 @@
         </includes>
       </testResource>
     </testResources>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>sql-maven-plugin</artifactId>
+          <version>${version.org.codehaus.mojo.sql-maven-plugin}</version>
+          <!-- Driver we use to create PIM schema -->
+          <dependencies>
+            <dependency>
+              <groupId>com.h2database</groupId>
+              <artifactId>h2</artifactId>
+              <version>${version.com.h2database}</version>
+            </dependency>
+          </dependencies>
+          <configuration>
+            <driver>${maven.jdbc.driver.class}</driver>
+            <url>${maven.jdbc.url}</url>
+            <username>${maven.jdbc.username}</username>
+            <password>${maven.jdbc.password}</password>
+          </configuration>
+          <executions>
+            <execution>
+              <id>drop-pim-schema</id>
+              <phase>generate-test-resources</phase>
+              <goals>
+                <goal>execute</goal>
+              </goals>
+              <configuration>
+                <autocommit>true</autocommit>
+                <srcFiles>
+                  <srcFile>${maven.jdbc.pim.drop.script.file}</srcFile>
+                  <srcFile>${maven.jdbc.quartz.drop.script.file}</srcFile>
+                </srcFiles>
+              </configuration>
+            </execution>
+            <execution>
+              <id>create-pim-schema</id>
+              <phase>generate-test-resources</phase>
+              <goals>
+                <goal>execute</goal>
+              </goals>
+              <configuration>
+                <autocommit>true</autocommit>
+                <srcFiles>
+                  <srcFile>${maven.jdbc.quartz.create.script.file}</srcFile>
+                  <srcFile>${maven.jdbc.pim.create.script.file}</srcFile>
+                </srcFiles>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -464,6 +533,10 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>sql-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>com.bazaarvoice.maven.plugins</groupId>
@@ -628,33 +701,9 @@
             <phase>generate-resources</phase>
             <configuration>
               <target>
-                <concat destfile="${project.build.outputDirectory}/db/migration/h2/h2${maven.pim.flyway.prefix.version}pim-schema.sql">
+                <concat destfile="${project.build.outputDirectory}/db/migration/V1.0.0__h2-pim-schema.sql">
                   <fileset file="${project.basedir}/ddl-scripts/h2/h2-quartz-schema.sql" />
                   <fileset file="${project.basedir}/ddl-scripts/h2/h2-pim-schema.sql" />
-                </concat>
-                <concat destfile="${project.build.outputDirectory}/db/migration/db2/db2${maven.pim.flyway.prefix.version}pim-schema.sql">
-                  <fileset file="${project.basedir}/ddl-scripts/db2/db2-quartz-schema.sql" />
-                  <fileset file="${project.basedir}/ddl-scripts/db2/db2-pim-schema.sql" />
-                </concat>
-                <concat destfile="${project.build.outputDirectory}/db/migration/mariadb/mariadb${maven.pim.flyway.prefix.version}pim-schema.sql">
-                  <fileset file="${project.basedir}/ddl-scripts/mariadb/mariadb-quartz-schema.sql" />
-                  <fileset file="${project.basedir}/ddl-scripts/mariadb/mariadb-pim-schema.sql" />
-                </concat>
-                <concat destfile="${project.build.outputDirectory}/db/migration/mssql/mssql${maven.pim.flyway.prefix.version}pim-schema.sql">
-                  <fileset file="${project.basedir}/ddl-scripts/mssql/mssql-quartz-schema.sql" />
-                  <fileset file="${project.basedir}/ddl-scripts/mssql/mssql-pim-schema.sql" />
-                </concat>
-                <concat destfile="${project.build.outputDirectory}/db/migration/mysql/mysql${maven.pim.flyway.prefix.version}pim-schema.sql">
-                  <fileset file="${project.basedir}/ddl-scripts/mysql/mysql-quartz-schema.sql" />
-                  <fileset file="${project.basedir}/ddl-scripts/mysql/mysql-pim-schema.sql" />
-                </concat>
-                <concat destfile="${project.build.outputDirectory}/db/migration/oracle/oracle${maven.pim.flyway.prefix.version}pim-schema.sql">
-                  <fileset file="${project.basedir}/ddl-scripts/oracle/oracle-quartz-schema.sql" />
-                  <fileset file="${project.basedir}/ddl-scripts/oracle/oracle-pim-schema.sql" />
-                </concat>
-                <concat destfile="${project.build.outputDirectory}/db/migration/postgresql/postgresql${maven.pim.flyway.prefix.version}pim-schema.sql">
-                  <fileset file="${project.basedir}/ddl-scripts/postgresql/postgresql-quartz-schema.sql" />
-                  <fileset file="${project.basedir}/ddl-scripts/postgresql/postgresql-pim-schema.sql" />
                 </concat>
               </target>
             </configuration>
@@ -819,6 +868,58 @@
       <properties>
         <maven.skip.it.tests>true</maven.skip.it.tests>
       </properties>
+    </profile>
+    <profile>
+      <!-- Need to load the appropriate driver for the particular DB to test based on a system path -->
+      <id>database</id>
+      <activation>
+        <property>
+          <name>maven.jdbc.db-kind</name>
+        </property>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>sql-maven-plugin</artifactId>
+              <version>${version.org.codehaus.mojo.sql-maven-plugin}</version>
+              <dependencies>
+                <dependency>
+                  <groupId>pim.database.driver</groupId>
+                  <artifactId>driver</artifactId>
+                  <scope>system</scope>
+                  <version>1.0</version>
+                  <systemPath>${maven.jdbc.driver.path}</systemPath>
+                </dependency>
+              </dependencies>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+    <profile>
+      <id>skip-db-schema-creation</id>
+      <activation>
+        <property>
+          <name>maven.jdbc.pim.create-db-schema</name>
+          <value>false</value>
+        </property>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>sql-maven-plugin</artifactId>
+              <version>${version.org.codehaus.mojo.sql-maven-plugin}</version>
+              <configuration>
+                <skip>true</skip>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
     </profile>
   </profiles>
 </project>

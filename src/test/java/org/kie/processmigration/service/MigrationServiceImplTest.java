@@ -26,8 +26,7 @@ import javax.inject.Inject;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
-import org.flywaydb.core.Flyway;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.processmigration.model.Execution;
 import org.kie.processmigration.model.Migration;
@@ -79,13 +78,15 @@ class MigrationServiceImplTest {
     @InjectMock
     SchedulerService schedulerService;
 
-    @Inject
-    Flyway flyway;
-
-    @AfterEach
+    @BeforeEach
     void cleanUp() {
-        flyway.clean();
-        flyway.migrate();
+        migrationService.findAll().forEach(migration -> {
+            try {
+                migrationService.delete(migration.getId());
+            } catch (MigrationNotFoundException e) {
+                // ignore
+            }
+        });
     }
 
     @Test
