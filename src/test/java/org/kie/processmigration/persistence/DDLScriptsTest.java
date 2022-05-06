@@ -30,8 +30,7 @@ import javax.inject.Inject;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
-import org.flywaydb.core.Flyway;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.kie.processmigration.listener.CountDownJobListener;
@@ -43,6 +42,7 @@ import org.kie.processmigration.model.Plan;
 import org.kie.processmigration.model.ProcessRef;
 import org.kie.processmigration.model.exceptions.InvalidMigrationException;
 import org.kie.processmigration.model.exceptions.MigrationNotFoundException;
+import org.kie.processmigration.model.exceptions.PlanNotFoundException;
 import org.kie.processmigration.service.KieService;
 import org.kie.processmigration.service.MigrationService;
 import org.kie.processmigration.service.PlanService;
@@ -99,13 +99,22 @@ public class DDLScriptsTest {
     @Inject
     Scheduler scheduler;
 
-    @Inject
-    Flyway flyway;
-
-    @AfterEach
+    @BeforeEach
     void cleanUp() {
-        flyway.clean();
-        flyway.migrate();
+        migrationService.findAll().forEach(migration -> {
+            try {
+                migrationService.delete(migration.getId());
+            } catch (MigrationNotFoundException e) {
+                // ignore
+            }
+        });
+        planService.findAll().forEach(plan -> {
+            try {
+                planService.delete(plan.getId());
+            } catch (PlanNotFoundException e) {
+                // ignore
+            }
+        });
     }
 
     static Stream<Execution> getExecutionTypes() {
