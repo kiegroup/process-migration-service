@@ -72,12 +72,13 @@ public class GenerateDDLScriptsTest {
 
     static Stream<ScriptFile> getScriptFiles() {
         return Stream.of(
-                new ScriptFile("org.hibernate.dialect.DB297Dialect", "db2", "db2"),
+                new ScriptFile("org.hibernate.dialect.DB2Dialect", "db2", "db2"),
                 new ScriptFile("org.hibernate.dialect.H2Dialect", "h2", "h2"),
                 new ScriptFile("org.hibernate.dialect.MariaDB103Dialect", "mariadb", "mariadb"),
                 new ScriptFile("org.hibernate.dialect.MySQL8Dialect", "mysql", "mysql"),
                 new ScriptFile("org.hibernate.dialect.Oracle12cDialect", "oracle", "oracle"),
                 new ScriptFile("org.hibernate.dialect.PostgreSQL10Dialect", "postgresql", "postgresql"),
+                new ScriptFile("org.hibernate.dialect.PostgresPlusDialect", "postgresql-plus", "postgresql-plus"),
                 new ScriptFile("org.hibernate.dialect.SQLServer2012Dialect", "mssql", "mssql"));
     }
 

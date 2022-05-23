@@ -42,11 +42,12 @@
     <maven.jdbc.driver.class>org.h2.Driver</maven.jdbc.driver.class>
     <maven.jdbc.driver.path>/non-h2-driver-path-has-to-be-set</maven.jdbc.driver.path>
     <maven.jdbc.pim.create-db-schema>true</maven.jdbc.pim.create-db-schema>
-    <maven.jdbc.pim.scripts.root.folder>${project.basedir}/ddl-scripts</maven.jdbc.pim.scripts.root.folder>
-    <maven.jdbc.pim.create.script.file>${maven.jdbc.pim.scripts.root.folder}/${maven.jdbc.db-kind}/${maven.jdbc.db-kind}-pim-schema.sql</maven.jdbc.pim.create.script.file>
-    <maven.jdbc.pim.drop.script.file>${maven.jdbc.pim.scripts.root.folder}/${maven.jdbc.db-kind}/${maven.jdbc.db-kind}-pim-drop-schema.sql</maven.jdbc.pim.drop.script.file>
-    <maven.jdbc.quartz.drop.script.file>${maven.jdbc.pim.scripts.root.folder}/${maven.jdbc.db-kind}/${maven.jdbc.db-kind}-quartz-drop-schema.sql</maven.jdbc.quartz.drop.script.file>
-    <maven.jdbc.quartz.create.script.file>${maven.jdbc.pim.scripts.root.folder}/${maven.jdbc.db-kind}/${maven.jdbc.db-kind}-quartz-schema.sql</maven.jdbc.quartz.create.script.file>
+    <maven.jdbc.pim.scripts.create.folder>${project.basedir}/ddl-scripts</maven.jdbc.pim.scripts.create.folder>
+    <maven.jdbc.pim.scripts.upgrade.folder>${project.basedir}/upgrade-scripts</maven.jdbc.pim.scripts.upgrade.folder>
+    <maven.jdbc.pim.create.script.file>${maven.jdbc.pim.scripts.create.folder}/${maven.jdbc.db-kind}/${maven.jdbc.db-kind}-pim-schema.sql</maven.jdbc.pim.create.script.file>
+    <maven.jdbc.pim.drop.script.file>${maven.jdbc.pim.scripts.create.folder}/${maven.jdbc.db-kind}/${maven.jdbc.db-kind}-pim-drop-schema.sql</maven.jdbc.pim.drop.script.file>
+    <maven.jdbc.quartz.drop.script.file>${maven.jdbc.pim.scripts.create.folder}/${maven.jdbc.db-kind}/${maven.jdbc.db-kind}-quartz-drop-schema.sql</maven.jdbc.quartz.drop.script.file>
+    <maven.jdbc.quartz.create.script.file>${maven.jdbc.pim.scripts.create.folder}/${maven.jdbc.db-kind}/${maven.jdbc.db-kind}-quartz-schema.sql</maven.jdbc.quartz.create.script.file>
 
     <!-- Cargo plugin configuration -->
     <container.port>8080</container.port>
@@ -691,6 +692,36 @@
               </resources>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-scripts-test-resource</id>
+            <phase>generate-test-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.testOutputDirectory}/ddl-scripts</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>ddl-scripts</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-upgrade-scripts-test-resource</id>
+            <phase>generate-test-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.testOutputDirectory}/upgrade-scripts</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>upgrade-scripts</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>
@@ -702,8 +733,8 @@
             <configuration>
               <target>
                 <concat destfile="${project.build.outputDirectory}/db/migration/V1.0.0__h2-pim-schema.sql">
-                  <fileset file="${project.basedir}/ddl-scripts/h2/h2-quartz-schema.sql" />
-                  <fileset file="${project.basedir}/ddl-scripts/h2/h2-pim-schema.sql" />
+                  <fileset file="${maven.jdbc.pim.scripts.create.folder}/h2/h2-quartz-schema.sql" />
+                  <fileset file="${maven.jdbc.pim.scripts.create.folder}/h2/h2-pim-schema.sql" />
                 </concat>
               </target>
             </configuration>
