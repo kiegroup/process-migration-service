@@ -26,7 +26,6 @@ import org.apache.commons.io.FileUtils;
 import org.kie.processmigration.test.persistence.scripts.DatabaseType;
 
 import static org.kie.processmigration.test.persistence.scripts.DatabaseType.POSTGRESQL;
-import static org.kie.processmigration.test.persistence.scripts.DatabaseType.SQLSERVER;
 
 /**
  * Contains utility methods for working with SQL script.
