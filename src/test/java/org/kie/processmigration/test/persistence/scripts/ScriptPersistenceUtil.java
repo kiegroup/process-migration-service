@@ -25,13 +25,10 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.kie.processmigration.test.persistence.scripts.util.SQLCommandUtil;
 import org.kie.processmigration.test.persistence.scripts.util.SQLScriptUtil;
 import org.kie.processmigration.test.persistence.scripts.util.ScriptUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.kie.processmigration.test.persistence.scripts.DatabaseType.SQLSERVER;
 
 public class ScriptPersistenceUtil {
 
@@ -80,7 +77,7 @@ public class ScriptPersistenceUtil {
                 final List<String> scriptCommands = SQLScriptUtil.getCommandsFromScript(script, databaseType);
                 for (String command : scriptCommands) {
                     logger.debug("query {} ", command);
-                    final PreparedStatement statement = preparedStatement(connection, command);
+                    final PreparedStatement statement = connection.prepareStatement(command);
                     executeStatement(scriptFilter.hasOption(ScriptFilter.Option.THROW_ON_SCRIPT_ERROR), statement);
                     connection.commit();
                 }
@@ -91,16 +88,6 @@ public class ScriptPersistenceUtil {
         } finally {
             connection.close();
         }
-    }
-
-    private PreparedStatement preparedStatement(final Connection conn, String command) throws SQLException {
-        final PreparedStatement statement;
-        if (databaseType == SQLSERVER) {
-            statement = conn.prepareStatement(SQLCommandUtil.preprocessCommandSqlServer(command, dataSourceProperties));
-        } else {
-            statement = conn.prepareStatement(command);
-        }
-        return statement;
     }
 
     private void executeStatement(boolean createFiles, final PreparedStatement statement) throws SQLException {
