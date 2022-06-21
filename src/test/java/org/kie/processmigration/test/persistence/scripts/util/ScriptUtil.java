@@ -20,6 +20,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.kie.processmigration.test.persistence.scripts.DatabaseScript;
@@ -88,23 +90,30 @@ public final class ScriptUtil {
      * If specified SQL dialect is not supported, throws IllegalArgumentException.
      */
     public static DatabaseType getDatabaseTypeBySQLDialect(final String sqlDialect) {
-        if (sqlDialect.contains("DB2Dialect")) {
+        if (containsDialect(sqlDialect, "DB2")) {
             return DatabaseType.DB2;
-        } else if (sqlDialect.contains("H2Dialect")) {
+        } else if (containsDialect(sqlDialect, "H2")) {
             return DatabaseType.H2;
-        } else if (sqlDialect.contains("MySQL5Dialect")) {
+        } else if (containsDialect(sqlDialect, "MySQL")) {
             return DatabaseType.MYSQL;
-        } else if (sqlDialect.contains("MySQL5InnoDBDialect")) {
+        } else if (containsDialect(sqlDialect, "MariaDB")) {
             return DatabaseType.MARIADB;
-        } else if (sqlDialect.contains("Oracle")) {
+        } else if (containsDialect(sqlDialect, "Oracle")) {
             return DatabaseType.ORACLE;
-        } else if (sqlDialect.contains("Postgre")) {
+        } else if (containsDialect(sqlDialect, "Postgre")) {
             return DatabaseType.POSTGRESQL;
-        } else if (sqlDialect.contains("SQLServer2012Dialect")) {
+        } else if (containsDialect(sqlDialect, "SQLServer")) {
             return DatabaseType.SQLSERVER;
         } else {
             throw new IllegalArgumentException("SQL dialect type " + sqlDialect + " is not supported!");
         }
+    }
+
+    private static boolean containsDialect(String dialect, String dbType){
+        String regex = "(.*)%s(.*)Dialect";
+        Pattern p = Pattern.compile(String.format(regex, dbType));
+        Matcher m = p.matcher(dialect);
+        return m.matches();
     }
 
     public static byte[] hexStringToByteArray(final String hexString) {
