@@ -1,4 +1,5 @@
 import BaseClient from "./baseClient";
+import DOMPurify from "dompurify";
 
 class KieServerClient extends BaseClient {
   constructor() {
@@ -35,8 +36,8 @@ class KieServerClient extends BaseClient {
         params: {
           page: page - 1,
           pageSize,
-          sortBy: sortingColumn,
-          orderBy: sortingOrder
+          sortBy: DOMPurify.sanitize(sortingColumn),
+          orderBy: DOMPurify.sanitize(sortingOrder)
         }
       }
     );
