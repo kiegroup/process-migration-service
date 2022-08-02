@@ -21,6 +21,10 @@
             <directory>upgrade-scripts</directory>
             <outputDirectory>upgrade-scripts</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>target/vault-utils</directory>
+            <outputDirectory>vault-utils</outputDirectory>
+        </fileSet>
     </fileSets>
 
 </assembly>
