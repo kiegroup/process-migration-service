@@ -1,0 +1,11 @@
+quarkus:
+  file:
+    vault:
+      provider:
+        pim:
+          path: config/pimvault.p12
+          encryption-key: ${vault.storepassword} # This will be provided as a property
+          secret: DJKKd0NAXdzuXgQuvc1YWsjAObO1Lk9nZuFhGFep1FV_7if9F4aRXhIU
+kieservers:
+  - host: http://localhost:18080/kie-server/services/rest/server
+    credentials-provider: quarkus.file.vault.provider.pim.kieserver
