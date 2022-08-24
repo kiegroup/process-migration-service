@@ -57,13 +57,13 @@ $ podman-remote info
 
 It is a [Quarkus 2.x](https://quarkus.io/) application.
 
-### JVM
+### JVM Build
 
 ```shell script
 mvn clean package
 ```
 
-### Native
+### Native Build
 
 **Note**: Native compilation is currently not supported.
 
@@ -73,7 +73,7 @@ mvn clean package -Pnative -Dquarkus.native.container-build=true
 
 ## Run application
 
-### JVM 
+### JVM
 
 ```bash
 java -jar target/quarkus-app/quarkus-run.jar
@@ -243,6 +243,53 @@ quarkus:
 kieservers:
   - host: http://localhost:18080/kie-server/services/rest/server
     credentials-provider: quarkus.file.vault.provider.pim.kieserver
+```
+
+##### Masking the Vault password
+
+This is a feature introduced in [Quarkus-File-Vault 0.7.1](https://github.com/quarkiverse/quarkus-file-vault/tree/0.7.1)
+where a symetric password can be used to add an additional indirection to the stored passwords and certificates.
+
+By using the [vault-utils](https://github.com/quarkiverse/quarkus-file-vault/tree/0.7.1/vault-utils) tool it is possible to
+encrypt using an encryption key (a default will be generated if none is provided).
+
+In order to use the vault-utils, clone the repository and build the project as an uber-jar.
+
+```bash
+git clone https://github.com/quarkiverse/quarkus-file-vault.git
+cd quarkus-file-vault/vault-utils
+git checkout 0.7.1
+mvn clean package -Dquarkus.package.type=uber-jar
+```
+
+Now use the generated artifact to encrypt the passwords:
+
+```bash
+$ java -jar target/quarkus-file-vault-utils-0.7.1-runner.jar -p vaultpassword
+###########################################################################################################
+Please, add the following parameters to your application.properties file, and replace the <keystore-name> !
+quarkus.file.vault.provider.<keystore-name>.encryption-key=Y2UaDd4T6QFpmirTQjhb6A
+quarkus.file.vault.provider.<keystore-name>.secret=DBQLBMTjbTO1rYbSRu82DeTqcp0YgOAEFfzRVx_kJJnG0dPaBZfgolg8
+###########################################################################################################
+```
+
+The output can be translated into yaml and used into the application.yaml file like this:
+
+```yaml
+quarkus:
+  file:
+    vault:
+      provider:
+        pim:
+          path: config/pimvault.p12
+          encryption-key: ${vault.encryption-key}
+          secret: DBQLBMTjbTO1rYbSRu82DeTqcp0YgOAEFfzRVx_kJJnG0dPaBZfgolg8
+```
+
+Finally, the application can be started as follows:
+
+```bash
+java -jar -Dvault.encryption-key=vaultpassword target/quarkus-app/quarkus-run.jar
 ```
 
 #### Defining KIE Servers
