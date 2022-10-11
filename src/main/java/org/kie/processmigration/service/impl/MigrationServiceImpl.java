@@ -269,6 +269,7 @@ public class MigrationServiceImpl implements MigrationService {
             migration.getReports().stream().map(MigrationReport::getProcessInstanceId).forEach(migratedInstances::add);
         }
         Plan plan = planService.get(migration.getDefinition().getPlanId());
+        String processId = plan.getSource().getProcessId();
         if (instanceIds.isEmpty()) {
             boolean allFetched = false;
             int page = 0;
@@ -276,7 +277,7 @@ public class MigrationServiceImpl implements MigrationService {
                 List<ProcessInstance> instances = kieService.getQueryServicesClient(migration.getDefinition().getKieServerId())
                         .findProcessInstancesByContainerId(plan.getSource().getContainerId(), QUERY_PROCESS_INSTANCE_STATUSES, page++, QUERY_PAGE_SIZE);
 
-                instances.forEach(p -> instanceIds.add(p.getId()));
+                instances.stream().filter(p -> processId.equals(p.getProcessId())).map(ProcessInstance::getId).forEach(instanceIds::add);
                 if (instances.size() < QUERY_PAGE_SIZE) {
                     allFetched = true;
                 }
