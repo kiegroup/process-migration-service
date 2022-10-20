@@ -12,8 +12,7 @@
     "build": "webpack -p",
     "start": "node src/bin/server.js",
     "test": "jest",
-    "precommit": "lint-staged",
-    "locktt": "locktt"
+    "precommit": "lint-staged"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,json,css,md}": [
@@ -48,7 +47,6 @@
     "jest-fetch-mock": "^2.1.2",
     "jest-junit": "^6.4.0",
     "lint-staged": "^8.2.1",
-    "@kie/lock-treatment-tool": "^0.0.2",
     "moment": "^2.29.4",
     "patternfly-react": "^2.36.2",
     "prettier": "^1.18.2",
