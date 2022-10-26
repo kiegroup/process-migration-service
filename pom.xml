@@ -78,6 +78,7 @@
     <maven.pim.server.http.url>http://${maven.pim.server.host}:${maven.pim.server.http.port}</maven.pim.server.http.url>
     <maven.pim.server.http.health>${maven.pim.server.http.url}/q/health</maven.pim.server.http.health>
 
+    <version.lock-treatment-tool>^0.2.2</version.lock-treatment-tool>
   </properties>
 
   <repositories>
@@ -623,7 +624,7 @@
               <goal>npm</goal>
             </goals>
             <configuration>
-              <arguments>exec @kie/lock-treatment-tool --</arguments>
+              <arguments>exec @kie/lock-treatment-tool@${version.lock-treatment-tool} --</arguments>
             </configuration>
           </execution>
           <execution>
