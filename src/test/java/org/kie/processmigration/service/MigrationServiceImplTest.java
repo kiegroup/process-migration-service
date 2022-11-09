@@ -181,6 +181,7 @@ class MigrationServiceImplTest {
         ProcessInstance instance = new ProcessInstance();
         instance.setId(2L);
         instance.setContainerId("source-container");
+        instance.setProcessId("source-process");
         instances.add(instance);
         when(mockQueryServicesClient.findProcessInstancesByContainerId(eq(plan.getSource().getContainerId()), anyList(), anyInt(), anyInt())).thenReturn(instances);
         when(mockQueryServicesClient.findProcessInstanceById(instance.getId())).thenReturn(instance);
