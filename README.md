@@ -436,36 +436,31 @@ to `ram` or `jdbc-tx`. See the
 ## Using other JDBC extensions
 
 The H2 JDBC extension is set by default. However, users will be able to use different JDBC extensions to connect to any
-supported database. For that purpose you will have to re-augment the base build to include the right build properties.
+supported database. For that purpose you will need to follow these steps:
 
-For instance, the below command will add a PostgreSQL database extension by re-augmenting the application.
+1. Create PIM schema database by using the right DDL scripts located at [ddl-scripts](ddl-scripts) folder. In case of using an existing PIM database schema, use the upgrade DDL scripts located at [upgrade-scripts](upgrade-scripts) folder.
 
-```shell script
-java -jar -Dquarkus.launch.rebuild=true -Dquarkus.datasource.db-kind=postgresql target/quarkus-app/quarkus-run.jar
-```
 
-Note that in case of using a database requiring a JDBC driver license agreement (such as Oracle, DB2 and MS SQL Server), we will need to drop the JDBC drivers in the `providers` folder manually before re-augmenting the Quarkus application.
+2. Re-augment the base build to include the right build properties for the database. For instance, the below command will add a PostgreSQL database extension by re-augmenting the application.
 
+    ```shell script
+    java -jar -Dquarkus.launch.rebuild=true -Dquarkus.datasource.db-kind=postgresql target/quarkus-app/quarkus-run.jar
+    ```
+   Note that in case of using a database requiring a JDBC driver license agreement (such as Oracle, DB2 and MS SQL Server), we will need to drop the JDBC drivers in the `providers` folder manually before re-augmenting the Quarkus application.
+
+
+3. Out of the box, PIM comes with an H2 in-memory database where the database schema is auto-created automatically for you. However, this feature is not supported for other certified databases. 
+In that sense, you need to disable the database schema auto-creation feature by passing and setting up the `quarkus.flyway.migrate-at-start` property to `false` 
 Afterwards, you can start up the application normally.
-```shell script
-java -jar -Dquarkus.flyway.migrate-at-start=false -Dquarkus.datasource.username=jbpm -Dquarkus.datasource.password=jbpm -Dquarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/jbpm?pinGlobalTxToPhysicalConnection=true target/quarkus-app/quarkus-run.jar
-```
+    ```shell script
+    java -jar -Dquarkus.flyway.migrate-at-start=false -Dquarkus.datasource.username=jbpm -Dquarkus.datasource.password=jbpm -Dquarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/jbpm?pinGlobalTxToPhysicalConnection=true target/quarkus-app/quarkus-run.jar
+    ```
 
 Reference:
 
 * [Quarkus Datasources](https://quarkus.io/guides/datasource#jdbc-datasource)
 * [Quarkus Re-augmentation](https://quarkus.io/guides/reaugmentation)
 * [Quarkus Flyway](https://quarkus.io/guides/flyway)
-
-## Disabling database schema auto-creation
-
-By default, Process Migration service generates an in-memory database schema automatically.
-You should be able to disable it and manage the schema creation by setting and passing the `quarkus.flyway.migrate-at-start=false` system property.
-
-```shell script
-java -jar -Dquarkus.flyway.migrate-at-start=false target/quarkus-app/quarkus-run.jar
-```
-
 
 ### How to change build time properties in a `mutable-jar`
 
