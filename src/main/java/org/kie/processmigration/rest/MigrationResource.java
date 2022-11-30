@@ -75,7 +75,7 @@ public class MigrationResource {
 
     @GET
     @Path("/{id}/results/{logId}")
-    public Response getResultLog(@PathParam("id") Long id, @PathParam("logId") Long logId) throws MigrationNotFoundException {
+    public Response getResultLog(@PathParam("id") Long id, @PathParam("logId") Long logId) {
         return Response.ok(migrationService.getReport(logId)).build();
     }
 
