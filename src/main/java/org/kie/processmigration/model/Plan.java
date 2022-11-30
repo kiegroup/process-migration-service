@@ -41,7 +41,6 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

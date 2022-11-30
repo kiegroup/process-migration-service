@@ -30,10 +30,11 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     public List<Plan> findAll() {
-        return Plan.findAll().list();
+        return Plan.listAll();
     }
 
     @Override
+    @Transactional
     public Plan get(Long id) throws PlanNotFoundException {
         Optional<Plan> plan = Plan.findByIdOptional(id);
         return plan.orElseThrow(() -> new PlanNotFoundException(id));

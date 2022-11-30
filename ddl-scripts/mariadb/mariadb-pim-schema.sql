@@ -60,21 +60,16 @@ create table process_instance_ids (
 create index IDX_MigrationReports_Id on migration_reports (migration_id);
 
 alter table migration_report_logs
-   add constraint FKj8bsydiucvs2kygnscp1bt1wy
-   foreign key (report_id)
-   references migration_reports (id);
-
-alter table migration_reports
-   add constraint FK98ckwvu4fyt55u6sq680xwkmx
-   foreign key (migration_id)
-   references migrations (id);
+    add constraint FKj8bsydiucvs2kygnscp1bt1wy
+    foreign key (report_id)
+    references migration_reports (id);
 
 alter table plan_mappings
-   add constraint FKk892t85t9vt1xe6vf9nqwgqoh
-   foreign key (plan_id)
-   references plans (id);
+    add constraint FKk892t85t9vt1xe6vf9nqwgqoh
+    foreign key (plan_id)
+    references plans (id);
 
 alter table process_instance_ids
-   add constraint FKobucfuy73fgsmkncl9q2rv6ko
-   foreign key (migration_definition_id)
-   references migrations (id);
+    add constraint FKobucfuy73fgsmkncl9q2rv6ko
+    foreign key (migration_definition_id)
+    references migrations (id);

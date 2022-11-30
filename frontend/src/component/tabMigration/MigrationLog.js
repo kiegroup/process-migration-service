@@ -2,7 +2,7 @@ import React from "react";
 
 export const MigrationLog = props => {
   const { log } = props;
-  const logs = log.logs.map((log, i) => <li key={i}>{log}</li>);
+  const logs = log.logs.map((l, i) => <li key={i}>{l}</li>);
   const flag = "" + log.successful;
   return (
     <div className="form-horizontal">

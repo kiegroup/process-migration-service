@@ -19,6 +19,12 @@ class MigrationClient extends BaseClient {
       .then(res => res.data);
   }
 
+  getResultDetail(id, logId) {
+    return this.instance
+      .get(this.buildUrl("" + id, "results", "" + logId))
+      .then(res => res.data);
+  }
+
   create(migration) {
     return this.instance.post("", migration).then(res => res.data);
   }
