@@ -34,6 +34,8 @@ import org.kie.api.KieServices;
 import org.kie.processmigration.model.Execution;
 import org.kie.processmigration.model.Migration;
 import org.kie.processmigration.model.MigrationDefinition;
+import org.kie.processmigration.model.MigrationReport;
+import org.kie.processmigration.model.MigrationReportDto;
 import org.kie.processmigration.model.Plan;
 import org.kie.processmigration.model.ProcessRef;
 import org.kie.server.api.marshalling.MarshallingFormat;
@@ -47,9 +49,11 @@ import org.kie.server.client.KieServicesConfiguration;
 import org.kie.server.client.KieServicesFactory;
 import org.kie.server.client.ProcessServicesClient;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -83,7 +87,8 @@ class ProcessMigrationIT extends AbstractBaseIT {
 
             ReleaseId releaseId = new ReleaseId(GROUP_ID, ARTIFACT_ID, version);
             KieContainerResource resource = new KieContainerResource(CONTAINER_ID, releaseId);
-            ServiceResponse<KieContainerResource> response = kieClient.createContainer(CONTAINER_ID + "_" + version, resource);
+            ServiceResponse<KieContainerResource> response = kieClient.createContainer(CONTAINER_ID + "_" + version,
+                    resource);
             assertThat(response.getType(), is(KieServiceResponse.ResponseType.SUCCESS));
         }
     }
@@ -140,9 +145,53 @@ class ProcessMigrationIT extends AbstractBaseIT {
         assertThat(migration.getFinishedAt(), notNullValue());
         assertThat(migration.getCancelledAt(), nullValue());
         assertThat(migration.getErrorMessage(), nullValue());
-        assertThat(migration.getReports(), empty());
         assertThat(migration.getDefinition(), notNullValue());
         assertThat(migration.getDefinition().getRequester(), is(PIM_USERNAME));
+
+        String migrationResults = given()
+                .auth()
+                .basic(PIM_USERNAME, PIM_PASSWORD)
+                .contentType(MediaType.APPLICATION_JSON)
+                .get("/rest/migrations/" + migration.getId() + "/results")
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .extract()
+                .body()
+                .asString();
+
+        List<MigrationReportDto> reports = mapper.readValue(migrationResults,
+                new TypeReference<List<MigrationReportDto>>() {
+                });
+
+        assertThat(reports, hasSize(1));
+        assertThat(reports.get(0).getId(), notNullValue());
+        assertThat(reports.get(0).getMigrationId(), equalTo(migration.getId()));
+        assertThat(reports.get(0).getStartDate(), notNullValue());
+        assertThat(reports.get(0).getEndDate(), notNullValue());
+        assertThat(reports.get(0).getProcessInstanceId(), notNullValue());
+        assertThat(reports.get(0).getSuccessful(), equalTo(Boolean.TRUE));
+
+        String migrationLog = given()
+                .auth()
+                .basic(PIM_USERNAME, PIM_PASSWORD)
+                .contentType(MediaType.APPLICATION_JSON)
+                .get("/rest/migrations/" + migration.getId() + "/results/" + reports.get(0).getId())
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .extract()
+                .body()
+                .asString();
+
+        MigrationReport report = mapper.readValue(migrationLog, MigrationReport.class);
+
+        assertThat(report, notNullValue());
+        assertThat(report.getId(), equalTo(reports.get(0).getId()));
+        assertThat(report.getStartDate(), equalTo(reports.get(0).getStartDate()));
+        assertThat(report.getEndDate(), equalTo(reports.get(0).getEndDate()));
+        assertThat(report.getSuccessful(), equalTo(reports.get(0).getSuccessful()));
+        assertThat(report.getMigrationId(), equalTo(reports.get(0).getMigrationId()));
+        assertThat(report.getProcessInstanceId(), equalTo(reports.get(0).getProcessInstanceId()));
+        assertThat(report.getLogs(), notNullValue());
     }
 
     private Plan createPlan() throws IOException {
@@ -181,7 +230,8 @@ class ProcessMigrationIT extends AbstractBaseIT {
     }
 
     private KieServicesClient createClient() {
-        KieServicesConfiguration configuration = KieServicesFactory.newRestConfiguration(KIE_ENDPOINT, KIE_USERNAME, KIE_PASSWORD);
+        KieServicesConfiguration configuration = KieServicesFactory.newRestConfiguration(KIE_ENDPOINT, KIE_USERNAME,
+                KIE_PASSWORD);
         configuration.setTimeout(60000);
         configuration.setMarshallingFormat(MarshallingFormat.JSON);
         return KieServicesFactory.newKieServicesClient(configuration);
