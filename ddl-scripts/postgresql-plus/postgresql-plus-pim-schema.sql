@@ -1,48 +1,48 @@
-create sequence MIG_REP_ID_SEQ start with 1 increment by 50;
-create sequence MIGRATION_ID_SEQ start with 1 increment by 50;
-create sequence PLAN_ID_SEQ start with 1 increment by 50;
+create sequence MIG_REP_ID_SEQ start 1 increment 50;
+create sequence MIGRATION_ID_SEQ start 1 increment 50;
+create sequence PLAN_ID_SEQ start 1 increment 50;
 
 create table migration_report_logs (
-    report_id bigint not null,
-    log varchar(MAX)
+    report_id int8 not null,
+    log oid
 );
 
 create table migration_reports (
-    id bigint not null,
-    end_date datetime2,
-    migration_id bigint,
-    process_instance_id bigint,
-    start_date datetime2,
-    success bit,
+    id int8 not null,
+    end_date timestamp,
+    migration_id int8,
+    process_instance_id int8,
+    start_date timestamp,
+    success boolean,
     primary key (id)
 );
 
 create table migrations (
-    id bigint not null,
-    cancelled_at datetime2,
-    created_at datetime2,
-    callback_url varbinary(255),
-    scheduled_start_time datetime2,
-    execution_type int,
+    id int8 not null,
+    cancelled_at timestamp,
+    created_at timestamp,
+    callback_url bytea,
+    scheduled_start_time timestamp,
+    execution_type int4,
     kieServerId varchar(255),
-    plan_id bigint,
+    plan_id int8,
     requester varchar(255),
-    error_message varchar(MAX),
-    finished_at datetime2,
-    started_at datetime2,
-    status int,
+    error_message oid,
+    finished_at timestamp,
+    started_at timestamp,
+    status int4,
     primary key (id)
 );
 
 create table plan_mappings (
-    plan_id bigint not null,
+    plan_id int8 not null,
     target varchar(255),
     source varchar(255) not null,
     primary key (plan_id, source)
 );
 
 create table plans (
-    id bigint not null,
+    id int8 not null,
     description varchar(255),
     name varchar(255),
     source_container_id varchar(255),
@@ -53,9 +53,10 @@ create table plans (
 );
 
 create table process_instance_ids (
-    migration_definition_id bigint not null,
-    processInstanceIds bigint
+    migration_definition_id int8 not null,
+    processInstanceIds int8
 );
+
 create index IDX_MigrationReports_Id on migration_reports (migration_id);
 
 alter table migration_report_logs

@@ -33,11 +33,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.transaction.Transactional;
 
 import org.kie.server.api.model.admin.MigrationReportInstance;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -82,6 +82,11 @@ public class MigrationReport extends PanacheEntityBase {
             joinColumns = @JoinColumn(name = "report_id")
     )
     private List<String> logs;
+
+    @Transactional
+    public static List<MigrationReport> listByMigrationId(Long id) {
+        return list("migrationId", id);
+    }
 
     public MigrationReport() {
     }

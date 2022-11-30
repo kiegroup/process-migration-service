@@ -1,15 +1,15 @@
 alter table migration_report_logs
-   drop
-   foreign key if exists FKj8bsydiucvs2kygnscp1bt1wy;
-alter table migration_reports
-   drop
-   foreign key if exists FK98ckwvu4fyt55u6sq680xwkmx;
+    drop
+    foreign key if exists FKj8bsydiucvs2kygnscp1bt1wy;
+
 alter table plan_mappings
-   drop
-   foreign key if exists FKk892t85t9vt1xe6vf9nqwgqoh;
+    drop
+    foreign key if exists FKk892t85t9vt1xe6vf9nqwgqoh;
+
 alter table process_instance_ids
-   drop
-   foreign key if exists FKobucfuy73fgsmkncl9q2rv6ko;
+    drop
+    foreign key if exists FKobucfuy73fgsmkncl9q2rv6ko;
+
 drop table if exists migration_report_logs;
 drop table if exists migration_reports;
 drop table if exists migrations;
