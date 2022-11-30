@@ -29,6 +29,7 @@ import java.util.Optional;
 public class PlanServiceImpl implements PlanService {
 
     @Override
+    @Transactional
     public List<Plan> findAll() {
         return Plan.listAll();
     }
