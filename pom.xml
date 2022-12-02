@@ -29,14 +29,14 @@
     <version.org.kie.server>${project.version}</version.org.kie.server>
     <version.org.mockito>3.7.7</version.org.mockito>
     <version.org.projectlombok.lombok>1.18.16</version.org.projectlombok.lombok>
-    <h2.version>1.4.197</h2.version>
+    <h2.version>2.1.214</h2.version>
     <version.org.apache.maven>3.3.9</version.org.apache.maven> <!-- Need to force the version of the maven-core artifact to be in sync with kie. Otherwise it might pick a wrong version coming from quarkus bom import -->
     <version.org.codehaus.mojo.sql-maven-plugin>1.5</version.org.codehaus.mojo.sql-maven-plugin>
     <version.cargo-maven3-plugin>1.10.4</version.cargo-maven3-plugin>
 
     <!-- Quarkus database setup -->
     <maven.jdbc.db-kind>h2</maven.jdbc.db-kind>
-    <maven.jdbc.url>jdbc:h2:file:./target/testdb;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE</maven.jdbc.url>
+    <maven.jdbc.url>jdbc:h2:file:./target/testdb;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE;NON_KEYWORDS=VALUE</maven.jdbc.url>
     <maven.jdbc.username>sa</maven.jdbc.username>
     <maven.jdbc.password>sa</maven.jdbc.password>
     <maven.jdbc.schema>PUBLIC</maven.jdbc.schema>
@@ -54,7 +54,7 @@
     <container.port>8080</container.port>
     <version.org.wildfly>23.0.2.Final</version.org.wildfly>
     <cargo.container.id>valid-id-needs-to-be-specified-in-appropriate-container-profile</cargo.container.id>
-    <org.kie.server.datasource.connection.url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1</org.kie.server.datasource.connection.url>
+    <org.kie.server.datasource.connection.url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;NON_KEYWORDS=VALUE;MODE=LEGACY</org.kie.server.datasource.connection.url>
     <org.kie.server.persistence.dialect>org.hibernate.dialect.H2Dialect</org.kie.server.persistence.dialect>
     <org.kie.server.datasource.driver.class>org.h2.jdbcx.JdbcDataSource</org.kie.server.datasource.driver.class>
     <org.kie.server.datasource.username>sa</org.kie.server.datasource.username>
