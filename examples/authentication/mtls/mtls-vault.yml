@@ -10,7 +10,6 @@ quarkus:
       certificate:
         credentials-provider: quarkus.file.vault.provider.pim
         key-store-file: config/server-keystore.jks
-        key-store-alias: pim
         trust-store-file: config/server-truststore.jks
         key-store-password-key: keystore-password
         trust-store-password-key: truststore-password
