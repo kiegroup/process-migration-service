@@ -18,11 +18,22 @@ module.exports = {
     rules: [
       {
         test: /\.(png|jpg|gif)$/i,
-        loader: ["url-loader"]
+        use: [
+          {
+            loader: 'url-loader'
+          }
+        ]
       },
       {
         test: /\.css$/,
-        loader: ["style-loader", "css-loader"]
+        use: [
+          {
+            loader: 'style-loader'
+          },
+          {
+            loader: 'css-loader'
+          }
+        ]
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/,

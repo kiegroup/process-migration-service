@@ -73,6 +73,12 @@ public class MigrationResource {
         return Response.ok(migrationService.getResults(id)).build();
     }
 
+    @GET
+    @Path("/{id}/results/{logId}")
+    public Response getResultLog(@PathParam("id") Long id, @PathParam("logId") Long logId) {
+        return Response.ok(migrationService.getReport(logId)).build();
+    }
+
     @POST
     public Response submit(@Context HttpHeaders headers, MigrationDefinition definition) throws InvalidMigrationException {
         setRequester(definition);

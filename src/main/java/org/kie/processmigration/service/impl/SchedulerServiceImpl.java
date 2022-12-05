@@ -20,7 +20,6 @@ import java.util.Date;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.kie.processmigration.model.Migration;
 import org.kie.processmigration.model.exceptions.InvalidMigrationException;
@@ -94,7 +93,6 @@ public class SchedulerServiceImpl implements SchedulerService {
         MigrationService migrationService;
 
         @Override
-        @Transactional
         public void execute(JobExecutionContext jobExecutionContext) {
             Long migrationId = Long.valueOf(jobExecutionContext
                     .getJobDetail().getKey().getName());

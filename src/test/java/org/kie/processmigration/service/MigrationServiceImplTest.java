@@ -31,9 +31,10 @@ import org.junit.jupiter.api.Test;
 import org.kie.processmigration.model.Execution;
 import org.kie.processmigration.model.Migration;
 import org.kie.processmigration.model.MigrationDefinition;
-import org.kie.processmigration.model.MigrationReport;
+import org.kie.processmigration.model.MigrationReportDto;
 import org.kie.processmigration.model.Plan;
 import org.kie.processmigration.model.ProcessRef;
+import org.kie.processmigration.model.exceptions.InvalidKieServerException;
 import org.kie.processmigration.model.exceptions.InvalidMigrationException;
 import org.kie.processmigration.model.exceptions.MigrationNotFoundException;
 import org.kie.processmigration.model.exceptions.PlanNotFoundException;
@@ -103,8 +104,10 @@ class MigrationServiceImplTest {
     @Test
     void testValidatePlan() throws InvalidMigrationException, PlanNotFoundException {
         Plan plan = new Plan()
-                .setSource(new ProcessRef().setContainerId("source-container").setProcessId("source-process"))
-                .setTarget(new ProcessRef().setContainerId("target-container").setProcessId("target-process"))
+                .setSource(new ProcessRef().setContainerId("source-container")
+                        .setProcessId("source-process"))
+                .setTarget(new ProcessRef().setContainerId("target-container")
+                        .setProcessId("target-process"))
                 .setName("migrationPlan");
         MigrationDefinition definition = new MigrationDefinition();
         definition.setPlanId(11L);
@@ -114,7 +117,9 @@ class MigrationServiceImplTest {
                 .setScheduledStartTime(Instant.now().plus(1, ChronoUnit.MINUTES)));
         when(kieService.hasKieServer(definition.getKieServerId())).thenReturn(Boolean.TRUE);
 
-        when(planService.get(definition.getPlanId())).thenThrow(new PlanNotFoundException(definition.getPlanId())).thenReturn(plan);
+        when(planService.get(definition.getPlanId()))
+                .thenThrow(new PlanNotFoundException(definition.getPlanId()))
+                .thenReturn(plan);
         assertThrows(InvalidMigrationException.class, () -> migrationService.submit(definition));
 
         when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getSource()))
@@ -133,19 +138,25 @@ class MigrationServiceImplTest {
     }
 
     @Test
-    void testScheduleMigration() throws InvalidMigrationException, PlanNotFoundException, MigrationNotFoundException {
+    void testScheduleMigration()
+            throws InvalidMigrationException, PlanNotFoundException, MigrationNotFoundException {
         Plan plan = new Plan()
-                .setSource(new ProcessRef().setContainerId("source-container").setProcessId("source-process"))
-                .setTarget(new ProcessRef().setContainerId("target-container").setProcessId("target-process"))
+                .setSource(new ProcessRef().setContainerId("source-container")
+                        .setProcessId("source-process"))
+                .setTarget(new ProcessRef().setContainerId("target-container")
+                        .setProcessId("target-process"))
                 .setName("migrationPlan");
         MigrationDefinition definition = new MigrationDefinition();
         definition.setPlanId(11L);
         definition.setKieServerId("foo");
-        definition.setExecution(new Execution().setType(Execution.ExecutionType.ASYNC).setScheduledStartTime(Instant.now().plus(1, ChronoUnit.MINUTES)));
+        definition.setExecution(new Execution().setType(Execution.ExecutionType.ASYNC)
+                .setScheduledStartTime(Instant.now().plus(1, ChronoUnit.MINUTES)));
         when(kieService.hasKieServer(definition.getKieServerId())).thenReturn(Boolean.TRUE);
         when(planService.get(11L)).thenReturn(plan);
-        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getSource())).thenReturn(Boolean.TRUE);
-        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getTarget())).thenReturn(Boolean.TRUE);
+        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getSource()))
+                .thenReturn(Boolean.TRUE);
+        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getTarget()))
+                .thenReturn(Boolean.TRUE);
 
         Migration migration = migrationService.submit(definition);
 
@@ -154,12 +165,14 @@ class MigrationServiceImplTest {
     }
 
     @Test
-    void testSubmitSyncMigration() throws InvalidMigrationException, PlanNotFoundException, MigrationNotFoundException {
+    void testSubmitSyncMigration() throws PlanNotFoundException, InvalidKieServerException {
         // Given
         assertThat(migrationService, notNullValue());
         Plan plan = new Plan()
-                .setSource(new ProcessRef().setContainerId("source-container").setProcessId("source-process"))
-                .setTarget(new ProcessRef().setContainerId("target-container").setProcessId("target-process"))
+                .setSource(new ProcessRef().setContainerId("source-container")
+                        .setProcessId("source-process"))
+                .setTarget(new ProcessRef().setContainerId("target-container")
+                        .setProcessId("target-process"))
                 .setName("migrationPlan");
         MigrationDefinition definition = new MigrationDefinition();
         definition.setRequester("requester");
@@ -169,13 +182,17 @@ class MigrationServiceImplTest {
 
         when(planService.get(11L)).thenReturn(plan);
         when(kieService.hasKieServer(definition.getKieServerId())).thenReturn(Boolean.TRUE);
-        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getSource())).thenReturn(Boolean.TRUE);
-        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getTarget())).thenReturn(Boolean.TRUE);
+        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getSource()))
+                .thenReturn(Boolean.TRUE);
+        when(kieService.existsProcessDefinition(definition.getKieServerId(), plan.getTarget()))
+                .thenReturn(Boolean.TRUE);
 
         QueryServicesClient mockQueryServicesClient = mock(QueryServicesClient.class);
-        when(kieService.getQueryServicesClient(definition.getKieServerId())).thenReturn(mockQueryServicesClient);
+        when(kieService.getQueryServicesClient(definition.getKieServerId()))
+                .thenReturn(mockQueryServicesClient);
         ProcessAdminServicesClient mockAdminServicesClient = mock(ProcessAdminServicesClient.class);
-        when(kieService.getProcessAdminServicesClient(definition.getKieServerId())).thenReturn(mockAdminServicesClient);
+        when(kieService.getProcessAdminServicesClient(definition.getKieServerId()))
+                .thenReturn(mockAdminServicesClient);
 
         List<ProcessInstance> instances = new ArrayList<>();
         ProcessInstance instance = new ProcessInstance();
@@ -183,13 +200,17 @@ class MigrationServiceImplTest {
         instance.setContainerId("source-container");
         instance.setProcessId("source-process");
         instances.add(instance);
-        when(mockQueryServicesClient.findProcessInstancesByContainerId(eq(plan.getSource().getContainerId()), anyList(), anyInt(), anyInt())).thenReturn(instances);
+        when(mockQueryServicesClient.findProcessInstancesByContainerId(eq(plan.getSource().getContainerId()),
+                anyList(),
+                anyInt(), anyInt())).thenReturn(instances);
         when(mockQueryServicesClient.findProcessInstanceById(instance.getId())).thenReturn(instance);
 
         List.of(createReport(instance.getId(), true), createReport(instance.getId(), false))
                 .forEach(r -> {
                     try {
-                        when(mockAdminServicesClient.migrateProcessInstance(anyString(), anyLong(), anyString(), anyString(), anyMap())).thenReturn(r);
+                        when(mockAdminServicesClient.migrateProcessInstance(anyString(),
+                                anyLong(), anyString(),
+                                anyString(), anyMap())).thenReturn(r);
 
                         // When
                         migrationService.submit(definition);
@@ -201,28 +222,36 @@ class MigrationServiceImplTest {
                         assertThat(migrations, hasSize(1));
                         Migration migration = migrations.get(0);
                         if (r.isSuccessful()) {
-                            assertThat(migration.getStatus(), is(Execution.ExecutionStatus.COMPLETED));
+                            assertThat(migration.getStatus(),
+                                    is(Execution.ExecutionStatus.COMPLETED));
                         } else {
-                            assertThat(migration.getStatus(), is(Execution.ExecutionStatus.FAILED));
+                            assertThat(migration.getStatus(),
+                                    is(Execution.ExecutionStatus.FAILED));
                         }
                         assertThat(migration.getCancelledAt(), nullValue());
                         assertThat(migration.getStartedAt(), notNullValue());
                         assertThat(migration.getFinishedAt(), notNullValue());
-                        List<MigrationReport> results = migrationService.getResults(migration.getId());
+                        List<MigrationReportDto> results = migrationService
+                                .getResults(migration.getId());
                         assertThat(results, hasSize(1));
-                        assertThat(results.get(0).getProcessInstanceId(), is(r.getProcessInstanceId()));
+                        assertThat(results.get(0).getProcessInstanceId(),
+                                is(r.getProcessInstanceId()));
                         assertThat(results.get(0).getSuccessful(), is(r.isSuccessful()));
-                        assertThat(results.get(0).getStartDate(), is(r.getStartDate().toInstant()));
+                        assertThat(results.get(0).getStartDate(),
+                                is(r.getStartDate().toInstant()));
                         assertThat(results.get(0).getEndDate(), is(r.getEndDate().toInstant()));
                         assertThat(results.get(0).getMigrationId(), is(migration.getId()));
-                        assertThat(results.get(0).getLogs(), containsInAnyOrder(r.getLogs().toArray()));
+
+                        assertThat(migrationService.getReport(results.get(0).getId()).getLogs(),
+                                containsInAnyOrder(r.getLogs().toArray()));
 
                         migrationService.delete(migration.getId());
                     } catch (MigrationNotFoundException | InvalidMigrationException e) {
                         fail("Unexpected exception", e);
                     }
                 });
-        verify(mockAdminServicesClient, times(2)).migrateProcessInstance(anyString(), anyLong(), anyString(), anyString(), anyMap());
+        verify(mockAdminServicesClient, times(2)).migrateProcessInstance(anyString(), anyLong(), anyString(),
+                anyString(), anyMap());
     }
 
     private MigrationReportInstance createReport(Long instanceId, boolean successful) {

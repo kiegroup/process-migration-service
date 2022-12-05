@@ -31,6 +31,7 @@ import javax.persistence.EntityManagerFactory;
 import io.agroal.api.AgroalDataSource;
 import io.quarkus.test.junit.mockito.InjectMock;
 import lombok.SneakyThrows;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.kie.processmigration.listener.CountDownJobListener;
@@ -38,6 +39,7 @@ import org.kie.processmigration.model.Execution;
 import org.kie.processmigration.model.Migration;
 import org.kie.processmigration.model.MigrationDefinition;
 import org.kie.processmigration.model.MigrationReport;
+import org.kie.processmigration.model.MigrationReportDto;
 import org.kie.processmigration.model.Plan;
 import org.kie.processmigration.model.ProcessRef;
 import org.kie.processmigration.model.exceptions.InvalidMigrationException;
@@ -58,7 +60,7 @@ import org.quartz.TriggerKey;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
@@ -164,8 +166,16 @@ public abstract class AbstractScriptsBaseTest {
         assertThat(migration.getFinishedAt(), executionType == ASYNC ? nullValue() : notNullValue());
         assertThat(migration.getCancelledAt(), nullValue());
         assertThat(migration.getErrorMessage(), nullValue());
-        assertThat(migration.getReports(), empty());
         assertThat(migration.getDefinition(), notNullValue());
+        
+        List<MigrationReport> reports = MigrationReport.listByMigrationId(migration.getId());
+        assertThat(reports, hasSize(1));
+        assertThat(reports.get(0).getId(), notNullValue());
+        assertThat(reports.get(0).getMigrationId(), equalTo(migration.getId()));
+        assertThat(reports.get(0).getStartDate(), notNullValue());
+        assertThat(reports.get(0).getEndDate(), notNullValue());
+        assertThat(reports.get(0).getProcessInstanceId(), notNullValue());
+        assertThat(reports.get(0).getSuccessful(), equalTo(Boolean.TRUE));
     }
 
     protected void testSimpleMigration(Execution execution, PlanService planService,
@@ -203,8 +213,7 @@ public abstract class AbstractScriptsBaseTest {
 
         // When
         Migration migration = migrationService.submit(definition);
-        assertMigration(migration, execution.getType());
-
+  
         // Then
         if (execution.getType() == ASYNC) {
             assertThat(scheduler.checkExists(new JobKey(migration.getId().toString())), is(Boolean.TRUE));
@@ -213,6 +222,7 @@ public abstract class AbstractScriptsBaseTest {
                 fail("Failed while waiting for the jobs to be completed");
             }
         }
+        assertMigration(migration, execution.getType());
 
         // Then
         List<Migration> migrations = migrationService.findAll();
@@ -225,14 +235,15 @@ public abstract class AbstractScriptsBaseTest {
         assertThat(migration.getCancelledAt(), nullValue());
         assertThat(migration.getStartedAt(), notNullValue());
         assertThat(migration.getFinishedAt(), notNullValue());
-        List<MigrationReport> results = migrationService.getResults(migration.getId());
+        List<MigrationReportDto> results = migrationService.getResults(migration.getId());
         assertThat(results, hasSize(1));
         assertThat(results.get(0).getProcessInstanceId(), is(report.getProcessInstanceId()));
         assertThat(results.get(0).getSuccessful(), is(report.isSuccessful()));
         assertThat(results.get(0).getStartDate(), is(report.getStartDate().toInstant()));
         assertThat(results.get(0).getEndDate(), is(report.getEndDate().toInstant()));
         assertThat(results.get(0).getMigrationId(), is(migration.getId()));
-        assertThat(results.get(0).getLogs(), containsInAnyOrder(report.getLogs().toArray()));
+        assertThat(migrationService.getReport(results.get(0).getId()).getLogs(),
+                                containsInAnyOrder(report.getLogs().toArray()));
 
         migrationService.delete(migration.getId());
 

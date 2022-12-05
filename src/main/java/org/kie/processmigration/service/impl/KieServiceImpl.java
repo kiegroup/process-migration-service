@@ -16,6 +16,7 @@
 
 package org.kie.processmigration.service.impl;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,6 +37,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.kie.processmigration.model.BpmNode;
 import org.kie.processmigration.model.KieServerConfig;
 import org.kie.processmigration.model.ProcessInfo;
@@ -78,7 +80,7 @@ import static io.quarkus.credentials.CredentialsProvider.USER_PROPERTY_NAME;
 @Startup
 public class KieServiceImpl implements KieService {
 
-    private static final long CONFIGURATION_TIMEOUT = 60000;
+    private static final String CONFIGURATION_TIMEOUT = "60S";
     private static final Integer DEFAULT_PAGE_SIZE = 100;
     private static final long AWAIT_EXECUTOR = 5;
     private static final long RETRY_DELAY = 2;
@@ -94,6 +96,9 @@ public class KieServiceImpl implements KieService {
     private CredentialsProvider credentialsProvider = CredentialsProviderFinder.find("quarkus.file.vault");
     final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     final Collection<KieServerConfig> configs = new ArrayList<>();
+
+    @ConfigProperty(name = "quarkus.http.read-timeout", defaultValue = CONFIGURATION_TIMEOUT)
+    Duration httpReadTimeout;
 
     @Inject
     KieServers kieServers;
@@ -301,7 +306,7 @@ public class KieServiceImpl implements KieService {
 
     private KieServicesClient createKieServicesClient(KieServerConfig config) {
         KieServicesConfiguration configuration = KieServicesFactory.newRestConfiguration(config.getHost(), config.getCredentialsProvider());
-        configuration.setTimeout(CONFIGURATION_TIMEOUT);
+        configuration.setTimeout(httpReadTimeout.toMillis());
         configuration.setMarshallingFormat(MarshallingFormat.JSON);
         if (cert.clientCert().isPresent()) {
             configuration.setClientCertificate(new ClientCertificate()
