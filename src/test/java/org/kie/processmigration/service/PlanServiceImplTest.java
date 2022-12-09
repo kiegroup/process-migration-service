@@ -22,7 +22,6 @@ import javax.inject.Inject;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.processmigration.model.Plan;

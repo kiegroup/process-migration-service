@@ -40,6 +40,7 @@ import org.kie.processmigration.model.Execution.ExecutionType;
 import org.kie.processmigration.model.Migration;
 import org.kie.processmigration.model.MigrationDefinition;
 import org.kie.processmigration.model.MigrationReport;
+import org.kie.processmigration.model.MigrationReportDto;
 import org.kie.processmigration.model.Plan;
 import org.kie.processmigration.model.exceptions.InvalidKieServerException;
 import org.kie.processmigration.model.exceptions.InvalidMigrationException;
@@ -83,6 +84,7 @@ public class MigrationServiceImpl implements MigrationService {
     TransactionHelper txHelper;
 
     @Override
+    @Transactional
     public Migration get(Long id) throws MigrationNotFoundException {
         Optional<Migration> migration = Migration.findByIdOptional(id);
         return migration.orElseThrow(() -> new MigrationNotFoundException(id));
@@ -90,14 +92,21 @@ public class MigrationServiceImpl implements MigrationService {
 
     @Override
     @Transactional
-    public List<MigrationReport> getResults(Long id) throws MigrationNotFoundException {
+    public List<MigrationReportDto> getResults(Long id) throws MigrationNotFoundException {
         Migration m = get(id);
-        return MigrationReport.find("migration_id", m.getId()).list();
+        return MigrationReport.stream("migration_id", m.getId()).map(r -> new MigrationReportDto((MigrationReport) r)).collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
+    public MigrationReport getReport(Long logId) {
+        return MigrationReport.findById(logId);
+    }
+
+    @Override
+    @Transactional
     public List<Migration> findAll() {
-        return Migration.findAll().list();
+        return Migration.listAll();
     }
 
     @Override
@@ -131,6 +140,7 @@ public class MigrationServiceImpl implements MigrationService {
     }
 
     @Override
+    @Transactional
     public Migration update(Long id, MigrationDefinition definition) throws MigrationNotFoundException, ReScheduleException, InvalidMigrationException {
         validateDefinition(definition);
         Migration migration = get(id);
@@ -265,9 +275,11 @@ public class MigrationServiceImpl implements MigrationService {
     private List<Long> getInstancesToMigrate(Migration migration) throws InvalidKieServerException, PlanNotFoundException {
         List<Long> instanceIds = Optional.ofNullable(migration.getDefinition().getProcessInstanceIds()).orElse(new ArrayList<>());
         List<Long> migratedInstances = new ArrayList<>();
-        if (migration.getReports() != null && !migration.getReports().isEmpty()) {
-            migration.getReports().stream().map(MigrationReport::getProcessInstanceId).forEach(migratedInstances::add);
-        }
+        MigrationReport.listByMigrationId(migration.getId())
+                .stream()
+                .map(MigrationReport::getProcessInstanceId)
+                .forEach(migratedInstances::add);
+
         Plan plan = planService.get(migration.getDefinition().getPlanId());
         String processId = plan.getSource().getProcessId();
         if (instanceIds.isEmpty()) {
