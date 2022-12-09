@@ -5,22 +5,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 2,
@@ -28,22 +13,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 3,
@@ -51,22 +21,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 4,
@@ -74,22 +29,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 5,
@@ -97,22 +37,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 6,
@@ -120,22 +45,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 7,
@@ -143,22 +53,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 8,
@@ -166,22 +61,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 9,
@@ -189,22 +69,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 10,
@@ -212,22 +77,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 11,
@@ -235,22 +85,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 12,
@@ -258,22 +93,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 13,
@@ -281,22 +101,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 14,
@@ -304,22 +109,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 15,
@@ -327,22 +117,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 16,
@@ -350,22 +125,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.853Z",
-      "successful": false,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": false
     },
     {
       "id": 17,
@@ -373,22 +133,7 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.738Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     },
     {
       "id": 18,
@@ -396,21 +141,6 @@
       "processInstanceId": null,
       "startDate": "2019-02-03T21:17:54.739Z",
       "endDate": "2019-02-03T21:17:54.854Z",
-      "successful": true,
-      "logs": [
-        "INFO Sun Feb 03 16:17:54 EST 2019 Variable instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Node instances updated = 3 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Process instances updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task variables updated = 4 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Task audit updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Tasks updated = 1 for process instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Context info updated = 0 for process instance id 1",
-        "WARN Sun Feb 03 16:17:54 EST 2019 Source and target process id is exactly the same (evaluation) it's recommended to use unique process ids",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs to be updated  = [1]",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Node instance logs updated = 1 for node instance id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task audit updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Mapping: Task updated = 1 for task id 1",
-        "INFO Sun Feb 03 16:17:54 EST 2019 Migration of process instance (1) completed successfully to process evaluation"
-      ]
+      "successful": true
     }
   ]

@@ -11,6 +11,7 @@ import {
 } from "patternfly-react";
 
 import { MigrationLog } from "./MigrationLog";
+import MigrationClient from "../../clients/migrationClient";
 import AdvancedTable from "../common/AdvancedTable";
 
 const tooltipViewLog = (
@@ -21,7 +22,6 @@ const tooltipViewLog = (
 
 const PrimaryLogDetailsContent = props => {
   const { log } = props;
-
   if (log != null && log != "") {
     return (
       <Table.Actions key="1">
@@ -222,7 +222,9 @@ export default class PageViewMigrationLogs extends Component {
   }
 
   showLogDetails = log => {
-    this.setState({ isLogDetailsShown: true, currentLogData: log });
+    MigrationClient.getResultDetail(log.migrationId, log.id).then(report => {
+      this.setState({ isLogDetailsShown: true, currentLogData: report });
+    });
   };
 
   hideLogDetails = () => {

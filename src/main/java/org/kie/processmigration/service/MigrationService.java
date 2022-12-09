@@ -21,6 +21,7 @@ import java.util.List;
 import org.kie.processmigration.model.Migration;
 import org.kie.processmigration.model.MigrationDefinition;
 import org.kie.processmigration.model.MigrationReport;
+import org.kie.processmigration.model.MigrationReportDto;
 import org.kie.processmigration.model.exceptions.InvalidMigrationException;
 import org.kie.processmigration.model.exceptions.MigrationNotFoundException;
 import org.kie.processmigration.model.exceptions.ReScheduleException;
@@ -29,7 +30,7 @@ public interface MigrationService {
 
     Migration get(Long id) throws MigrationNotFoundException;
 
-    List<MigrationReport> getResults(Long id) throws MigrationNotFoundException;
+    List<MigrationReportDto> getResults(Long id) throws MigrationNotFoundException;
 
     List<Migration> findAll();
 
@@ -42,4 +43,6 @@ public interface MigrationService {
     Migration migrate(Migration migration) throws InvalidMigrationException;
 
     List<Migration> findPending();
+
+    MigrationReport getReport(Long id);
 }

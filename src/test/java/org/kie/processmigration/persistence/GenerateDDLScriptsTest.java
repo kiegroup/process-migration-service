@@ -38,6 +38,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Utility class for generating DDL scripts (create and drop) please ignore it.
+ * Rename peristence-generate-ddls.xml to persistence.xml
  */
 @Disabled
 public class GenerateDDLScriptsTest {
