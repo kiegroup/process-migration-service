@@ -21,7 +21,7 @@ create table migrations (
     id bigint not null,
     cancelled_at timestamp,
     created_at timestamp,
-    callback_url binary(255),
+    callback_url varbinary(255),
     scheduled_start_time timestamp,
     execution_type integer,
     kieServerId varchar(255),

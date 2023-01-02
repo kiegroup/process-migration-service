@@ -1,0 +1,15 @@
+quarkus:
+  file:
+    vault:
+      provider:
+        pim:
+          path: config/pimvault.p12
+          secret: ${vault.storepassword} # This will be provided as a property
+  http:
+    ssl:
+      certificate:
+        credentials-provider: quarkus.file.vault.provider.pim
+        key-store-file: config/server-keystore.jks
+        trust-store-file: config/server-truststore.jks
+        key-store-password-key: keystore-password
+        trust-store-password-key: truststore-password
