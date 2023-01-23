@@ -23,19 +23,20 @@
     <maven.skip.it.tests>false</maven.skip.it.tests>
     <version.com.fasterxml.jackson.core.jackson-databind>2.13.2.2</version.com.fasterxml.jackson.core.jackson-databind>
     <version.frontend.plugin>1.12.0</version.frontend.plugin>
-    <version.io.quarkus>2.7.5.Final</version.io.quarkus>
+    <version.io.quarkus>2.13.4.Final</version.io.quarkus>
     <version.io.quarkiverse.file-vault>0.7.1</version.io.quarkiverse.file-vault>
     <version.org.github.tomakehurst.wiremock-jre8>2.27.2</version.org.github.tomakehurst.wiremock-jre8>
     <version.org.kie.server>${project.version}</version.org.kie.server>
     <version.org.mockito>3.7.7</version.org.mockito>
     <version.org.projectlombok.lombok>1.18.16</version.org.projectlombok.lombok>
-    <version.com.h2database>1.4.197</version.com.h2database>
+    <h2.version>2.1.214</h2.version>
     <version.org.apache.maven>3.3.9</version.org.apache.maven> <!-- Need to force the version of the maven-core artifact to be in sync with kie. Otherwise it might pick a wrong version coming from quarkus bom import -->
     <version.org.codehaus.mojo.sql-maven-plugin>1.5</version.org.codehaus.mojo.sql-maven-plugin>
+    <version.cargo-maven3-plugin>1.10.4</version.cargo-maven3-plugin>
 
     <!-- Quarkus database setup -->
     <maven.jdbc.db-kind>h2</maven.jdbc.db-kind>
-    <maven.jdbc.url>jdbc:h2:file:./target/testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE</maven.jdbc.url>
+    <maven.jdbc.url>jdbc:h2:file:./target/testdb;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE;NON_KEYWORDS=VALUE</maven.jdbc.url>
     <maven.jdbc.username>sa</maven.jdbc.username>
     <maven.jdbc.password>sa</maven.jdbc.password>
     <maven.jdbc.schema>PUBLIC</maven.jdbc.schema>
@@ -53,7 +54,7 @@
     <container.port>8080</container.port>
     <version.org.wildfly>23.0.2.Final</version.org.wildfly>
     <cargo.container.id>valid-id-needs-to-be-specified-in-appropriate-container-profile</cargo.container.id>
-    <org.kie.server.datasource.connection.url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</org.kie.server.datasource.connection.url>
+    <org.kie.server.datasource.connection.url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;NON_KEYWORDS=VALUE;MODE=LEGACY</org.kie.server.datasource.connection.url>
     <org.kie.server.persistence.dialect>org.hibernate.dialect.H2Dialect</org.kie.server.persistence.dialect>
     <org.kie.server.datasource.driver.class>org.h2.jdbcx.JdbcDataSource</org.kie.server.datasource.driver.class>
     <org.kie.server.datasource.username>sa</org.kie.server.datasource.username>
@@ -106,6 +107,11 @@
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <version>${h2.version}</version>
+      </dependency>	    
       <dependency>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-bom</artifactId>
@@ -360,7 +366,7 @@
             <dependency>
               <groupId>com.h2database</groupId>
               <artifactId>h2</artifactId>
-              <version>${version.com.h2database}</version>
+              <version>${h2.version}</version>
             </dependency>
           </dependencies>
           <configuration>
@@ -460,6 +466,7 @@
       <plugin>
         <groupId>org.codehaus.cargo</groupId>
         <artifactId>cargo-maven3-plugin</artifactId>
+        <version>${version.cargo-maven3-plugin}</version>
         <configuration>
           <container>
             <containerId>${cargo.container.id}</containerId>
