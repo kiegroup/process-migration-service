@@ -34,6 +34,8 @@
     <version.org.codehaus.mojo.sql-maven-plugin>1.5</version.org.codehaus.mojo.sql-maven-plugin>
     <version.cargo-maven3-plugin>1.10.4</version.cargo-maven3-plugin>
     <version.org.yaml.snakeyaml>2.0</version.org.yaml.snakeyaml>
+    <version.io.vertx-web>4.3.8</version.io.vertx-web>
+    <version.io.vertx-core>4.5.3</version.io.vertx-core>
 
     <!-- Quarkus database setup -->
     <maven.jdbc.db-kind>h2</maven.jdbc.db-kind>
@@ -222,12 +224,12 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
-      <version>4.5.3</version>
+      <version>${version.io.vertx-core}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
-      <version>4.3.8</version>
+      <version>${version.io.vertx-web}</version>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
