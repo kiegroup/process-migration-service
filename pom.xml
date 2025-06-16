@@ -34,6 +34,7 @@
     <version.org.codehaus.mojo.sql-maven-plugin>1.5</version.org.codehaus.mojo.sql-maven-plugin>
     <version.cargo-maven3-plugin>1.10.4</version.cargo-maven3-plugin>
     <version.org.yaml.snakeyaml>2.0</version.org.yaml.snakeyaml>
+    <version.io.netty>4.1.118.Final</version.io.netty>
 
     <!-- Quarkus database setup -->
     <maven.jdbc.db-kind>h2</maven.jdbc.db-kind>
@@ -315,7 +316,7 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-handler</artifactId>
-      <version>4.1.118.Final</version>
+      <version>${version.io.netty}</version>
     </dependency>
     <!-- Test dependencies -->
     <dependency>
