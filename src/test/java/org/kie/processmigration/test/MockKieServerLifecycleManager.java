@@ -40,6 +40,7 @@ import org.kie.server.api.model.instance.ProcessInstance;
 import org.kie.server.api.model.instance.ProcessInstanceList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -66,7 +67,10 @@ public class MockKieServerLifecycleManager implements QuarkusTestResourceLifecyc
 
     private WireMockServer wireMockServer;
 
-    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JaxbAnnotationModule());
+    private final ObjectMapper mapper = new ObjectMapper()
+            .registerModule(new JaxbAnnotationModule())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
 
     @SneakyThrows
     @Override
