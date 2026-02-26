@@ -122,6 +122,12 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <!-- Override Quarkus BOM version to fix CVE-2025-59250 -->
+      <dependency>
+        <groupId>com.microsoft.sqlserver</groupId>
+        <artifactId>mssql-jdbc</artifactId>
+        <version>11.2.4.jre11</version>
+      </dependency>
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
