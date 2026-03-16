@@ -31,6 +31,7 @@
     <version.org.mockito>3.7.7</version.org.mockito>
     <version.org.projectlombok.lombok>1.18.16</version.org.projectlombok.lombok>
     <h2.version>2.1.214</h2.version>
+    <version.com.microsoft.sqlserver.mssql-jdbc>11.2.4.jre11</version.com.microsoft.sqlserver.mssql-jdbc>
     <version.org.apache.maven>3.8.6</version.org.apache.maven> <!-- Need to force the version of the maven-core artifact to be in sync with kie. Otherwise it might pick a wrong version coming from quarkus bom import -->
     <version.org.codehaus.mojo.sql-maven-plugin>1.5</version.org.codehaus.mojo.sql-maven-plugin>
     <version.cargo-maven3-plugin>1.10.4</version.cargo-maven3-plugin>
@@ -126,7 +127,7 @@
       <dependency>
         <groupId>com.microsoft.sqlserver</groupId>
         <artifactId>mssql-jdbc</artifactId>
-        <version>11.2.4.jre11</version>
+        <version>${version.com.microsoft.sqlserver.mssql-jdbc}</version>
       </dependency>
       <dependency>
         <groupId>org.projectlombok</groupId>
