@@ -121,7 +121,7 @@
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.1.128.Final</version>
+        <version>${version.io.netty}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
