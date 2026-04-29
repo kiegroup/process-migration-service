@@ -215,6 +215,12 @@
         <version>${version.org.apache.maven}</version>
         <scope>test</scope>
       </dependency>
+      <!-- Override plexus-utils to fix CVE -->
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-utils</artifactId>
+        <version>3.6.1</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
