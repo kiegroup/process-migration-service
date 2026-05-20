@@ -38,6 +38,7 @@
     <version.org.yaml.snakeyaml>2.0</version.org.yaml.snakeyaml>
     <!-- Netty version to fix CVE-2025-58057, CVE-2025-58056, CVE-2025-55163 -->
     <version.io.netty>4.1.128.Final</version.io.netty>
+    <version.org.codehaus.plexus.plexus-utils>3.6.1</version.org.codehaus.plexus.plexus-utils>
 
     <!-- Quarkus database setup -->
     <maven.jdbc.db-kind>h2</maven.jdbc.db-kind>
@@ -219,7 +220,7 @@
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-utils</artifactId>
-        <version>3.6.1</version>
+        <version>${version.org.codehaus.plexus.plexus-utils}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
