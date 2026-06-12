@@ -38,6 +38,7 @@
     <version.org.yaml.snakeyaml>2.0</version.org.yaml.snakeyaml>
     <!-- Netty version to fix CVE-2025-58057, CVE-2025-58056, CVE-2025-55163 -->
     <version.io.netty>4.1.128.Final</version.io.netty>
+    <version.mchange.commons.java>0.4.0</version.mchange.commons.java>
 
     <!-- Quarkus database setup -->
     <maven.jdbc.db-kind>h2</maven.jdbc.db-kind>
@@ -138,6 +139,12 @@
         <groupId>com.microsoft.sqlserver</groupId>
         <artifactId>mssql-jdbc</artifactId>
         <version>${version.com.microsoft.sqlserver.mssql-jdbc}</version>
+      </dependency>
+      <!-- Override mchange-commons-java version from Quarkus BOM -->
+      <dependency>
+        <groupId>com.mchange</groupId>
+        <artifactId>mchange-commons-java</artifactId>
+        <version>${version.mchange.commons.java}</version>
       </dependency>
       <dependency>
         <groupId>org.projectlombok</groupId>
